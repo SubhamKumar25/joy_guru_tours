@@ -350,9 +350,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const path = window.location.pathname;
   const isLoginPage = path.includes('Login') || path.includes('Signup');
   const isLauncher = path.includes('Launcher');
+  const isLandingPage = path === '' || path === '/' || path.includes('index.html');
   const isLoggedIn = StateEngine.isLoggedIn();
 
-  if (!isLoggedIn && !isLoginPage && !isLauncher && !StateEngine.isDemoMode()) {
+  if (!isLoggedIn && !isLoginPage && !isLauncher && !isLandingPage && !StateEngine.isDemoMode()) {
     window.location.href = "Login & Signup.html";
     return;
   }
