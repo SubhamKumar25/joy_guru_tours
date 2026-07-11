@@ -221,7 +221,7 @@ window.DemoAssistant = {
       case 1:
         return {
           title: "Step 1: Search Cab",
-          desc: "Welcome to Joy Guru Tours & Travels! Prefill or customize your pickup/destination details in the 'Book Premium Cab' card and click 'Find Luxury Rides' to check out the rides.",
+          desc: "Welcome to Joy Guru Tours & Travels! Prefill or customize your pickup/destination details in the 'Book Premium Cab' card and click 'Find Your Ride' to check out the rides.",
           actionText: "Search Cabs",
           selector: "form button[type='submit']"
         };
@@ -517,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         StateEngine.setActiveSearch(searchObj);
 
-        UIUtils.showLoading('Searching Luxury Rides...', 1200, function() {
+        UIUtils.showLoading('Finding Your Ride...', 1200, function() {
           window.location.href = "Search Results.html";
         });
       });
