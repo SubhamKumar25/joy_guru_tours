@@ -845,7 +845,9 @@ document.addEventListener('DOMContentLoaded', function () {
           <!-- WhatsApp Preview Panel -->
           <div class="flex-1 bg-[#efeae2] flex flex-col">
             <div class="bg-[#00a884] text-white p-3 flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">JG</div>
+              <div class="w-8 h-8 rounded-full overflow-hidden bg-white">
+                <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
+              </div>
               <div>
                 <span class="block text-xs font-bold">Joy Guru Tours & Travels</span>
                 <span class="block text-[9px] opacity-80">Official Business Account</span>
@@ -875,9 +877,14 @@ document.addEventListener('DOMContentLoaded', function () {
               <p class="text-slate-800 font-bold mt-1">Subject: Booking Confirmed & Payment Receipt - ${booking.id}</p>
             </div>
             <div class="p-6 flex-1 overflow-y-auto font-sans text-xs text-slate-800 space-y-4">
-              <div class="flex items-center gap-2 border-b border-border pb-3">
-                <span class="font-heading font-bold text-sm tracking-wide text-primary">JOY GURU</span>
-                <span class="text-[9px] tracking-widest text-secondary uppercase font-bold">Tours & Travels</span>
+              <div class="flex items-center gap-3 border-b border-border pb-3">
+                <div class="w-8 h-8 rounded-full overflow-hidden border border-border/20">
+                  <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <span class="font-heading font-bold text-sm tracking-wide text-primary">JOY GURU</span>
+                  <span class="text-[9px] tracking-widest text-secondary uppercase font-bold">Tours & Travels</span>
+                </div>
               </div>
               <p>Hi ${booking.customerName},</p>
               <p>Your advance payment has been successfully verified. Please find your travel invoice summary below.</p>

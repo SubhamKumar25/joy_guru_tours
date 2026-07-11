@@ -25,3 +25,5 @@ joy-guru-travel-platform/
 *.log
 *.py
 project_report.md
+
+.vercel
