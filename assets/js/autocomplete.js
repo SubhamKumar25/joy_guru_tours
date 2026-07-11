@@ -4,11 +4,10 @@
 
 (function() {
   const POPULAR_DESTINATIONS = [
-    { name: "Shillong, Meghalaya", lat: 25.5788, lon: 91.8933 },
-    { name: "Guwahati, Assam", lat: 26.1445, lon: 91.7362 },
-    { name: "Dawki, Meghalaya", lat: 25.1782, lon: 92.0205 },
-    { name: "Kaziranga, Assam", lat: 26.5775, lon: 93.1711 },
-    { name: "Silchar Airport (IXS), Assam", lat: 24.9128, lon: 92.9786 }
+    { name: "Shillong", lat: 25.5788, lon: 91.8933 },
+    { name: "Dawki", lat: 25.1782, lon: 92.0205 },
+    { name: "Kaziranga", lat: 26.5775, lon: 93.1711 },
+    { name: "Aizawl", lat: 23.7271, lon: 92.7176 }
   ];
 
   let debounceTimeout = null;
@@ -90,6 +89,11 @@
         };
         currentLocSec.appendChild(currentLocItem);
         dropdown.appendChild(currentLocSec);
+
+        // Divider
+        const divider = document.createElement('div');
+        divider.className = 'border-t border-border/60 my-1';
+        dropdown.appendChild(divider);
       }
 
       // Section 2: Recent Searches
@@ -100,7 +104,7 @@
         
         const header = document.createElement('div');
         header.className = 'autocomplete-header';
-        header.textContent = 'Recent Searches';
+        header.textContent = 'Recent';
         recentSec.appendChild(header);
 
         recentSearches.forEach(search => {
@@ -108,7 +112,7 @@
           item.className = 'autocomplete-item';
           item.innerHTML = `
             <span class="autocomplete-item-icon"><iconify-icon icon="lucide:history"></iconify-icon></span>
-            <span class="autocomplete-item-text">${search.name}</span>
+            <span class="autocomplete-item-text">📍 ${search.name}</span>
           `;
           item.onclick = function() {
             selectLocation(input, search.name, search.lat, search.lon);
@@ -117,15 +121,31 @@
           recentSec.appendChild(item);
         });
         dropdown.appendChild(recentSec);
+
+        // Divider
+        const divider = document.createElement('div');
+        divider.className = 'border-t border-border/60 my-1';
+        dropdown.appendChild(divider);
       }
 
-      // Section 3: Popular Destinations
+      // Section 3: Search Location Placeholder Header
+      const searchHolderSec = document.createElement('div');
+      searchHolderSec.className = 'autocomplete-header text-muted-foreground/60';
+      searchHolderSec.textContent = 'Search Location...';
+      dropdown.appendChild(searchHolderSec);
+
+      // Divider
+      const divider2 = document.createElement('div');
+      divider2.className = 'border-t border-border/60 my-1';
+      dropdown.appendChild(divider2);
+
+      // Section 4: Popular Destinations
       const popularSec = document.createElement('div');
       popularSec.className = 'autocomplete-section';
       
       const popularHeader = document.createElement('div');
       popularHeader.className = 'autocomplete-header';
-      popularHeader.textContent = 'Popular Destinations';
+      popularHeader.textContent = 'Popular';
       popularSec.appendChild(popularHeader);
 
       POPULAR_DESTINATIONS.forEach(dest => {
@@ -364,12 +384,18 @@
   }
 
   // Recent Searches LocalStorage helpers
+  const DEFAULT_RECENT = [
+    { name: "Silchar Airport", lat: 24.9128, lon: 92.9786 },
+    { name: "Shillong", lat: 25.5788, lon: 91.8933 },
+    { name: "Guwahati", lat: 26.1445, lon: 91.7362 }
+  ];
+
   function getRecentSearches() {
     try {
       const searches = localStorage.getItem('jg_recent_searches');
-      return searches ? JSON.parse(searches) : [];
+      return searches ? JSON.parse(searches) : DEFAULT_RECENT;
     } catch (e) {
-      return [];
+      return DEFAULT_RECENT;
     }
   }
 
