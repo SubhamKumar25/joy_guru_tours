@@ -1260,8 +1260,8 @@ document.addEventListener('DOMContentLoaded', function () {
     renderBookingsList();
     
     // If successful checkout redirect, automatically open the latest booking details
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success') === 'true' && activeBooking) {
+    const dashboardUrlParams = new URLSearchParams(window.location.search);
+    if (dashboardUrlParams.get('success') === 'true' && activeBooking) {
       populateBookingDetails(activeBooking);
       const listView = document.getElementById('trips-list-view');
       const detailsView = document.getElementById('trip-details-view');
