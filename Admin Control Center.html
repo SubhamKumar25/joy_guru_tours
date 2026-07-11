@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Control Center — Exported from UXMagic Copilot">
+    <title>Admin Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Poppins:wght@100..900&amp;family=Fira+Code:wght@300..700&amp;family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @import "tailwindcss";
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-tertiary: var(--tertiary);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --font-family-sans: var(--font-sans);
+        --font-family-heading: var(--font-heading);
+        --font-family-mono: var(--font-mono);
+      }
+      :root {
+        --background: #F8FAFC;
+        --foreground: #0F172A;
+        --primary: #0F4C81;
+        --primary-foreground: #FFFFFF;
+        --secondary: #F59E0B;
+        --secondary-foreground: #0F172A;
+        --tertiary: #10B981;
+        --muted: #F1F5F9;
+        --muted-foreground: #64748b;
+        --accent: #FEF3C7;
+        --accent-foreground: #0F172A;
+        --card: #FFFFFF;
+        --card-foreground: #0F172A;
+        --destructive: #EF4444;
+        --border: #E2E8F0;
+        --input: #E2E8F0;
+        --ring: #F59E0B;
+        --radius: 1rem;
+        --font-sans: Poppins, Inter, sans-serif;
+        --font-heading: Poppins, Inter, sans-serif;
+        --font-mono: JetBrains Mono, monospace;
+        --shadow-offset-x: 0;
+        --shadow-offset-y: 10;
+        --shadow-blur: 30;
+        --shadow-spread: -8;
+        --shadow-color: rgba(15, 23, 42, 0.12);
+        }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div data-page="admin-control-center">
+
+<div class="min-h-screen w-full bg-background flex flex-col relative font-sans text-foreground">
+  <!-- Interactive Navbar -->
+  <header class="bg-background border-b border-border px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-border">
+          <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <span class="font-heading font-bold text-lg tracking-wide text-primary">JOY GURU</span>
+          <span class="block text-xs font-semibold tracking-widest text-secondary uppercase">Admin Control Center</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-xs bg-red-100 text-red-800 font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1">
+          <iconify-icon icon="lucide:bell"></iconify-icon> 2 New Bookings
+        </span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-primary">Administrator</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Admin Dashboard Layout -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+    <!-- Left Navigation Sidebar -->
+    <aside class="lg:col-span-3 space-y-4">
+      <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-6">
+        <nav class="space-y-1 text-sm font-medium">
+          <a href="#overview" class="flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg">
+            <iconify-icon icon="lucide:layout-dashboard" class="text-lg"></iconify-icon> Control Overview
+          </a>
+          <a href="#bookings" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:calendar" class="text-lg"></iconify-icon> Bookings Management
+          </a>
+          <a href="#fleet" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:car" class="text-lg"></iconify-icon> Vehicles &amp; Drivers
+          </a>
+          <a href="#reports" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:chart-bar" class="text-lg"></iconify-icon> Revenue Reports
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Admin Content Area -->
+    <section class="lg:col-span-9 space-y-8">
+      <!-- High-End Analytics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+          <span class="text-xs text-muted-foreground font-semibold">Total Revenue (Oct)</span>
+          <span class="block text-2xl font-bold text-primary">₹8,45,200</span>
+          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+            <iconify-icon icon="lucide:arrow-right" class="-rotate-45"></iconify-icon> +18.4% vs last month
+          </span>
+        </div>
+
+        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+          <span class="text-xs text-muted-foreground font-semibold">Active Bookings</span>
+          <span class="block text-2xl font-bold text-primary">42 Rides</span>
+          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+            <iconify-icon icon="lucide:arrow-right" class="-rotate-45"></iconify-icon> 98% driver utilization
+          </span>
+        </div>
+
+        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+          <span class="text-xs text-muted-foreground font-semibold">Pending Collection</span>
+          <span class="block text-2xl font-bold text-secondary">₹1,84,500</span>
+          <span class="text-[10px] text-muted-foreground">To be collected by pilots</span>
+        </div>
+
+        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+          <span class="text-xs text-muted-foreground font-semibold">Customer Rating</span>
+          <span class="block text-2xl font-bold text-primary">4.92 / 5.0</span>
+          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+            Based on 1,420 reviews
+          </span>
+        </div>
+      </div>
+
+      <!-- Chart.js Unbounded Canvas Block (Strictly wrapped) -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+        <h3 class="font-heading font-bold text-base text-primary">Monthly Booking &amp; Revenue Trends</h3>
+        <div class="h-64 overflow-hidden">
+          <canvas id="adminTrendChart" height="160"></canvas>
+        </div>
+        <!-- Chart.js initialization script -->
+        <script>
+          (function() {
+            const ctx = document.getElementById('adminTrendChart');
+            if (ctx) {
+              new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct (Proj)'],
+                  datasets: [
+                    {
+                      label: 'Monthly Bookings',
+                      data: [120, 180, 240, 290, 380, 450],
+                      borderColor: '#0F4C81',
+                      backgroundColor: 'rgba(15, 76, 129, 0.1)',
+                      borderWidth: 3,
+                      tension: 0.4,
+                      fill: true
+                    },
+                    {
+                      label: 'Tours Completed',
+                      data: [40, 65, 80, 95, 140, 180],
+                      borderColor: '#F59E0B',
+                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                      borderWidth: 3,
+                      tension: 0.4,
+                      fill: true
+                    }
+                  ]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'top',
+                      labels: { font: { family: 'Poppins, sans-serif', size: 11 } }
+                    }
+                  },
+                  scales: {
+                    y: { grid: { color: '#E2E8F0' } },
+                    x: { grid: { display: false } }
+                  }
+                }
+              });
+            }
+          })();
+        </script>
+      </div>
+
+      <!-- Live Booking & Remaining Payment Collection Management -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-border pb-4">
+          <h3 class="font-heading font-bold text-base text-primary">Live Booking Management</h3>
+          <button onclick="alert('Refreshing live bookings...')" class="text-xs text-primary font-bold hover:text-secondary flex items-center gap-1">
+            <iconify-icon icon="lucide:refresh-cw"></iconify-icon> Refresh
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-border bg-muted text-muted-foreground font-bold">
+                <th class="py-3 px-4">Booking ID</th>
+                <th class="py-3 px-4">Customer</th>
+                <th class="py-3 px-4">Route</th>
+                <th class="py-3 px-4">Pilot Assigned</th>
+                <th class="py-3 px-4">Advance Paid</th>
+                <th class="py-3 px-4">Remaining Balance</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1 -->
+              <tr class="border-b border-border hover:bg-muted/30 transition-all">
+                <td class="py-3.5 px-4 font-bold text-primary">JG-2025-4829</td>
+                <td class="py-3.5 px-4 font-semibold">Rahul Sharma</td>
+                <td class="py-3.5 px-4">Silchar ⇄ Shillong</td>
+                <td class="py-3.5 px-4">Bimal Das</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">₹1,500</td>
+                <td class="py-3.5 px-4 font-bold text-secondary">₹4,799</td>
+                <td class="py-3.5 px-4 text-right space-x-2">
+                  <button onclick="alert('Opening remaining payment collector...')" class="bg-secondary text-secondary-foreground font-bold px-2.5 py-1.5 rounded text-[10px] hover:bg-secondary/95 transition-all">
+                    Collect Balance
+                  </button>
+                </td>
+              </tr>
+              <!-- Row 2 -->
+              <tr class="border-b border-border hover:bg-muted/30 transition-all">
+                <td class="py-3.5 px-4 font-bold text-primary">JG-2025-4830</td>
+                <td class="py-3.5 px-4 font-semibold">Ananya Das</td>
+                <td class="py-3.5 px-4">Silchar ⇄ Guwahati</td>
+                <td class="py-3.5 px-4">Rahul Nath</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">₹2,000</td>
+                <td class="py-3.5 px-4 font-bold text-secondary">₹5,999</td>
+                <td class="py-3.5 px-4 text-right space-x-2">
+                  <button onclick="alert('Opening remaining payment collector...')" class="bg-secondary text-secondary-foreground font-bold px-2.5 py-1.5 rounded text-[10px] hover:bg-secondary/95 transition-all">
+                    Collect Balance
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Footer -->
+  <footer class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60">
+    <p>© 2025 Joy Guru Tours &amp; Travels. All Rights Reserved. Control panel session active.</p>
+  </footer>
+</div>
+
+    </div>
+    <script src="script.js?v=4"></script>
+</body>
+</html>

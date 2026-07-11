@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Booking & Payment — Exported from UXMagic Copilot">
+    <title>Booking & Payment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Poppins:wght@100..900&amp;family=Fira+Code:wght@300..700&amp;family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @import "tailwindcss";
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-tertiary: var(--tertiary);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --font-family-sans: var(--font-sans);
+        --font-family-heading: var(--font-heading);
+        --font-family-mono: var(--font-mono);
+      }
+      :root {
+        --background: #F8FAFC;
+        --foreground: #0F172A;
+        --primary: #0F4C81;
+        --primary-foreground: #FFFFFF;
+        --secondary: #F59E0B;
+        --secondary-foreground: #0F172A;
+        --tertiary: #10B981;
+        --muted: #F1F5F9;
+        --muted-foreground: #64748b;
+        --accent: #FEF3C7;
+        --accent-foreground: #0F172A;
+        --card: #FFFFFF;
+        --card-foreground: #0F172A;
+        --destructive: #EF4444;
+        --border: #E2E8F0;
+        --input: #E2E8F0;
+        --ring: #F59E0B;
+        --radius: 1rem;
+        --font-sans: Poppins, Inter, sans-serif;
+        --font-heading: Poppins, Inter, sans-serif;
+        --font-mono: JetBrains Mono, monospace;
+        --shadow-offset-x: 0;
+        --shadow-offset-y: 10;
+        --shadow-blur: 30;
+        --shadow-spread: -8;
+        --shadow-color: rgba(15, 23, 42, 0.12);
+        }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div data-page="booking-payment">
+
+<div class="min-h-screen w-full bg-background flex flex-col relative font-sans text-foreground">
+  <!-- Interactive Navbar -->
+  <header class="bg-background border-b border-border px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-border">
+          <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <span class="font-heading font-bold text-lg tracking-wide text-primary">JOY GURU</span>
+          <span class="block text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1">
+          <iconify-icon icon="lucide:shield-check" class="text-sm"></iconify-icon> 256-Bit SSL Secure Booking
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Process Steps / Breadcrumbs -->
+  <div class="bg-muted py-4 px-6 border-b border-border">
+    <div class="max-w-7xl mx-auto flex items-center gap-4 text-xs font-semibold">
+      <span class="text-muted-foreground">1. Select Ride</span>
+      <iconify-icon icon="lucide:arrow-right" class="text-muted-foreground"></iconify-icon>
+      <span class="text-primary font-bold">2. Booking Summary</span>
+      <iconify-icon icon="lucide:arrow-right" class="text-muted-foreground"></iconify-icon>
+      <span class="text-muted-foreground">3. Razorpay Advance Payment</span>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+    <!-- Left Column: Summary & Coupon -->
+    <div class="lg:col-span-7 space-y-6">
+      <!-- Selected Vehicle Details -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-border pb-4">
+          <h3 class="font-heading font-bold text-lg text-primary">Trip Details</h3>
+          <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">One Way</span>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="w-24 h-auto bg-muted rounded-lg p-2 flex items-center justify-center shrink-0">
+            <iconify-icon icon="lucide:car" class="text-4xl text-primary"></iconify-icon>
+          </div>
+          <div class="space-y-1">
+            <h4 class="font-heading font-semibold text-base text-primary">Toyota Innova Crysta</h4>
+            <p class="text-xs text-muted-foreground">SUV • AC • 6+1 Seats • 3 Bags</p>
+            <div class="flex items-center gap-1 text-xs text-secondary font-bold pt-1">
+              <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon> 4.9 (50+ mountain trips completed)
+            </div>
+          </div>
+        </div>
+
+        <!-- Route Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-border text-sm">
+          <div class="space-y-1">
+            <span class="block text-xs font-bold text-muted-foreground tracking-wider uppercase">Pickup Location</span>
+            <p class="font-medium text-primary">Silchar Airport (IXS), Assam</p>
+            <span class="text-xs text-muted-foreground">15 Oct 2025 • 09:30 AM</span>
+          </div>
+          <div class="space-y-1">
+            <span class="block text-xs font-bold text-muted-foreground tracking-wider uppercase">Drop Destination</span>
+            <p class="font-medium text-primary">Shillong, Meghalaya</p>
+            <span class="text-xs text-muted-foreground">Estimated duration: ~6.5 hours</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupon Code Section -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-3">
+        <h3 class="font-heading font-bold text-sm text-primary">Apply Coupon / Promo Code</h3>
+        <div class="flex gap-2">
+          <input type="text" id="coupon-input" value="NORTHEAST2025" class="bg-muted border border-input rounded-lg px-4 py-3 text-sm font-semibold text-primary uppercase focus:outline-none focus:ring-2 focus:ring-ring w-full">
+          <button id="coupon-apply-btn" class="bg-primary hover:bg-primary/95 text-primary-foreground font-bold px-6 py-3 rounded-lg text-xs tracking-wider uppercase whitespace-nowrap">
+            Apply
+          </button>
+        </div>
+        <p id="coupon-success-msg" class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+          <iconify-icon icon="lucide:circle-check"></iconify-icon> Coupon NORTHEAST2025 applied successfully! Saved ₹500.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Fare Breakdown & Razorpay Advance Payment Popup -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+        <h3 class="font-heading font-bold text-lg text-primary border-b border-border pb-4">Fare Summary</h3>
+
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Base Fare</span>
+            <span class="font-semibold text-primary">₹6,499</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Coupon Discount</span>
+            <span class="font-semibold text-emerald-600">-₹500</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">Tolls &amp; State Taxes</span>
+            <span class="font-semibold text-emerald-600">Included (Free)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted-foreground">GST (5%)</span>
+            <span class="font-semibold text-primary">₹300</span>
+          </div>
+          <div class="border-t border-border pt-3 flex justify-between text-base font-bold">
+            <span class="text-primary">Total Payable Amount</span>
+            <span class="text-primary">₹6,299</span>
+          </div>
+        </div>
+
+        <!-- Advance Payment Split -->
+        <div class="bg-muted p-4 rounded-xl space-y-3">
+          <div class="flex justify-between text-sm font-bold text-primary">
+            <span>Pay Advance Now (25%)</span>
+            <span class="text-secondary">₹1,500</span>
+          </div>
+          <div class="flex justify-between text-xs text-muted-foreground">
+            <span>Remaining Balance (to driver in Cash/UPI)</span>
+            <span>₹4,799</span>
+          </div>
+          <p class="text-[10px] text-muted-foreground leading-relaxed">
+            *Remaining amount to be paid directly to the driver at the end of the trip via cash or UPI.
+          </p>
+        </div>
+
+        <!-- Checkbox before payment -->
+        <label class="flex items-start gap-2.5 text-xs text-muted-foreground cursor-pointer">
+          <input type="checkbox" checked="" class="rounded border-border text-primary focus:ring-secondary mt-0.5 w-4 h-4">
+          <span>I agree to the <a href="#" class="text-primary font-semibold underline">Booking &amp; Cancellation Policy</a>. Free cancellation up to 24 hours before pickup.</span>
+        </label>
+
+        <!-- Razorpay-style Trigger CTA -->
+        <button onclick="document.getElementById('razorpay-modal').classList.remove('hidden')" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+          Proceed to Pay Advance <iconify-icon icon="lucide:credit-card" class="text-lg"></iconify-icon>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Razorpay Popup Style Modal (Initially Hidden, click Proceed to open) -->
+  <div id="razorpay-modal" class="fixed inset-0 z-50 bg-primary/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-card w-full max-w-md rounded-xl shadow-2xl overflow-hidden border border-border flex flex-col">
+      <!-- Razorpay Header -->
+      <div class="bg-primary text-primary-foreground p-5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded bg-background/10 flex items-center justify-center text-secondary">
+            <iconify-icon icon="lucide:sparkles" class="text-lg"></iconify-icon>
+          </div>
+          <div>
+            <span class="block text-xs font-bold tracking-wider text-secondary uppercase">JOY GURU TOURS</span>
+            <span class="block text-[10px] text-primary-foreground/70">Secure Checkout</span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('razorpay-modal').classList.add('hidden')" class="text-primary-foreground/80 hover:text-primary-foreground">
+          <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+        </button>
+      </div>
+
+      <!-- Payment Summary Bar -->
+      <div class="bg-muted px-5 py-3 border-b border-border flex justify-between items-center text-xs">
+        <span class="font-medium text-muted-foreground">Booking ID: <strong class="text-primary">JG-2025-4829</strong></span>
+        <span class="font-bold text-primary">₹1,500.00</span>
+      </div>
+
+      <!-- Razorpay Payment Options -->
+      <div class="p-5 space-y-4 flex-1">
+        <p class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Preferred Payment Methods</p>
+
+        <!-- UPI Option -->
+        <div class="border border-border hover:border-secondary p-3.5 rounded-lg cursor-pointer transition-all flex items-center justify-between group">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="lucide:qr-code" class="text-2xl text-primary group-hover:text-secondary"></iconify-icon>
+            <div>
+              <span class="block text-sm font-bold text-primary">UPI (Google Pay, PhonePe, Paytm)</span>
+              <span class="block text-[10px] text-muted-foreground">Pay instantly using any UPI app</span>
+            </div>
+          </div>
+          <iconify-icon icon="lucide:arrow-right" class="text-muted-foreground group-hover:text-secondary"></iconify-icon>
+        </div>
+
+        <!-- Card Option -->
+        <div class="border border-border hover:border-secondary p-3.5 rounded-lg cursor-pointer transition-all flex items-center justify-between group">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="lucide:credit-card" class="text-2xl text-primary group-hover:text-secondary"></iconify-icon>
+            <div>
+              <span class="block text-sm font-bold text-primary">Cards (Visa, MasterCard, RuPay)</span>
+              <span class="block text-[10px] text-muted-foreground">Credit or Debit card accepted</span>
+            </div>
+          </div>
+          <iconify-icon icon="lucide:arrow-right" class="text-muted-foreground group-hover:text-secondary"></iconify-icon>
+        </div>
+
+        <!-- Netbanking Option -->
+        <div class="border border-border hover:border-secondary p-3.5 rounded-lg cursor-pointer transition-all flex items-center justify-between group">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="lucide:globe" class="text-2xl text-primary group-hover:text-secondary"></iconify-icon>
+            <div>
+              <span class="block text-sm font-bold text-primary">Net Banking</span>
+              <span class="block text-[10px] text-muted-foreground">All major Indian banks supported</span>
+            </div>
+          </div>
+          <iconify-icon icon="lucide:arrow-right" class="text-muted-foreground group-hover:text-secondary"></iconify-icon>
+        </div>
+      </div>
+
+      <!-- Razorpay Footer -->
+      <div class="bg-muted p-4 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground">
+        <span class="flex items-center gap-1">
+          <iconify-icon icon="lucide:shield-check" class="text-tertiary text-sm"></iconify-icon> Secured by Razorpay
+        </span>
+        <button onclick="alert('Demo Mode: Payment successful! Redirecting to dashboard...'); document.getElementById('razorpay-modal').classList.add('hidden')" class="bg-secondary text-secondary-foreground font-bold px-4 py-2 rounded text-[10px] hover:bg-secondary/95 transition-all">
+          Simulate Success
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Footer -->
+  <footer class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60">
+    <p>© 2025 Joy Guru Tours &amp; Travels. All Rights Reserved. Need help? Call +91 94350 XXXXX</p>
+  </footer>
+</div>
+
+    </div>
+    <script src="script.js?v=4"></script>
+</body>
+</html>

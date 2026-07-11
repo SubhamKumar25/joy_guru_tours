@@ -1,0 +1,22 @@
+{
+  "name": "joy-guru-travel-platform",
+  "version": "1.0.0",
+  "description": "UI project exported from UXMagic Copilot — Joy Guru Travel Platform",
+  "main": "Landing Page.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx live-server ."
+  },
+  "keywords": [
+    "ui",
+    "frontend",
+    "design",
+    "uxmagic"
+  ],
+  "author": "UXMagic Copilot",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "serve": "^14.2.1"
+  }
+}

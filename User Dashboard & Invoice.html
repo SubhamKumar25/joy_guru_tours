@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Poppins:wght@100..900&family=Fira+Code:wght@300..700&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+  <style type="text/tailwindcss">
+    @import "tailwindcss";
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-tertiary: var(--tertiary);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --font-family-sans: var(--font-sans);
+        --font-family-heading: var(--font-heading);
+        --font-family-mono: var(--font-mono);
+      }
+      :root { --background: #F8FAFC;
+        --foreground: #0F172A;
+        --primary: #0F4C81;
+        --primary-foreground: #FFFFFF;
+        --secondary: #F59E0B;
+        --secondary-foreground: #0F172A;
+        --tertiary: #10B981;
+        --muted: #F1F5F9;
+        --muted-foreground: #64748b;
+        --accent: #FEF3C7;
+        --accent-foreground: #0F172A;
+        --card: #FFFFFF;
+        --card-foreground: #0F172A;
+        --destructive: #EF4444;
+        --border: #E2E8F0;
+        --input: #E2E8F0;
+        --ring: #F59E0B;
+        --radius: 1rem;
+        --font-sans: Poppins, Inter, sans-serif;
+        --font-heading: Poppins, Inter, sans-serif;
+        --font-mono: JetBrains Mono, monospace;
+        --shadow-offset-x: 0;
+        --shadow-offset-y: 10;
+        --shadow-blur: 30;
+        --shadow-spread: -8;
+        --shadow-color: rgba(15, 23, 42, 0.12); }
+    </style>
+  <style>
+    .brand-gradient {
+      background-image: linear-gradient(135deg, var(--primary), var(--accent));
+    }
+
+    .shadow-theme {
+      box-shadow:
+        calc(var(--shadow-offset-x, 0) * 1px) calc(var(--shadow-offset-y, 10) * 1px) calc(var(--shadow-blur, 30) * 1px) calc(var(--shadow-spread, -8) * 1px) var(--shadow-color, rgba(15, 23, 42, 0.12));
+    }
+  </style>
+</head>
+
+<body>
+  <div data-page="user-dashboard-invoice" class="min-h-screen w-full bg-background flex flex-col relative font-sans text-foreground">
+    <!-- Interactive Navbar -->
+    <header class="bg-background border-b border-border px-6 py-4">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3" style="cursor:pointer" onclick="window.location.href='index.html'">
+          <div class="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-border">
+            <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <span class="font-heading font-bold text-lg tracking-wide text-primary">JOY GURU</span>
+            <span class="block text-xs font-semibold tracking-widest text-secondary uppercase">Tours & Travels</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <!-- User Badge (Dynamic) -->
+          <div class="flex items-center gap-2">
+            <div id="nav-avatar" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs shadow-sm border-2 border-secondary">RS</div>
+            <span id="nav-user-name" class="text-xs font-bold text-primary hidden sm:inline">Rahul Sharma</span>
+          </div>
+          <button id="logout-btn"
+            class="text-muted-foreground hover:text-primary text-xs font-bold flex items-center gap-1">
+            <iconify-icon icon="lucide:log-out" class="text-sm"></iconify-icon> Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+      <!-- Sidebar Navigation -->
+      <aside class="lg:col-span-3 space-y-4">
+        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-6">
+          <!-- User Quick Profile (Dynamic) -->
+          <div class="text-center space-y-2 pb-4 border-b border-border">
+            <div id="sidebar-avatar" class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-md mx-auto border-2 border-secondary">RS</div>
+            <div>
+              <h4 id="sidebar-user-name" class="font-heading font-bold text-base text-primary">Rahul Sharma</h4>
+            </div>
+          </div>
+
+          <!-- Sidebar Menu Links -->
+          <nav class="space-y-1 text-sm font-medium">
+            <a href="#profile" id="menu-profile"
+              class="flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg">
+              <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> My Profile
+            </a>
+            <a href="#trips" id="menu-trips"
+              class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+              <iconify-icon icon="lucide:car" class="text-lg"></iconify-icon> My Trips
+            </a>
+            <a href="#payments" id="menu-payments"
+              class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+              <iconify-icon icon="lucide:credit-card" class="text-lg"></iconify-icon> Payments
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Main Dashboard Content -->
+      <section class="lg:col-span-9 space-y-8">
+        <!-- Profile Tab Content (Ola/Rapido Inspired) -->
+        <div id="profile-tab-content" class="space-y-8">
+          <!-- Profile Main Details Card -->
+          <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+            <div class="flex items-center justify-between border-b border-border pb-4">
+              <h3 class="font-heading font-bold text-lg text-primary">Member Profile Preferences</h3>
+            </div>
+
+            <!-- Profile Info Fields -->
+            <form class="space-y-6" onsubmit="event.preventDefault(); UIUtils.showToast('Profile Updated Successfully', 'success');">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <div class="space-y-1">
+                  <label class="block text-xs font-bold text-muted-foreground tracking-wider uppercase">Full Name</label>
+                  <input type="text" id="profile-disp-name" class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-sm font-semibold text-primary focus:ring-2 focus:ring-ring focus:outline-none" value="Rahul Sharma">
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-xs font-bold text-muted-foreground tracking-wider uppercase">Mobile Number</label>
+                  <input type="tel" class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-sm font-semibold text-primary focus:ring-2 focus:ring-ring focus:outline-none" value="+91 94350 12345">
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-xs font-bold text-muted-foreground tracking-wider uppercase">Email Address</label>
+                  <input type="email" id="profile-disp-email" class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-sm font-semibold text-primary focus:ring-2 focus:ring-ring focus:outline-none" value="rahul@example.com">
+                </div>
+              </div>
+              <div class="flex justify-end pt-2">
+                <button type="submit" class="bg-primary hover:bg-primary/95 text-primary-foreground px-6 py-2 rounded-lg text-sm font-semibold transition-all">Save Changes</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Saved Places & Favorite Routes -->
+          <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+            <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4 flex items-center gap-2">
+              <iconify-icon icon="lucide:map-pin" class="text-secondary"></iconify-icon> Saved Places & Favorite Routes
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Place 1 -->
+              <div class="border border-border p-4 rounded-xl flex gap-3 hover:border-secondary transition-all">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <iconify-icon icon="lucide:home" class="text-lg"></iconify-icon>
+                </div>
+                <div class="text-xs">
+                  <span class="font-bold text-primary block">Home Address</span>
+                  <span class="text-muted-foreground block mt-0.5">Club Road, Silchar, Assam - 788001</span>
+                </div>
+              </div>
+
+              <!-- Place 2 -->
+              <div class="border border-border p-4 rounded-xl flex gap-3 hover:border-secondary transition-all">
+                <div class="w-10 h-10 rounded-lg bg-secondary/10 text-secondary-foreground flex items-center justify-center shrink-0">
+                  <iconify-icon icon="lucide:briefcase" class="text-lg"></iconify-icon>
+                </div>
+                <div class="text-xs">
+                  <span class="font-bold text-primary block">Work Address</span>
+                  <span class="text-muted-foreground block mt-0.5">Secretariat Police Bazar, Shillong, Meghalaya</span>
+                </div>
+              </div>
+
+              <!-- Route Preference -->
+              <div class="border border-border p-4 rounded-xl flex gap-3 hover:border-secondary transition-all md:col-span-2">
+                <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                  <iconify-icon icon="lucide:navigation" class="text-lg"></iconify-icon>
+                </div>
+                <div class="text-xs">
+                  <span class="font-bold text-primary block">Preferred Outstation Highway Corridor</span>
+                  <span class="text-muted-foreground block mt-0.5">Silchar Airport (IXS) ⇄ Shillong Jaintia Hills Route (Frequent Traveller)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Payments Tab Content -->
+        <div id="payments-tab-content" class="space-y-8 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Payment Wallets -->
+            <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+              <h4 class="font-heading font-bold text-sm text-primary flex items-center gap-1.5">
+                <iconify-icon icon="lucide:wallet" class="text-secondary"></iconify-icon> Payment Methods & Linked Wallets
+              </h4>
+              <div class="space-y-3 text-xs">
+                <div class="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <span class="font-semibold text-primary flex items-center gap-1.5">
+                    <iconify-icon icon="lucide:wallet" class="text-base text-secondary"></iconify-icon> Joy Guru Wallet
+                  </span>
+                  <strong class="text-primary font-bold">₹1,250.00</strong>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <span class="font-semibold text-primary flex items-center gap-1.5">
+                    <iconify-icon icon="lucide:smartphone" class="text-base text-primary"></iconify-icon> UPI Auto-Pay (GPay/PhonePe)
+                  </span>
+                  <strong class="text-emerald-600 font-bold">rahul@okaxis</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trips Tab Content -->
+        <div id="trips-tab-content" class="space-y-8 hidden">
+          <!-- Quick Stats Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="bg-card border border-border rounded-xl p-5 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <iconify-icon icon="lucide:calendar" class="text-2xl"></iconify-icon>
+            </div>
+            <div>
+              <span class="block text-xs text-muted-foreground font-semibold">Upcoming Trips</span>
+              <span class="text-2xl font-bold text-primary">1 Active</span>
+            </div>
+          </div>
+
+          <div class="bg-card border border-border rounded-xl p-5 shadow-sm flex items-center gap-4">
+            <div
+              class="w-12 h-12 rounded-lg bg-secondary/10 text-secondary-foreground flex items-center justify-center shrink-0">
+              <iconify-icon icon="lucide:check" class="text-2xl"></iconify-icon>
+            </div>
+            <div>
+              <span class="block text-xs text-muted-foreground font-semibold">Completed Trips</span>
+              <span class="text-2xl font-bold text-primary">12 Trips</span>
+            </div>
+          </div>
+
+          <div class="bg-card border border-border rounded-xl p-5 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+              <iconify-icon icon="lucide:shield-check" class="text-2xl"></iconify-icon>
+            </div>
+            <div>
+              <span class="block text-xs text-muted-foreground font-semibold">Wallet Balance</span>
+              <span class="text-2xl font-bold text-primary">₹1,250</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active / Upcoming Trip Details -->
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+            <div>
+              <h3 class="font-heading font-bold text-lg text-primary">Active Booking Status</h3>
+              <p class="text-xs text-muted-foreground">Booking ID: <strong class="text-primary">JG-2025-4829</strong>
+              </p>
+            </div>
+            <span
+              class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              <iconify-icon icon="lucide:check-circle"></iconify-icon> Advance Paid (Confirmed)
+            </span>
+          </div>
+
+          <!-- Booking Status Timeline -->
+          <div class="relative pl-6 space-y-6 border-l-2 border-primary/20">
+            <!-- Step 1 -->
+            <div class="relative">
+              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-primary border-4 border-background">
+              </div>
+              <div class="text-xs">
+                <span class="font-bold text-primary block">Booking Confirmed & Advance Paid</span>
+                <span class="text-muted-foreground">15 Oct 2025 • 09:30 AM • Received ₹1,500</span>
+              </div>
+            </div>
+            <!-- Step 2 -->
+            <div class="relative">
+              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-secondary border-4 border-background">
+              </div>
+              <div class="text-xs">
+                <span class="font-bold text-primary block">Driver Assigned</span>
+                <span class="text-muted-foreground">Pilot: <strong class="text-primary">Bimal Das</strong> (+91 94350
+                  XXXXX) • Toyota Innova Crysta</span>
+              </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="relative">
+              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-muted border-4 border-background"></div>
+              <div class="text-xs opacity-60">
+                <span class="font-bold text-muted-foreground block">Trip Started (Pending)</span>
+                <span class="text-muted-foreground">Silchar Airport (IXS) to Shillong</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Professional GST Invoice Layout (Inline Viewer) -->
+          <div class="border border-border rounded-xl overflow-hidden mt-6">
+            <div class="bg-muted px-4 py-3 border-b border-border flex items-center justify-between">
+              <span class="text-xs font-bold text-primary flex items-center gap-1">
+                <iconify-icon icon="lucide:file-text"></iconify-icon> Professional GST Invoice (JG-2025-4829)
+              </span>
+              <button onclick="alert('Downloading professional PDF invoice...')"
+                class="bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
+                <iconify-icon icon="lucide:download"></iconify-icon> Download PDF
+              </button>
+            </div>
+
+            <div class="p-6 bg-background text-slate-800 space-y-6 text-xs font-sans">
+              <!-- Invoice Header -->
+              <div class="flex justify-between items-start border-b border-slate-200 pb-4">
+                <div>
+                  <span class="font-heading font-black text-sm tracking-wide text-primary">JOY GURU TOURS &
+                    TRAVELS</span>
+                  <p class="text-[10px] text-slate-500 mt-1">
+                    Club Road, Silchar, Assam - 788001<br>
+                    GSTIN: 18AABCJ3829K1Z4<br>
+                    Email: billing@joygurutravels.com
+                  </p>
+                </div>
+                <div class="text-right">
+                  <span class="text-lg font-heading font-bold text-primary block">TAX INVOICE</span>
+                  <span class="text-[10px] text-slate-500 block">Invoice No: <strong
+                      class="text-slate-800">INV-2025-4829</strong></span>
+                  <span class="text-[10px] text-slate-500 block">Date: 15 Oct 2025</span>
+                </div>
+              </div>
+
+              <!-- Bill To / Bill From -->
+              <div class="grid grid-cols-2 gap-4 text-[10px]">
+                <div>
+                  <span class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Customer Details</span>
+                  <p class="font-semibold text-slate-800">Rahul Sharma</p>
+                  <p class="text-slate-500">Phone: +91 94350 XXXXX<br>Email: rahul@example.com</p>
+                </div>
+                <div>
+                  <span class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Trip Summary</span>
+                  <p class="font-semibold text-slate-800">Silchar Airport (IXS) ⇄ Shillong</p>
+                  <p class="text-slate-500">Vehicle: Toyota Innova Crysta (SUV)<br>Date: 15 Oct 2025</p>
+                </div>
+              </div>
+
+              <!-- Invoice Table -->
+              <table class="w-full text-left border-collapse text-[10px]">
+                <thead>
+                  <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 font-bold">
+                    <th class="py-2 px-3">Description</th>
+                    <th class="py-2 px-3 text-right">SAC Code</th>
+                    <th class="py-2 px-3 text-right">Rate</th>
+                    <th class="py-2 px-3 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-slate-100">
+                    <td class="py-2 px-3">Premium One-Way Outstation Cab Rental (Silchar Airport to Shillong)</td>
+                    <td class="py-2 px-3 text-right">9964</td>
+                    <td class="py-2 px-3 text-right">₹6,499.00</td>
+                    <td class="py-2 px-3 text-right">₹6,499.00</td>
+                  </tr>
+                  <tr class="border-b border-slate-100">
+                    <td class="py-2 px-3 text-emerald-600">Coupon Discount (NORTHEAST2025)</td>
+                    <td class="py-2 px-3 text-right">—</td>
+                    <td class="py-2 px-3 text-right text-emerald-600">-₹500.00</td>
+                    <td class="py-2 px-3 text-right text-emerald-600">-₹500.00</td>
+                  </tr>
+                  <tr class="border-b border-slate-100">
+                    <td class="py-2 px-3">CGST (2.5%)</td>
+                    <td class="py-2 px-3 text-right">—</td>
+                    <td class="py-2 px-3 text-right">₹150.00</td>
+                    <td class="py-2 px-3 text-right">₹150.00</td>
+                  </tr>
+                  <tr class="border-b border-slate-100">
+                    <td class="py-2 px-3">SGST (2.5%)</td>
+                    <td class="py-2 px-3 text-right">—</td>
+                    <td class="py-2 px-3 text-right">₹150.00</td>
+                    <td class="py-2 px-3 text-right">₹150.00</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Summary Totals -->
+              <div class="flex justify-between items-start pt-4">
+                <div class="space-y-1">
+                  <span class="block font-bold text-slate-500 uppercase tracking-wider">Payment Status</span>
+                  <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Advance
+                    Paid</span>
+                </div>
+                <div class="w-48 space-y-1.5 text-right">
+                  <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-500">Gross Total:</span>
+                    <span class="font-semibold text-slate-800">₹6,299.00</span>
+                  </div>
+                  <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-500">Advance Paid:</span>
+                    <span class="font-bold text-emerald-600">₹1,500.00</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] border-t border-slate-200 pt-1.5 font-bold">
+                    <span class="text-slate-800">Balance Due:</span>
+                    <span class="text-primary">₹4,799.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div> <!-- End of Trips Tab Content -->
+      </section>
+    </main>
+
+    <!-- Sticky Footer -->
+    <footer
+      class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60">
+      <p>© 2025 Joy Guru Tours & Travels. All Rights Reserved. Need help? Call +91 94350 XXXXX</p>
+    </footer>
+  </div>
+
+  <!-- Dynamic User Name & Initials Script -->
+  <script>
+    (function updateUserDisplay() {
+      // Get name from localStorage (set at login)
+      const rawName = localStorage.getItem('jg_user_name') || 'Rahul Sharma';
+
+      // Clean up possible suffixes added by Google login
+      const cleanName = rawName.replace(/\(Google\)/i, '').trim();
+
+      // Generate initials: first letter of first name + first letter of last name
+      const parts = cleanName.split(' ').filter(Boolean);
+      const initials = parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : parts[0].substring(0, 2).toUpperCase();
+
+      // Update navbar
+      const navAvatar = document.getElementById('nav-avatar');
+      const navName   = document.getElementById('nav-user-name');
+      if (navAvatar) navAvatar.textContent = initials;
+      if (navName)   navName.textContent   = cleanName;
+
+      // Update sidebar
+      const sideAvatar = document.getElementById('sidebar-avatar');
+      const sideName   = document.getElementById('sidebar-user-name');
+      if (sideAvatar) sideAvatar.textContent = initials;
+      if (sideName)   sideName.textContent   = cleanName;
+
+      // Also update any profile-tab name fields
+      const profNameEl  = document.getElementById('profile-disp-name');
+      const profEmailEl = document.getElementById('profile-disp-email');
+      if (profNameEl)  profNameEl.textContent  = cleanName;
+      if (profEmailEl) {
+        const email = localStorage.getItem('jg_user_email') || 'rahul@example.com';
+        profEmailEl.textContent = email;
+      }
+
+      // Wire logout button
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+          localStorage.setItem('jg_logged_in', 'false');
+          localStorage.removeItem('jg_user_name');
+          localStorage.removeItem('jg_user_email');
+          localStorage.setItem('jg_demo_mode', 'false');
+          window.location.href = 'index.html';
+        });
+      }
+    })();
+  </script>
+  <script src="script.js?v=4"></script>
+</body>
+
+</html>

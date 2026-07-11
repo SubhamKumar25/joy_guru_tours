@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Agents / AI
+.agents/
+.gemini/
+.cursorrules
+
+# Build artifacts
+joy-guru-travel-platform/
+
+# Misc
+*.log
+*.py
+project_report.md

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Search Results — Exported from UXMagic Copilot">
+    <title>Search Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Poppins:wght@100..900&amp;family=Fira+Code:wght@300..700&amp;family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @import "tailwindcss";
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-tertiary: var(--tertiary);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --font-family-sans: var(--font-sans);
+        --font-family-heading: var(--font-heading);
+        --font-family-mono: var(--font-mono);
+      }
+      :root {
+        --background: #F8FAFC;
+        --foreground: #0F172A;
+        --primary: #0F4C81;
+        --primary-foreground: #FFFFFF;
+        --secondary: #F59E0B;
+        --secondary-foreground: #0F172A;
+        --tertiary: #10B981;
+        --muted: #F1F5F9;
+        --muted-foreground: #64748b;
+        --accent: #FEF3C7;
+        --accent-foreground: #0F172A;
+        --card: #FFFFFF;
+        --card-foreground: #0F172A;
+        --destructive: #EF4444;
+        --border: #E2E8F0;
+        --input: #E2E8F0;
+        --ring: #F59E0B;
+        --radius: 1rem;
+        --font-sans: Poppins, Inter, sans-serif;
+        --font-heading: Poppins, Inter, sans-serif;
+        --font-mono: JetBrains Mono, monospace;
+        --shadow-offset-x: 0;
+        --shadow-offset-y: 10;
+        --shadow-blur: 30;
+        --shadow-spread: -8;
+        --shadow-color: rgba(15, 23, 42, 0.12);
+        }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div data-page="search-results">
+
+<div class="min-h-screen w-full bg-background flex flex-col relative font-sans text-foreground">
+  <!-- Interactive Navbar -->
+  <header class="bg-background border-b border-border px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-border">
+          <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <span class="font-heading font-bold text-lg tracking-wide text-primary">JOY GURU</span>
+          <span class="block text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-xs bg-muted text-muted-foreground font-semibold px-3 py-1.5 rounded-full flex items-center gap-1">
+          <iconify-icon icon="lucide:shield-check" class="text-tertiary"></iconify-icon> All vehicles sanitised
+        </span>
+        <a href="index.html" class="text-xs font-bold text-primary hover:text-secondary flex items-center gap-1">
+          <iconify-icon icon="lucide:arrow-left"></iconify-icon> Modify Search
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Overview Bar -->
+  <div class="bg-primary text-primary-foreground py-4 px-6 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-secondary font-semibold">From:</span>
+          <span>Silchar Airport (IXS)</span>
+        </div>
+        <div class="text-secondary/60 hidden sm:inline">|</div>
+        <div class="flex items-center gap-2">
+          <span class="text-secondary font-semibold">To:</span>
+          <span>Shillong, Meghalaya</span>
+        </div>
+        <div class="text-secondary/60 hidden sm:inline">|</div>
+        <div class="flex items-center gap-2">
+          <span class="text-secondary font-semibold">Date:</span>
+          <span>15 Oct 2025</span>
+        </div>
+        <div class="text-secondary/60 hidden sm:inline">|</div>
+        <div class="flex items-center gap-2">
+          <span class="text-secondary font-semibold">Time:</span>
+          <span>09:30 AM</span>
+        </div>
+      </div>
+      <div class="bg-background/10 px-3 py-1 rounded-lg text-xs font-semibold border border-border/20">
+        One Way Trip
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+    <!-- Filters Sidebar -->
+    <aside class="lg:col-span-3 space-y-6">
+      <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-border">
+          <h3 class="font-heading font-bold text-primary flex items-center gap-2">
+            <iconify-icon icon="lucide:funnel" class="text-secondary"></iconify-icon> Filters
+          </h3>
+          <button class="text-xs text-secondary font-semibold hover:underline">Clear All</button>
+        </div>
+
+        <!-- Vehicle Type -->
+        <div class="space-y-3 mb-6">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Vehicle Type</h4>
+          <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input type="checkbox" id="filter-suv" checked="" class="rounded border-border text-primary focus:ring-secondary w-4 h-4">
+            <span>Premium SUV <span class="text-xs text-muted-foreground">(Innova, Scorpio)</span></span>
+          </label>
+          <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input type="checkbox" id="filter-sedan" checked="" class="rounded border-border text-primary focus:ring-secondary w-4 h-4">
+            <span>Executive Sedan <span class="text-xs text-muted-foreground">(Dzire, Etios)</span></span>
+          </label>
+          <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input type="checkbox" id="filter-traveler" checked="" class="rounded border-border text-primary focus:ring-secondary w-4 h-4">
+            <span>Luxury Traveler <span class="text-xs text-muted-foreground">(Tempo Traveler)</span></span>
+          </label>
+          <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input type="checkbox" id="filter-hatchback" class="rounded border-border text-primary focus:ring-secondary w-4 h-4">
+            <span>Premium Hatchback <span class="text-xs text-muted-foreground">(i20, Baleno)</span></span>
+          </label>
+        </div>
+
+        <!-- Price Range -->
+        <div class="space-y-3 mb-6">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Price Range</h4>
+          <div class="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+            <span>₹4,000</span>
+            <span id="filter-price-label">₹12,000</span>
+          </div>
+          <input type="range" id="filter-price-slider" min="4000" max="12000" value="12000" class="w-full accent-primary">
+        </div>
+
+
+      </div>
+
+      <!-- Trust Badge Card -->
+      <div class="bg-gradient-to-br from-primary to-primary/95 text-primary-foreground rounded-xl p-5 shadow-sm space-y-4">
+        <h4 class="font-heading font-bold text-sm text-secondary flex items-center gap-2">
+          <iconify-icon icon="lucide:shield-check" class="text-lg"></iconify-icon> Joy Guru Guarantee
+        </h4>
+        <ul class="space-y-2.5 text-xs text-primary-foreground/80">
+          <li class="flex items-center gap-2">
+            <iconify-icon icon="lucide:check" class="text-secondary"></iconify-icon> Zero Hidden Charges
+          </li>
+          <li class="flex items-center gap-2">
+            <iconify-icon icon="lucide:check" class="text-secondary"></iconify-icon> 100% On-Time Guarantee
+          </li>
+          <li class="flex items-center gap-2">
+            <iconify-icon icon="lucide:check" class="text-secondary"></iconify-icon> Top Rated Mountain Drivers
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Results List -->
+    <section class="lg:col-span-9 space-y-6">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-semibold text-muted-foreground">
+          Showing <span class="text-primary font-bold">4 Available Premium Vehicles</span>
+        </p>
+        <div class="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+          <span>Sort By:</span>
+          <select class="bg-card border border-border rounded px-2.5 py-1 text-primary focus:outline-none focus:ring-1 focus:ring-secondary">
+            <option>Popularity</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+            <option>Customer Rating</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Vehicle Card 1 -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <!-- Vehicle Thumbnail & Quick Badges -->
+        <div class="md:col-span-3 space-y-3">
+          <img src="https://uxmagic.blob.core.windows.net/public/agent-images/luxury-suv-1783757866936-wp7ctnkd6fo.png" alt="Innova Crysta" class="w-full h-auto object-cover rounded-lg">
+          <div class="flex justify-center gap-2">
+            <span class="text-[10px] bg-secondary/10 text-secondary-foreground font-bold px-2 py-0.5 rounded">Top Choice</span>
+            <span class="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded">AC Cabin</span>
+          </div>
+        </div>
+
+        <!-- Vehicle Details -->
+        <div class="md:col-span-5 space-y-3">
+          <div>
+            <h3 class="font-heading font-bold text-lg text-primary flex items-center gap-2">
+              Toyota Innova Crysta
+              <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">4.9 ★</span>
+            </h3>
+            <p class="text-xs text-muted-foreground">Or equivalent premium SUV</p>
+          </div>
+
+          <!-- Specs Grid -->
+          <div class="grid grid-cols-3 gap-2 text-xs text-muted-foreground font-medium">
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:user" class="text-primary"></iconify-icon> 6 + 1 Seats
+            </span>
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:folder" class="text-primary"></iconify-icon> 3 Bags
+            </span>
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:zap" class="text-primary"></iconify-icon> Diesel
+            </span>
+          </div>
+
+          <!-- Local Pilot Info -->
+          <div class="bg-muted p-2.5 rounded-lg flex items-center gap-2 text-xs">
+            <iconify-icon icon="lucide:user" class="text-secondary text-sm"></iconify-icon>
+            <span class="text-muted-foreground">Driver: <strong class="text-primary">Bimal Das</strong> (50+ mountain trips completed)</span>
+          </div>
+        </div>
+
+        <!-- Live Fare Card & CTA -->
+        <div class="md:col-span-4 text-left md:text-right border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-6 space-y-4">
+          <div>
+            <span class="text-xs text-muted-foreground block">Total Inclusive Fare</span>
+            <span class="text-2xl font-bold text-primary">₹6,499</span>
+            <span class="block text-[10px] text-tertiary font-semibold">Includes Tolls, State Tax </span>
+          </div>
+
+          <!-- Advance split info -->
+          <div class="text-xs space-y-1">
+            <p class="text-muted-foreground">Pay Advance: <strong class="text-primary">₹1,500</strong></p>
+            <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹4,999</strong></p>
+          </div>
+
+          <button onclick="alert('Proceeding to booking summary and secure payment...')" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+            Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vehicle Card 2 -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <!-- Vehicle Thumbnail & Quick Badges -->
+        <div class="md:col-span-3 space-y-3">
+          <div class="bg-muted w-full aspect-[4/3] rounded-lg flex items-center justify-center text-muted-foreground">
+            <iconify-icon icon="lucide:car" class="text-4xl"></iconify-icon>
+          </div>
+          <div class="flex justify-center gap-2">
+            <span class="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded">Best Value</span>
+            <span class="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded">AC Cabin</span>
+          </div>
+        </div>
+
+        <!-- Vehicle Details -->
+        <div class="md:col-span-5 space-y-3">
+          <div>
+            <h3 class="font-heading font-bold text-lg text-primary flex items-center gap-2">
+              Swift Dzire / Etios
+              <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">4.8 ★</span>
+            </h3>
+            <p class="text-xs text-muted-foreground">Or equivalent comfortable sedan</p>
+          </div>
+
+          <!-- Specs Grid -->
+          <div class="grid grid-cols-3 gap-2 text-xs text-muted-foreground font-medium">
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:user" class="text-primary"></iconify-icon> 4 Seats
+            </span>
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:folder" class="text-primary"></iconify-icon> 2 Bags
+            </span>
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:zap" class="text-primary"></iconify-icon> Petrol
+            </span>
+          </div>
+
+          <!-- Local Pilot Info -->
+          <div class="bg-muted p-2.5 rounded-lg flex items-center gap-2 text-xs">
+            <iconify-icon icon="lucide:user" class="text-secondary text-sm"></iconify-icon>
+            <span class="text-muted-foreground">Driver: <strong class="text-primary">Rahul Nath</strong> (Experienced highway pilot)</span>
+          </div>
+        </div>
+
+        <!-- Live Fare Card & CTA -->
+        <div class="md:col-span-4 text-left md:text-right border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-6 space-y-4">
+          <div>
+            <span class="text-xs text-muted-foreground block">Total Inclusive Fare</span>
+            <span class="text-2xl font-bold text-primary">₹4,499</span>
+            <span class="block text-[10px] text-tertiary font-semibold">Includes Tolls, State Tax </span>
+          </div>
+
+          <!-- Advance split info -->
+          <div class="text-xs space-y-1">
+            <p class="text-muted-foreground">Pay Advance: <strong class="text-primary">₹1,000</strong></p>
+            <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹3,499</strong></p>
+          </div>
+
+          <button onclick="alert('Proceeding to booking summary and secure payment...')" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+            Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vehicle Card 3 -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <!-- Vehicle Thumbnail & Quick Badges -->
+        <div class="md:col-span-3 space-y-3">
+          <div class="bg-muted w-full aspect-[4/3] rounded-lg flex items-center justify-center text-muted-foreground">
+            <iconify-icon icon="lucide:layers" class="text-4xl"></iconify-icon>
+          </div>
+          <div class="flex justify-center gap-2">
+            <span class="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded">Large Group</span>
+            <span class="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded">AC Cabin</span>
+          </div>
+        </div>
+
+        <!-- Vehicle Details -->
+        <div class="md:col-span-5 space-y-3">
+          <div>
+            <h3 class="font-heading font-bold text-lg text-primary flex items-center gap-2">
+              Tempo Traveler Luxury
+              <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">4.7 ★</span>
+            </h3>
+            <p class="text-xs text-muted-foreground">Ideal for family tours and mountain routes</p>
+          </div>
+
+          <!-- Specs Grid -->
+          <div class="grid grid-cols-3 gap-2 text-xs text-muted-foreground font-medium">
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:user" class="text-primary"></iconify-icon> 12 Seats
+            </span>
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:folder" class="text-primary"></iconify-icon> 8 Bags
+            </span>
+            <span class="flex items-center gap-1">
+              <iconify-icon icon="lucide:zap" class="text-primary"></iconify-icon> Diesel
+            </span>
+          </div>
+
+          <!-- Local Pilot Info -->
+          <div class="bg-muted p-2.5 rounded-lg flex items-center gap-2 text-xs">
+            <iconify-icon icon="lucide:user" class="text-secondary text-sm"></iconify-icon>
+            <span class="text-muted-foreground">Driver: <strong class="text-primary">Joydeep Roy</strong> (Specialist in Shillong &amp; Tawang)</span>
+          </div>
+        </div>
+
+        <!-- Live Fare Card & CTA -->
+        <div class="md:col-span-4 text-left md:text-right border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-6 space-y-4">
+          <div>
+            <span class="text-xs text-muted-foreground block">Total Inclusive Fare</span>
+            <span class="text-2xl font-bold text-primary">₹11,999</span>
+            <span class="block text-[10px] text-tertiary font-semibold">Includes Tolls, State Tax </span>
+          </div>
+
+          <!-- Advance split info -->
+          <div class="text-xs space-y-1">
+            <p class="text-muted-foreground">Pay Advance: <strong class="text-primary">₹2,500</strong></p>
+            <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹9,499</strong></p>
+          </div>
+
+          <button onclick="alert('Proceeding to booking summary and secure payment...')" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+            Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Footer -->
+  <footer class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60">
+    <p>© 2025 Joy Guru Tours &amp; Travels. All Rights Reserved. Need help? Call +91 94350 XXXXX</p>
+  </footer>
+</div>
+
+    </div>
+    <script src="script.js?v=4"></script>
+</body>
+</html>
