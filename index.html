@@ -72,6 +72,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <!-- Autocomplete dropdown styles -->
     <link rel="stylesheet" href="assets/css/autocomplete.css">
+    <!-- Custom styling extensions -->
+    <link rel="stylesheet" href="assets/css/location.css">
+    <link rel="stylesheet" href="assets/css/profile.css">
 </head>
 <body>
     <div data-page="landing-page">
@@ -102,9 +105,30 @@
 
       <!-- CTA and Portal Links -->
       <div class="flex items-center gap-4">
-        <span class="text-xs bg-accent text-secondary-foreground font-bold px-3 py-1 rounded-full border border-secondary/20 hidden sm:inline-flex items-center gap-1">
+        <span id="navbar-location-span" class="text-xs bg-accent text-secondary-foreground font-bold px-3 py-1 rounded-full border border-secondary/20 hidden sm:inline-flex items-center gap-1">
           <iconify-icon icon="lucide:map-pin" class="text-secondary"></iconify-icon> Silchar, Assam
         </span>
+
+        <!-- Notification Icon Button -->
+        <div class="relative">
+          <button id="notification-bell-btn" class="w-8 h-8 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-primary flex items-center justify-center transition-all relative">
+            <iconify-icon icon="lucide:bell" class="text-sm"></iconify-icon>
+            <!-- Unread badge -->
+            <span id="notification-unread-badge" class="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary rounded-full border border-background hidden"></span>
+          </button>
+          
+          <!-- Notification Panel Dropdown -->
+          <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 bg-card border border-border shadow-xl rounded-xl p-4 z-50 hidden text-left text-slate-800">
+            <div class="flex items-center justify-between border-b border-border pb-2 mb-3">
+              <span class="font-bold text-xs text-primary uppercase tracking-wide">Notifications</span>
+              <button id="mark-all-read-btn" class="text-[10px] text-secondary font-bold hover:underline">Mark all read</button>
+            </div>
+            <div id="notifications-list" class="space-y-3 max-h-64 overflow-y-auto">
+              <!-- Loaded from JS -->
+            </div>
+          </div>
+        </div>
+
         <button id="login-btn" onclick="window.location.href='Login & Signup.html'" class="bg-primary hover:bg-primary/95 text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md transition-all flex items-center gap-2">
           <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Login / Sign In
         </button>
@@ -598,8 +622,10 @@
     <script src="script.js?v=9"></script>
     <!-- Leaflet JS library -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Autocomplete geocoding & Leaflet route drawing scripts -->
+    <!-- Custom logic scripts -->
     <script src="assets/js/autocomplete.js"></script>
     <script src="assets/js/map.js"></script>
+    <script src="assets/js/location.js"></script>
+    <script src="assets/js/notifications.js"></script>
 </body>
 </html>

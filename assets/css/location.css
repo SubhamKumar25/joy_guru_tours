@@ -1,0 +1,21 @@
+/* Custom location markers styling for Leaflet Map */
+.custom-map-marker {
+  transition: transform 0.2s ease-out;
+}
+
+.custom-map-marker:hover {
+  transform: scale(1.2);
+  z-index: 1000 !important;
+}
+
+/* Info popup panel customization */
+.leaflet-popup-content-wrapper {
+  border-radius: 0.5rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  border: 1px solid var(--border, #e2e8f0);
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+}
