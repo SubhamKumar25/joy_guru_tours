@@ -245,10 +245,10 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
                     if (redirect === 'booking') {
-                        window.location.href = "Booking & Payment.html";
+                        window.location.href = "booking-payment.html";
                     } else if (StateEngine.isDemoMode()) {
                         // In demo mode: go to search results as step 3
-                        window.location.href = "Search Results.html";
+                        window.location.href = "search-results.html";
                     } else {
                         window.location.href = "index.html";
                     }
@@ -264,9 +264,9 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
                     if (redirect === 'booking') {
-                        window.location.href = "Booking & Payment.html";
+                        window.location.href = "booking-payment.html";
                     } else if (StateEngine.isDemoMode()) {
-                        window.location.href = "Search Results.html";
+                        window.location.href = "search-results.html";
                     } else {
                         window.location.href = "index.html";
                     }

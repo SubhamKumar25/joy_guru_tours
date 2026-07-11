@@ -196,23 +196,23 @@ window.DemoAssistant = {
   getCurrentStep: function() {
     const path = window.location.pathname;
     if (path.includes('index.html') || path.endsWith('/') || path === '') return 1;
-    if (path.includes('Login & Signup.html')) return 2;
-    if (path.includes('Search%20Results.html') || path.includes('Search Results.html')) return 3;
-    if (path.includes('Booking%20&%20Payment.html') || path.includes('Booking & Payment.html')) {
+    if (path.includes('login-signup.html')) return 2;
+    if (path.includes('search-results.html')) return 3;
+    if (path.includes('booking-payment.html')) {
       const modal = document.getElementById('razorpay-modal');
       if (modal && !modal.classList.contains('hidden')) {
         return 5;
       }
       return 4;
     }
-    if (path.includes('User%20Dashboard%20&%20Invoice.html') || path.includes('User Dashboard & Invoice.html')) {
+    if (path.includes('user-dashboard.html')) {
       const activeBooking = StateEngine.getBookings().find(b => b.id === 'JG-2025-4829' || b.id.startsWith('JG-25'));
       if (activeBooking && activeBooking.status === 'Fully Paid') {
         return 8;
       }
       return 6;
     }
-    if (path.includes('Admin%20Control%20Center.html') || path.includes('Admin Control Center.html')) return 7;
+    if (path.includes('admin-control-center.html')) return 7;
     return 0;
   },
 
@@ -334,7 +334,7 @@ window.DemoAssistant = {
     if (manualBtn) {
       manualBtn.addEventListener('click', () => {
         if (step === 6) {
-          window.location.href = "Admin Control Center.html";
+          window.location.href = "admin-control-center.html";
         } else if (step === 8) {
           StateEngine.logout();
           window.location.href = "index.html";
@@ -348,13 +348,13 @@ window.DemoAssistant = {
 document.addEventListener('DOMContentLoaded', function () {
   // Check login authentication state
   const path = window.location.pathname;
-  const isLoginPage = path.includes('Login') || path.includes('Signup');
-  const isLauncher = path.includes('Launcher');
+  const isLoginPage = path.includes('login-signup');
+  const isLauncher = path.includes('prototype-launcher');
   const isLandingPage = path === '' || path === '/' || path.includes('index.html');
   const isLoggedIn = StateEngine.isLoggedIn();
 
   if (!isLoggedIn && !isLoginPage && !isLauncher && !isLandingPage && !StateEngine.isDemoMode()) {
-    window.location.href = "Login & Signup.html";
+    window.location.href = "login-signup.html";
     return;
   }
 
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get('redirect');
     if (redirect === 'booking') {
-      window.location.href = "Booking & Payment.html";
+      window.location.href = "booking-payment.html";
     } else {
       window.location.href = "index.html";
     }
@@ -401,12 +401,12 @@ document.addEventListener('DOMContentLoaded', function () {
           const shortName = rawName.split(' ')[0]; // First name
           el.innerHTML = `<iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> ${shortName}`;
           el.onclick = function() {
-            window.location.href = "User Dashboard & Invoice.html";
+            window.location.href = "user-dashboard.html";
           };
         } else {
           el.innerHTML = `<iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Login / Sign In`;
           el.onclick = function() {
-            window.location.href = "Login & Signup.html";
+            window.location.href = "login-signup.html";
           };
         }
       }
@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function () {
         StateEngine.setActiveSearch(searchObj);
 
         UIUtils.showLoading('Finding Your Ride...', 1200, function() {
-          window.location.href = "Search Results.html";
+          window.location.href = "search-results.html";
         });
       });
     }
@@ -557,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         UIUtils.showLoading('Setting up Route...', 800, () => {
-          window.location.href = "Search Results.html";
+          window.location.href = "search-results.html";
         });
       });
     });
@@ -685,11 +685,11 @@ document.addEventListener('DOMContentLoaded', function () {
           UIUtils.showLoading('Preparing Booking Invoice...', 1000, () => {
             // Force user to log in before checking out if logged out
             if (StateEngine.isLoggedIn()) {
-              window.location.href = "Booking & Payment.html";
+              window.location.href = "booking-payment.html";
             } else {
               UIUtils.showToast('Please log in to continue booking', 'error');
               setTimeout(() => {
-                window.location.href = "Login & Signup.html?redirect=booking";
+                window.location.href = "login-signup.html?redirect=booking";
               }, 1200);
             }
           });
@@ -864,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Redirect to User Dashboard
             setTimeout(() => {
-              window.location.href = "User Dashboard & Invoice.html?success=true";
+              window.location.href = "user-dashboard.html?success=true";
             }, 1000);
           });
         }, 1200);
@@ -873,7 +873,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // 4. USER DASHBOARD & INVOICE PAGE
-  if (document.querySelector('[data-page="user-dashboard-invoice"]') || document.getElementById('dashboard') || window.location.pathname.includes('User%20Dashboard')) {
+  if (document.querySelector('[data-page="user-dashboard-invoice"]') || document.getElementById('dashboard') || window.location.pathname.includes('user-dashboard')) {
     const bookings = StateEngine.getBookings();
     
     // Find active booking (most recent or selected)

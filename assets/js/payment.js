@@ -5,7 +5,7 @@
 (function() {
   document.addEventListener('DOMContentLoaded', function() {
     // Only run on the dashboard page
-    const isDashboard = document.querySelector('[data-page="user-dashboard-invoice"]') || document.getElementById('dashboard') || window.location.pathname.includes('User%20Dashboard');
+    const isDashboard = document.querySelector('[data-page="user-dashboard-invoice"]') || document.getElementById('dashboard') || window.location.pathname.includes('user-dashboard');
     if (!isDashboard) return;
 
     // Wait a brief moment to let script.js finish initial rendering, then override
