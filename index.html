@@ -68,6 +68,10 @@
         }
     </style>
     <link rel="stylesheet" href="styles.css">
+    <!-- Leaflet CSS for Map Preview -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <!-- Autocomplete dropdown styles -->
+    <link rel="stylesheet" href="assets/css/autocomplete.css">
 </head>
 <body>
     <div data-page="landing-page">
@@ -165,26 +169,39 @@
 
           <!-- Form Fields -->
           <form class="space-y-4">
-            <div class="space-y-1">
+            <div class="space-y-1 relative">
               <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                 <iconify-icon icon="lucide:map-pin" class="text-primary"></iconify-icon> PICKUP LOCATION
               </label>
               <input type="text" id="pickup-location" placeholder="Enter pickup location (e.g. Silchar)" class="w-full bg-muted border border-input rounded-lg px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none">
             </div>
 
-            <div class="space-y-1 relative">
-              <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                <iconify-icon icon="lucide:map-pin" class="text-secondary"></iconify-icon> DROP DESTINATION
-              </label>
-              <input type="text" id="drop-destination" placeholder="Enter destination (e.g. Shillong, Tura)" class="w-full bg-muted border border-input rounded-lg px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1 relative">
+                <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                  <iconify-icon icon="lucide:navigation" class="text-primary"></iconify-icon> DESTINATION
+                </label>
+                <input type="text" id="drop-destination" placeholder="Enter drop destination (e.g. Shillong)" class="w-full bg-muted border border-input rounded-lg px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none">
+              </div>
               <div class="space-y-1">
                 <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                   <iconify-icon icon="lucide:calendar" class="text-primary"></iconify-icon> DATE
                 </label>
                 <input type="date" id="travel-date" class="w-full bg-muted border border-input rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                  <iconify-icon icon="lucide:users" class="text-primary"></iconify-icon> PASSENGERS
+                </label>
+                <select class="w-full bg-muted border border-input rounded-lg px-3 py-3.5 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none">
+                  <option>1 Passenger</option>
+                  <option selected="">4 Passengers</option>
+                  <option>7 Passengers</option>
+                  <option>12+ Group</option>
+                </select>
               </div>
               <div class="space-y-1">
                 <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
@@ -206,6 +223,16 @@
               Find Your Ride <iconify-icon icon="lucide:arrow-right" class="text-lg"></iconify-icon>
             </button>
           </form>
+
+          <!-- Dynamic OSM Map Preview & Routing Panel -->
+          <div id="map-preview-container" class="mt-6 hidden animate-fade-in">
+            <div class="flex flex-wrap gap-2 justify-between items-center mb-2.5 text-[10px] font-semibold text-muted-foreground bg-muted p-2 rounded-lg border border-border">
+              <span id="route-distance" class="flex items-center gap-1"><iconify-icon icon="lucide:map" class="text-primary text-sm"></iconify-icon> Distance: -- km</span>
+              <span id="route-duration" class="flex items-center gap-1"><iconify-icon icon="lucide:clock" class="text-primary text-sm"></iconify-icon> Time: -- mins</span>
+              <span id="route-fare" class="flex items-center gap-1"><iconify-icon icon="lucide:tag" class="text-secondary text-sm"></iconify-icon> Est. Fare: --</span>
+            </div>
+            <div id="map" style="height: 180px;" class="w-full rounded-xl border border-border z-0 shadow-inner"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -569,5 +596,10 @@
 
     </div>
     <script src="script.js?v=9"></script>
+    <!-- Leaflet JS library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Autocomplete geocoding & Leaflet route drawing scripts -->
+    <script src="assets/js/autocomplete.js"></script>
+    <script src="assets/js/map.js"></script>
 </body>
 </html>
