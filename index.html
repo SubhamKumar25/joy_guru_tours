@@ -159,9 +159,9 @@
 
           <!-- Trip Type Selector -->
           <div class="grid grid-cols-3 gap-2 bg-muted p-1 rounded-lg mb-6">
-            <button class="bg-primary text-primary-foreground text-xs font-semibold py-2 rounded-md shadow-sm">One Way</button>
-            <button class="text-muted-foreground hover:text-primary text-xs font-semibold py-2 rounded-md transition-colors">Round Trip</button>
-            <button class="text-muted-foreground hover:text-primary text-xs font-semibold py-2 rounded-md transition-colors">Airport</button>
+            <button type="button" id="type-one-way" class="bg-primary text-primary-foreground text-xs font-semibold py-2 rounded-md shadow-sm">One Way</button>
+            <button type="button" id="type-round-trip" class="text-muted-foreground hover:text-primary text-xs font-semibold py-2 rounded-md transition-colors">Round Trip</button>
+            <button type="button" id="type-airport" class="text-muted-foreground hover:text-primary text-xs font-semibold py-2 rounded-md transition-colors">Airport</button>
           </div>
 
           <!-- Form Fields -->
@@ -193,6 +193,14 @@
                 </label>
                 <input type="time" id="travel-time" class="w-full bg-muted border border-input rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none">
               </div>
+            </div>
+
+            <!-- Return Date for Round Trip (Toggled by JS) -->
+            <div id="return-date-container" class="space-y-1 hidden">
+              <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                <iconify-icon icon="lucide:calendar" class="text-secondary"></iconify-icon> RETURN DATE
+              </label>
+              <input type="date" id="return-date" class="w-full bg-muted border border-input rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none">
             </div>
 
             <button type="submit" class="w-full bg-secondary text-secondary-foreground font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base mt-2 hover:bg-secondary/95">
@@ -561,6 +569,6 @@
 </div>
 
     </div>
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>

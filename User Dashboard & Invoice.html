@@ -278,25 +278,24 @@
           </div>
         </div>
 
-        <!-- Two-Column Layout for Bookings List & Selected Details -->
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          <!-- Left Side: Bookings List -->
-          <div class="xl:col-span-4 space-y-4">
-            <h3 class="font-heading font-bold text-sm tracking-wider uppercase text-muted-foreground flex items-center gap-1.5">
-              <iconify-icon icon="lucide:list" class="text-primary"></iconify-icon> My Booking List
-            </h3>
-            <div id="dashboard-bookings-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-              <!-- Dynamically rendered list of bookings -->
-            </div>
+        <!-- Trips List View (Visible by default) -->
+        <div id="trips-list-view" class="space-y-4">
+          <h3 class="font-heading font-bold text-sm tracking-wider uppercase text-muted-foreground flex items-center gap-1.5">
+            <iconify-icon icon="lucide:list" class="text-primary"></iconify-icon> My Booking List
+          </h3>
+          <div id="dashboard-bookings-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <!-- Dynamically rendered list of bookings -->
           </div>
+        </div>
 
-          <!-- Right Side: Selected Booking Details -->
-          <div class="xl:col-span-8 space-y-6" id="selected-booking-details-panel">
-            <!-- Loading placeholder initially -->
-            <div class="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground text-sm">
-              <iconify-icon icon="lucide:loader" class="animate-spin text-2xl text-primary mb-2"></iconify-icon>
-              <p>Loading booking details...</p>
-            </div>
+        <!-- Trip Details View (Hidden by default) -->
+        <div id="trip-details-view" class="space-y-6 hidden">
+          <!-- Back Button -->
+          <button id="back-to-trips-btn" class="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-secondary transition-all">
+            <iconify-icon icon="lucide:arrow-left" class="text-sm"></iconify-icon> Back to My Trips
+          </button>
+          <div id="selected-booking-details-panel">
+            <!-- Dynamically loaded active booking details -->
           </div>
         </div>
       </div> <!-- End of Trips Tab Content -->
@@ -359,7 +358,7 @@
       }
     })();
   </script>
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
 </body>
 
 </html>

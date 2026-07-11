@@ -426,25 +426,88 @@ document.addEventListener('DOMContentLoaded', function () {
   // 1. LANDING PAGE
   if (document.querySelector('[data-page="landing-page"]')) {
     const searchForm = document.querySelector('section#home form');
+    
+    // Trip Type Selector Tabs Toggling
+    const btnOneWay = document.getElementById('type-one-way');
+    const btnRoundTrip = document.getElementById('type-round-trip');
+    const btnAirport = document.getElementById('type-airport');
+    
+    const returnDateContainer = document.getElementById('return-date-container');
+    const pickupInput = document.getElementById('pickup-location');
+    const dropInput = document.getElementById('drop-destination');
+
+    function setActiveTripType(activeBtn) {
+      [btnOneWay, btnRoundTrip, btnAirport].forEach(btn => {
+        if (btn) {
+          btn.className = "text-muted-foreground hover:text-primary text-xs font-semibold py-2 rounded-md transition-colors";
+        }
+      });
+      if (activeBtn) {
+        activeBtn.className = "bg-primary text-primary-foreground text-xs font-semibold py-2 rounded-md shadow-sm";
+      }
+    }
+
+    if (btnOneWay) {
+      btnOneWay.addEventListener('click', () => {
+        setActiveTripType(btnOneWay);
+        if (returnDateContainer) returnDateContainer.classList.add('hidden');
+        if (pickupInput) {
+          pickupInput.placeholder = "Enter pickup location (e.g. Silchar)";
+          pickupInput.value = "";
+        }
+        if (dropInput) {
+          dropInput.placeholder = "Enter destination (e.g. Shillong, Tura)";
+          dropInput.value = "";
+        }
+      });
+    }
+
+    if (btnRoundTrip) {
+      btnRoundTrip.addEventListener('click', () => {
+        setActiveTripType(btnRoundTrip);
+        if (returnDateContainer) returnDateContainer.classList.remove('hidden');
+        if (pickupInput) {
+          pickupInput.placeholder = "Enter pickup location (e.g. Silchar)";
+        }
+        if (dropInput) {
+          dropInput.placeholder = "Enter destination (e.g. Shillong, Tura)";
+        }
+      });
+    }
+
+    if (btnAirport) {
+      btnAirport.addEventListener('click', () => {
+        setActiveTripType(btnAirport);
+        if (returnDateContainer) returnDateContainer.classList.add('hidden');
+        if (pickupInput) {
+          pickupInput.value = "Silchar Town, Assam";
+        }
+        if (dropInput) {
+          dropInput.value = "Silchar Airport (IXS), Assam";
+          dropInput.placeholder = "Enter Airport (e.g. Silchar Airport IXS)";
+        }
+      });
+    }
+
     if (searchForm) {
       searchForm.removeAttribute('onsubmit'); // override static behavior
       searchForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         // Save inputs to state
-        const pickupInput = document.getElementById('pickup-location');
-        const dropInput = document.getElementById('drop-destination');
+        const pickupInputEl = document.getElementById('pickup-location');
+        const dropInputEl = document.getElementById('drop-destination');
         const dateInput = document.getElementById('travel-date');
         const timeInput = document.getElementById('travel-time');
 
-        if (!pickupInput || !pickupInput.value.trim() || !dropInput || !dropInput.value.trim()) {
+        if (!pickupInputEl || !pickupInputEl.value.trim() || !dropInputEl || !dropInputEl.value.trim()) {
           UIUtils.showToast('Please enter both pickup and destination locations', 'error');
           return;
         }
 
         const searchObj = {
-          pickup: pickupInput.value.trim(),
-          destination: dropInput.value.trim(),
+          pickup: pickupInputEl.value.trim(),
+          destination: dropInputEl.value.trim(),
           date: dateInput && dateInput.value ? dateInput.value : new Date().toISOString().split('T')[0],
           time: timeInput && timeInput.value ? timeInput.value : '10:00 AM',
           passengers: '4',
@@ -1146,13 +1209,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       bookings.forEach(b => {
-        const isSelected = b.id === (localStorage.getItem('jg_last_booking_id') || bookings[0].id);
         const card = document.createElement('div');
-        card.className = `p-4 rounded-xl border transition-all cursor-pointer ${
-          isSelected 
-            ? 'border-primary bg-primary/5 shadow-sm' 
-            : 'border-border bg-card hover:border-primary/50'
-        }`;
+        card.className = "p-5 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-md transition-all cursor-pointer";
         
         let statusBadgeClass = "bg-blue-100 text-blue-800";
         if (b.status === 'Fully Paid' || b.status === 'Completed') {
@@ -1160,33 +1218,56 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         card.innerHTML = `
-          <div class="flex justify-between items-start gap-2 mb-2">
+          <div class="flex justify-between items-start gap-2 mb-3">
             <span class="font-bold text-xs text-primary">${b.id}</span>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadgeClass}">${b.status}</span>
           </div>
-          <div class="text-xs font-semibold text-slate-800 mb-1 flex items-center gap-1">
+          <div class="text-sm font-semibold text-slate-800 mb-2 flex items-center gap-1.5">
             <iconify-icon icon="lucide:navigation" class="text-secondary text-sm"></iconify-icon>
             ${b.route}
           </div>
-          <div class="text-[10px] text-muted-foreground flex justify-between">
+          <div class="text-xs text-muted-foreground flex justify-between pt-2 border-t border-slate-100 mt-2">
             <span>Date: ${b.travelDate}</span>
             <span class="font-bold text-slate-700">₹${b.payableAmount.toLocaleString()}</span>
           </div>
         `;
 
         card.onclick = () => {
-          localStorage.setItem('jg_last_booking_id', b.id);
-          renderBookingsList();
           populateBookingDetails(b);
+          const listView = document.getElementById('trips-list-view');
+          const detailsView = document.getElementById('trip-details-view');
+          if (listView) listView.classList.add('hidden');
+          if (detailsView) detailsView.classList.remove('hidden');
         };
 
         bookingsListContainer.appendChild(card);
       });
     }
 
+    // Wire up back to list button
+    const backBtn = document.getElementById('back-to-trips-btn');
+    if (backBtn) {
+      backBtn.onclick = () => {
+        const listView = document.getElementById('trips-list-view');
+        const detailsView = document.getElementById('trip-details-view');
+        if (listView) listView.classList.remove('hidden');
+        if (detailsView) detailsView.classList.add('hidden');
+      };
+    }
+
     // Populate dynamic UI elements at start
     renderBookingsList();
-    populateBookingDetails(activeBooking);
+    
+    // If successful checkout redirect, automatically open the latest booking details
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true' && activeBooking) {
+      populateBookingDetails(activeBooking);
+      const listView = document.getElementById('trips-list-view');
+      const detailsView = document.getElementById('trip-details-view');
+      if (listView) listView.classList.add('hidden');
+      if (detailsView) detailsView.classList.remove('hidden');
+      UIUtils.showToast('Booking Successful! Invoice Generated.', 'success');
+    }
 
     // Bind left sidebar navigation items
     const sidebarDashboard = document.querySelector('nav a[href="#dashboard"]');
