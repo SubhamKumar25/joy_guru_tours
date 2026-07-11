@@ -346,6 +346,28 @@ window.DemoAssistant = {
 
 // Standard Document Ready Hook
 document.addEventListener('DOMContentLoaded', function () {
+  // Check login authentication state
+  const path = window.location.pathname;
+  const isLoginPage = path.includes('Login') || path.includes('Signup');
+  const isLauncher = path.includes('Launcher');
+  const isLoggedIn = StateEngine.isLoggedIn();
+
+  if (!isLoggedIn && !isLoginPage && !isLauncher && !StateEngine.isDemoMode()) {
+    window.location.href = "Login & Signup.html";
+    return;
+  }
+
+  if (isLoggedIn && isLoginPage) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirect = urlParams.get('redirect');
+    if (redirect === 'booking') {
+      window.location.href = "Booking & Payment.html";
+    } else {
+      window.location.href = "index.html";
+    }
+    return;
+  }
+
   // Smooth scroll for anchor links
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
@@ -410,16 +432,21 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         
         // Save inputs to state
-        const pickupInput = searchForm.querySelector('input[value*="Silchar"], input[placeholder*="pickup"]');
-        const dropInput = searchForm.querySelector('input[placeholder*="destination"], input[value*="Shillong"]');
-        const dateInput = searchForm.querySelector('input[type="date"]');
-        const timeInput = searchForm.querySelector('input[type="time"]');
+        const pickupInput = document.getElementById('pickup-location');
+        const dropInput = document.getElementById('drop-destination');
+        const dateInput = document.getElementById('travel-date');
+        const timeInput = document.getElementById('travel-time');
+
+        if (!pickupInput || !pickupInput.value.trim() || !dropInput || !dropInput.value.trim()) {
+          UIUtils.showToast('Please enter both pickup and destination locations', 'error');
+          return;
+        }
 
         const searchObj = {
-          pickup: pickupInput ? pickupInput.value : 'Silchar Airport (IXS), Assam',
-          destination: dropInput ? dropInput.value : 'Shillong, Meghalaya',
-          date: dateInput ? dateInput.value : '2025-10-15',
-          time: timeInput ? timeInput.value : '09:30 AM',
+          pickup: pickupInput.value.trim(),
+          destination: dropInput.value.trim(),
+          date: dateInput && dateInput.value ? dateInput.value : new Date().toISOString().split('T')[0],
+          time: timeInput && timeInput.value ? timeInput.value : '10:00 AM',
           passengers: '4',
           vehicleType: 'suv'
         };
@@ -427,7 +454,6 @@ document.addEventListener('DOMContentLoaded', function () {
         StateEngine.setActiveSearch(searchObj);
 
         UIUtils.showLoading('Searching Luxury Rides...', 1200, function() {
-          // If not logged in, force login to proceed or go direct to search
           window.location.href = "Search Results.html";
         });
       });
@@ -913,175 +939,254 @@ document.addEventListener('DOMContentLoaded', function () {
       };
     }
 
-    // Populate active booking details on Dashboard UI
-    if (activeBooking) {
-      // Booking ID displays
-      document.querySelectorAll('strong.text-primary').forEach(el => {
-        if (el.textContent.includes('JG-')) {
-          el.textContent = activeBooking.id;
-        }
-      });
-      const bookSubLabel = document.querySelector('p.text-xs.text-muted-foreground');
-      if (bookSubLabel && bookSubLabel.textContent.includes('Booking ID')) {
-        bookSubLabel.innerHTML = `Booking ID: <strong class="text-primary">${activeBooking.id}</strong>`;
+    // Render bookings list and select trip
+    const bookingsListContainer = document.getElementById('dashboard-bookings-list');
+    const selectedBookingDetailsPanel = document.getElementById('selected-booking-details-panel');
+
+    function populateBookingDetails(booking) {
+      if (!booking || !selectedBookingDetailsPanel) return;
+
+      let statusPillText = "Advance Paid (Confirmed)";
+      let statusPillClass = "bg-emerald-100 text-emerald-800";
+      if (booking.status === 'Fully Paid') {
+        statusPillText = "Fully Paid (Receipt Generated)";
+      } else if (booking.status === 'Completed') {
+        statusPillText = "Trip Completed (Pending Balance)";
+        statusPillClass = "bg-blue-100 text-blue-800";
       }
 
-      // Check current payment status and update confirmation pill
-      const confirmPill = document.querySelector('span.bg-emerald-100.text-emerald-800.font-bold');
-      if (confirmPill) {
-        if (activeBooking.status === 'Fully Paid') {
-          confirmPill.innerHTML = `<iconify-icon icon="lucide:check-circle"></iconify-icon> Fully Paid (Receipt Generated)`;
-          confirmPill.className = "text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1";
-        } else {
-          confirmPill.innerHTML = `<iconify-icon icon="lucide:check-circle"></iconify-icon> Advance Paid (Confirmed)`;
-          confirmPill.className = "text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1";
-        }
-      }
+      let step2Color = booking.status === 'Fully Paid' ? 'bg-primary' : 'bg-secondary';
+      let step3Color = booking.status === 'Fully Paid' ? 'bg-primary' : 'bg-muted';
+      let step3Opacity = booking.status === 'Fully Paid' ? '' : 'opacity-60';
 
-      // Timeline logic
-      const timelineSteps = document.querySelectorAll('div.relative.pl-6 > div.relative');
-      if (timelineSteps[0]) {
-        // Step 1: Confirmed
-        const label = timelineSteps[0].querySelector('span.font-bold');
-        const desc = timelineSteps[0].querySelector('span.text-muted-foreground');
-        if (label) label.textContent = "Booking Confirmed & Advance Paid";
-        if (desc) desc.textContent = `${activeBooking.travelDate} • Received ₹${activeBooking.advancePaid.toLocaleString()}`;
-      }
-      if (timelineSteps[1]) {
-        // Step 2: Driver Assigned
-        const label = timelineSteps[1].querySelector('span.font-bold');
-        const desc = timelineSteps[1].querySelector('span.text-muted-foreground');
-        
-        if (activeBooking.status === 'Fully Paid') {
-          timelineSteps[1].querySelector('div.absolute').className = "absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-primary border-4 border-background";
-        } else {
-          timelineSteps[1].querySelector('div.absolute').className = "absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-secondary border-4 border-background";
-        }
+      let step3Content = booking.status === 'Fully Paid'
+        ? `<span class="font-bold text-primary block">Trip Completed & Payment Finalised</span>
+           <span class="text-muted-foreground">${booking.pickup.split(',')[0]} to ${booking.destination.split(',')[0]} Route Completed successfully. Paid remaining balance of ₹${booking.balanceDue.toLocaleString()} to pilot.</span>`
+        : `<span class="font-bold text-muted-foreground block">Trip Started (Pending)</span>
+           <span class="text-muted-foreground">${booking.pickup.split(',')[0]} to ${booking.destination.split(',')[0]} • Remaining amount ₹${booking.balanceDue.toLocaleString()} due at drop.</span>`;
 
-        if (label) label.textContent = "Driver & Cab Assigned";
-        if (desc) desc.innerHTML = `Pilot: <strong class="text-primary">${activeBooking.driverName}</strong> (${activeBooking.driverPhone}) • ${activeBooking.vehicleName}`;
-      }
-      if (timelineSteps[2]) {
-        // Step 3: Completed / Fully Paid
-        const bullet = timelineSteps[2].querySelector('div.absolute');
-        const contentBlock = timelineSteps[2].querySelector('div.text-xs');
-        
-        if (activeBooking.status === 'Fully Paid') {
-          bullet.className = "absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-primary border-4 border-background";
-          contentBlock.className = "text-xs";
-          contentBlock.innerHTML = `
-            <span class="font-bold text-primary block">Trip Completed & Payment Finalised</span>
-            <span class="text-muted-foreground">Silchar to Shillong Route Completed successfully. Paid remaining balance of ₹${activeBooking.balanceDue.toLocaleString()} to pilot.</span>
-          `;
-        } else {
-          bullet.className = "absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-muted border-4 border-background";
-          contentBlock.className = "text-xs opacity-60";
-          contentBlock.innerHTML = `
-            <span class="font-bold text-muted-foreground block">Trip Completed (Pending)</span>
-            <span class="text-muted-foreground">Silchar Airport (IXS) to Shillong • Remaining amount ₹${activeBooking.balanceDue.toLocaleString()} due at drop.</span>
-          `;
-        }
-      }
-
-      // TAX INVOICE DETAILS
-      // Invoice Info Header
-      const invCompany = document.querySelector('span.font-heading.font-black.text-sm');
-      const invNo = document.querySelector('.text-right span.text-\\[10px\\]:nth-of-type(1)');
-      const invDate = document.querySelector('.text-right span.text-\\[10px\\]:nth-of-type(2)');
-      const custDetails = document.querySelector('div.grid.grid-cols-2.gap-4 div:nth-child(1) p.font-semibold');
-      const custContact = document.querySelector('div.grid.grid-cols-2.gap-4 div:nth-child(1) p.text-slate-500');
-      const tripSummaryRoute = document.querySelector('div.grid.grid-cols-2.gap-4 div:nth-child(2) p.font-semibold');
-      const tripSummaryDesc = document.querySelector('div.grid.grid-cols-2.gap-4 div:nth-child(2) p.text-slate-500');
-
-      if (invNo) invNo.innerHTML = `Invoice No: <strong class="text-slate-800">INV-${activeBooking.id.substring(3)}</strong>`;
-      if (invDate) invDate.textContent = `Date: ${activeBooking.travelDate}`;
-      if (custDetails) custDetails.textContent = activeBooking.customerName;
-      if (custContact) custContact.innerHTML = `Phone: ${activeBooking.customerPhone}<br>Email: ${activeBooking.customerEmail}`;
-      if (tripSummaryRoute) tripSummaryRoute.textContent = activeBooking.route;
-      if (tripSummaryDesc) tripSummaryDesc.innerHTML = `Vehicle: ${activeBooking.vehicleName}<br>Date: ${activeBooking.travelDate} at ${activeBooking.travelTime}`;
-
-      // Table Rows
-      const tbody = document.querySelector('table.w-full.text-left tbody');
-      if (tbody) {
-        tbody.innerHTML = `
-          <tr class="border-b border-slate-100">
-            <td class="py-2 px-3">Premium One-Way Outstation Cab Rental (${activeBooking.route})</td>
-            <td class="py-2 px-3 text-right">9964</td>
-            <td class="py-2 px-3 text-right">₹${activeBooking.baseFare.toLocaleString()}.00</td>
-            <td class="py-2 px-3 text-right">₹${activeBooking.baseFare.toLocaleString()}.00</td>
-          </tr>
-          ${activeBooking.discount > 0 ? `
-            <tr class="border-b border-slate-100">
-              <td class="py-2 px-3 text-emerald-600">Coupon Discount (NORTHEAST2025)</td>
-              <td class="py-2 px-3 text-right">—</td>
-              <td class="py-2 px-3 text-right text-emerald-600">-₹${activeBooking.discount.toLocaleString()}.00</td>
-              <td class="py-2 px-3 text-right text-emerald-600">-₹${activeBooking.discount.toLocaleString()}.00</td>
-            </tr>
-          ` : ''}
-          <tr class="border-b border-slate-100">
-            <td class="py-2 px-3">CGST (2.5%)</td>
-            <td class="py-2 px-3 text-right">—</td>
-            <td class="py-2 px-3 text-right">₹${Math.round(activeBooking.gst / 2).toLocaleString()}.00</td>
-            <td class="py-2 px-3 text-right">₹${Math.round(activeBooking.gst / 2).toLocaleString()}.00</td>
-          </tr>
-          <tr class="border-b border-slate-100">
-            <td class="py-2 px-3">SGST (2.5%)</td>
-            <td class="py-2 px-3 text-right">—</td>
-            <td class="py-2 px-3 text-right">₹${Math.round(activeBooking.gst / 2).toLocaleString()}.00</td>
-            <td class="py-2 px-3 text-right">₹${Math.round(activeBooking.gst / 2).toLocaleString()}.00</td>
-          </tr>
-        `;
-      }
-
-      // Invoice summary pricing details block
-      const summaryPriceBlock = document.querySelector('div.flex.justify-between.items-start.pt-4 div.w-48');
-      if (summaryPriceBlock) {
-        summaryPriceBlock.innerHTML = `
-          <div class="flex justify-between text-[10px]">
-            <span class="text-slate-500">Gross Total:</span>
-            <span class="font-semibold text-slate-800">₹${activeBooking.payableAmount.toLocaleString()}.00</span>
+      selectedBookingDetailsPanel.innerHTML = `
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+            <div>
+              <h3 class="font-heading font-bold text-lg text-primary">Active Booking Status</h3>
+              <p class="text-xs text-muted-foreground">Booking ID: <strong class="text-primary">${booking.id}</strong></p>
+            </div>
+            <span class="text-xs ${statusPillClass} font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              <iconify-icon icon="lucide:check-circle"></iconify-icon> ${statusPillText}
+            </span>
           </div>
-          <div class="flex justify-between text-[10px]">
-            <span class="text-slate-500">Advance Paid:</span>
-            <span class="font-bold text-emerald-600">₹${activeBooking.advancePaid.toLocaleString()}.00</span>
-          </div>
-          <div class="flex justify-between text-[10px] border-t border-slate-200 pt-1.5 font-bold">
-            <span class="text-slate-800">${activeBooking.status === 'Fully Paid' ? 'Total Paid Amount:' : 'Balance Due:'}</span>
-            <span class="text-primary">${activeBooking.status === 'Fully Paid' ? `₹${activeBooking.payableAmount.toLocaleString()}.00` : `₹${activeBooking.balanceDue.toLocaleString()}.00`}</span>
-          </div>
-        `;
-      }
 
-      // Invoice status banner
-      const statusBanner = document.querySelector('div.flex.justify-between.items-start.pt-4 div.space-y-1 span.text-emerald-800');
-      if (statusBanner) {
-        if (activeBooking.status === 'Fully Paid') {
-          statusBanner.textContent = "FULLY PAID";
-          statusBanner.className = "text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full";
-        } else {
-          statusBanner.textContent = "ADVANCE CONFIRMED";
-          statusBanner.className = "text-xs bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full";
-        }
+          <!-- Booking Status Timeline -->
+          <div class="relative pl-6 space-y-6 border-l-2 border-primary/20">
+            <!-- Step 1 -->
+            <div class="relative">
+              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-primary border-4 border-background"></div>
+              <div class="text-xs">
+                <span class="font-bold text-primary block">Booking Confirmed & Advance Paid</span>
+                <span class="text-muted-foreground">${booking.travelDate} • ${booking.travelTime} • Received ₹${booking.advancePaid.toLocaleString()}</span>
+              </div>
+            </div>
+            <!-- Step 2 -->
+            <div class="relative">
+              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full ${step2Color} border-4 border-background"></div>
+              <div class="text-xs">
+                <span class="font-bold text-primary block">Driver Assigned</span>
+                <span class="text-muted-foreground">Pilot: <strong class="text-primary">${booking.driverName}</strong> (${booking.driverPhone}) • ${booking.vehicleName}</span>
+              </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="relative">
+              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full ${step3Color} border-4 border-background"></div>
+              <div class="text-xs ${step3Opacity}">
+                ${step3Content}
+              </div>
+            </div>
+          </div>
+
+          <!-- Professional GST Invoice Layout (Inline Viewer) -->
+          <div class="border border-border rounded-xl overflow-hidden mt-6">
+            <div class="bg-muted px-4 py-3 border-b border-border flex items-center justify-between">
+              <span class="text-xs font-bold text-primary flex items-center gap-1">
+                <iconify-icon icon="lucide:file-text"></iconify-icon> Professional GST Invoice (${booking.id})
+              </span>
+              <button id="invoice-download-btn" class="bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
+                <iconify-icon icon="lucide:download"></iconify-icon> Download PDF
+              </button>
+            </div>
+
+            <div class="p-6 bg-background text-slate-800 space-y-6 text-xs font-sans">
+              <!-- Invoice Header -->
+              <div class="flex justify-between items-start border-b border-slate-200 pb-4">
+                <div>
+                  <span class="font-heading font-black text-sm tracking-wide text-primary">JOY GURU TOURS & TRAVELS</span>
+                  <p class="text-[10px] text-slate-500 mt-1">
+                    Club Road, Silchar, Assam - 788001<br>
+                    GSTIN: 18AABCJ3829K1Z4<br>
+                    Email: billing@joygurutravels.com
+                  </p>
+                </div>
+                <div class="text-right">
+                  <span class="text-lg font-heading font-bold text-primary block">TAX INVOICE</span>
+                  <span class="text-[10px] text-slate-500 block">Invoice No: <strong class="text-slate-800">INV-${booking.id.substring(3)}</strong></span>
+                  <span class="text-[10px] text-slate-500 block">Date: ${booking.travelDate}</span>
+                </div>
+              </div>
+
+              <!-- Bill To / Bill From -->
+              <div class="grid grid-cols-2 gap-4 text-[10px]">
+                <div>
+                  <span class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Customer Details</span>
+                  <p class="font-semibold text-slate-800">${booking.customerName}</p>
+                  <p class="text-slate-500">Phone: ${booking.customerPhone}<br>Email: ${booking.customerEmail}</p>
+                </div>
+                <div>
+                  <span class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Trip Summary</span>
+                  <p class="font-semibold text-slate-800">${booking.route}</p>
+                  <p class="text-slate-500">Vehicle: ${booking.vehicleName} (${booking.vehicleType.toUpperCase()})<br>Date: ${booking.travelDate} at ${booking.travelTime}</p>
+                </div>
+              </div>
+
+              <!-- Invoice Table -->
+              <table class="w-full text-left border-collapse text-[10px]">
+                <thead>
+                  <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 font-bold">
+                    <th class="py-2 px-3">Description</th>
+                    <th class="py-2 px-3 text-right">SAC Code</th>
+                    <th class="py-2 px-3 text-right">Rate</th>
+                    <th class="py-2 px-3 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-slate-100">
+                    <td class="py-2 px-3">Premium One-Way Outstation Cab Rental (${booking.route})</td>
+                    <td class="py-2 px-3 text-right">9964</td>
+                    <td class="py-2 px-3 text-right">₹${booking.baseFare.toLocaleString()}.00</td>
+                    <td class="py-2 px-3 text-right">₹${booking.baseFare.toLocaleString()}.00</td>
+                  </tr>
+                  ${booking.discount > 0 ? `
+                    <tr class="border-b border-slate-100">
+                      <td class="py-2 px-3 text-emerald-600">Coupon Discount</td>
+                      <td class="py-2 px-3 text-right">—</td>
+                      <td class="py-2 px-3 text-right text-emerald-600">-₹${booking.discount.toLocaleString()}.00</td>
+                      <td class="py-2 px-3 text-right text-emerald-600">-₹${booking.discount.toLocaleString()}.00</td>
+                    </tr>
+                  ` : ''}
+                  <tr class="border-b border-slate-100">
+                    <td class="py-2 px-3">CGST (2.5%)</td>
+                    <td class="py-2 px-3 text-right">—</td>
+                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
+                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
+                  </tr>
+                  <tr class="border-b border-slate-100">
+                    <td class="py-2 px-3">SGST (2.5%)</td>
+                    <td class="py-2 px-3 text-right">—</td>
+                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
+                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Summary Totals -->
+              <div class="flex justify-between items-start pt-4">
+                <div class="space-y-1">
+                  <span class="block font-bold text-slate-500 uppercase tracking-wider">Payment Status</span>
+                  <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">${booking.status.toUpperCase()}</span>
+                </div>
+                <div class="w-48 space-y-1.5 text-right">
+                  <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-500">Gross Total:</span>
+                    <span class="font-semibold text-slate-800">₹${booking.payableAmount.toLocaleString()}.00</span>
+                  </div>
+                  <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-500">Advance Paid:</span>
+                    <span class="font-bold text-emerald-600">₹${booking.advancePaid.toLocaleString()}.00</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] border-t border-slate-200 pt-1.5 font-bold">
+                    <span class="text-slate-800">${booking.status === 'Fully Paid' ? 'Total Paid Amount:' : 'Balance Due:'}</span>
+                    <span class="text-primary">${booking.status === 'Fully Paid' ? `₹${booking.payableAmount.toLocaleString()}.00` : `₹${booking.balanceDue.toLocaleString()}.00`}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // PDF Download trigger wiring
+      const downloadBtn = document.getElementById('invoice-download-btn');
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+          downloadBtn.disabled = true;
+          downloadBtn.innerHTML = `<iconify-icon icon="lucide:loader" class="animate-spin"></iconify-icon> Downloading...`;
+          UIUtils.showToast('Generating high fidelity PDF in invoice sandbox...', 'success');
+          setTimeout(function() {
+            downloadBtn.disabled = false;
+            downloadBtn.innerHTML = `<iconify-icon icon="lucide:download"></iconify-icon> Download PDF`;
+            UIUtils.showToast('Tax Invoice Download Completed!', 'success');
+          }, 2000);
+        });
       }
     }
 
-    // PDF Download Progress Bar simulation
-    const downloadPdfBtn = document.querySelector('button[onclick*="invoice"]');
-    if (downloadPdfBtn) {
-      downloadPdfBtn.removeAttribute('onclick');
-      downloadPdfBtn.addEventListener('click', function() {
-        downloadPdfBtn.disabled = true;
-        downloadPdfBtn.innerHTML = `<iconify-icon icon="lucide:loader" class="animate-spin"></iconify-icon> Downloading...`;
-        
-        UIUtils.showToast('Generating high fidelity PDF in invoice sandbox...', 'success');
+    function renderBookingsList() {
+      if (!bookingsListContainer) return;
+      bookingsListContainer.innerHTML = '';
 
-        setTimeout(function() {
-          downloadPdfBtn.disabled = false;
-          downloadPdfBtn.innerHTML = `<iconify-icon icon="lucide:download"></iconify-icon> Download PDF`;
-          UIUtils.showToast('Tax Invoice Download Completed!', 'success');
-        }, 2000);
+      if (bookings.length === 0) {
+        bookingsListContainer.innerHTML = `<p class="text-xs text-muted-foreground">No bookings found.</p>`;
+        if (selectedBookingDetailsPanel) {
+          selectedBookingDetailsPanel.innerHTML = `
+            <div class="bg-card border border-border rounded-xl p-6 text-center text-muted-foreground text-sm">
+              Select a booking to view details.
+            </div>
+          `;
+        }
+        return;
+      }
+
+      bookings.forEach(b => {
+        const isSelected = b.id === (localStorage.getItem('jg_last_booking_id') || bookings[0].id);
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-xl border transition-all cursor-pointer ${
+          isSelected 
+            ? 'border-primary bg-primary/5 shadow-sm' 
+            : 'border-border bg-card hover:border-primary/50'
+        }`;
+        
+        let statusBadgeClass = "bg-blue-100 text-blue-800";
+        if (b.status === 'Fully Paid' || b.status === 'Completed') {
+          statusBadgeClass = "bg-emerald-100 text-emerald-800";
+        }
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <span class="font-bold text-xs text-primary">${b.id}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadgeClass}">${b.status}</span>
+          </div>
+          <div class="text-xs font-semibold text-slate-800 mb-1 flex items-center gap-1">
+            <iconify-icon icon="lucide:navigation" class="text-secondary text-sm"></iconify-icon>
+            ${b.route}
+          </div>
+          <div class="text-[10px] text-muted-foreground flex justify-between">
+            <span>Date: ${b.travelDate}</span>
+            <span class="font-bold text-slate-700">₹${b.payableAmount.toLocaleString()}</span>
+          </div>
+        `;
+
+        card.onclick = () => {
+          localStorage.setItem('jg_last_booking_id', b.id);
+          renderBookingsList();
+          populateBookingDetails(b);
+        };
+
+        bookingsListContainer.appendChild(card);
       });
     }
+
+    // Populate dynamic UI elements at start
+    renderBookingsList();
+    populateBookingDetails(activeBooking);
 
     // Bind left sidebar navigation items
     const sidebarDashboard = document.querySelector('nav a[href="#dashboard"]');
@@ -1097,15 +1202,13 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sidebarTrips) {
       sidebarTrips.removeAttribute('href');
       sidebarTrips.addEventListener('click', () => {
-        // Simple notification of simulation
-        triggerNotificationPreviews(activeBooking);
+        if (menuTripsBtn) menuTripsBtn.click();
       });
     }
     if (sidebarPayments) {
       sidebarPayments.removeAttribute('href');
       sidebarPayments.addEventListener('click', () => {
-        UIUtils.showToast('Redirecting to Payment Portal...', 'success');
-        setTimeout(() => { window.location.href = "Booking & Payment.html"; }, 800);
+        if (menuPaymentsBtn) menuPaymentsBtn.click();
       });
     }
 
@@ -1114,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const walletBalanceStat = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-3.gap-6 div:nth-child(3)');
     if (upcomingTripsStat) {
       upcomingTripsStat.style.cursor = 'pointer';
-      upcomingTripsStat.onclick = () => { triggerNotificationPreviews(activeBooking); };
+      upcomingTripsStat.onclick = () => { if (menuTripsBtn) menuTripsBtn.click(); };
     }
     if (walletBalanceStat) {
       walletBalanceStat.style.cursor = 'pointer';

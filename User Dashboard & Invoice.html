@@ -278,161 +278,28 @@
           </div>
         </div>
 
-        <!-- Active / Upcoming Trip Details -->
-        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
-            <div>
-              <h3 class="font-heading font-bold text-lg text-primary">Active Booking Status</h3>
-              <p class="text-xs text-muted-foreground">Booking ID: <strong class="text-primary">JG-2025-4829</strong>
-              </p>
-            </div>
-            <span
-              class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1">
-              <iconify-icon icon="lucide:check-circle"></iconify-icon> Advance Paid (Confirmed)
-            </span>
-          </div>
-
-          <!-- Booking Status Timeline -->
-          <div class="relative pl-6 space-y-6 border-l-2 border-primary/20">
-            <!-- Step 1 -->
-            <div class="relative">
-              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-primary border-4 border-background">
-              </div>
-              <div class="text-xs">
-                <span class="font-bold text-primary block">Booking Confirmed & Advance Paid</span>
-                <span class="text-muted-foreground">15 Oct 2025 • 09:30 AM • Received ₹1,500</span>
-              </div>
-            </div>
-            <!-- Step 2 -->
-            <div class="relative">
-              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-secondary border-4 border-background">
-              </div>
-              <div class="text-xs">
-                <span class="font-bold text-primary block">Driver Assigned</span>
-                <span class="text-muted-foreground">Pilot: <strong class="text-primary">Bimal Das</strong> (+91 94350
-                  XXXXX) • Toyota Innova Crysta</span>
-              </div>
-            </div>
-            <!-- Step 3 -->
-            <div class="relative">
-              <div class="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-muted border-4 border-background"></div>
-              <div class="text-xs opacity-60">
-                <span class="font-bold text-muted-foreground block">Trip Started (Pending)</span>
-                <span class="text-muted-foreground">Silchar Airport (IXS) to Shillong</span>
-              </div>
+        <!-- Two-Column Layout for Bookings List & Selected Details -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          <!-- Left Side: Bookings List -->
+          <div class="xl:col-span-4 space-y-4">
+            <h3 class="font-heading font-bold text-sm tracking-wider uppercase text-muted-foreground flex items-center gap-1.5">
+              <iconify-icon icon="lucide:list" class="text-primary"></iconify-icon> My Booking List
+            </h3>
+            <div id="dashboard-bookings-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              <!-- Dynamically rendered list of bookings -->
             </div>
           </div>
 
-          <!-- Professional GST Invoice Layout (Inline Viewer) -->
-          <div class="border border-border rounded-xl overflow-hidden mt-6">
-            <div class="bg-muted px-4 py-3 border-b border-border flex items-center justify-between">
-              <span class="text-xs font-bold text-primary flex items-center gap-1">
-                <iconify-icon icon="lucide:file-text"></iconify-icon> Professional GST Invoice (JG-2025-4829)
-              </span>
-              <button onclick="alert('Downloading professional PDF invoice...')"
-                class="bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
-                <iconify-icon icon="lucide:download"></iconify-icon> Download PDF
-              </button>
-            </div>
-
-            <div class="p-6 bg-background text-slate-800 space-y-6 text-xs font-sans">
-              <!-- Invoice Header -->
-              <div class="flex justify-between items-start border-b border-slate-200 pb-4">
-                <div>
-                  <span class="font-heading font-black text-sm tracking-wide text-primary">JOY GURU TOURS &
-                    TRAVELS</span>
-                  <p class="text-[10px] text-slate-500 mt-1">
-                    Club Road, Silchar, Assam - 788001<br>
-                    GSTIN: 18AABCJ3829K1Z4<br>
-                    Email: billing@joygurutravels.com
-                  </p>
-                </div>
-                <div class="text-right">
-                  <span class="text-lg font-heading font-bold text-primary block">TAX INVOICE</span>
-                  <span class="text-[10px] text-slate-500 block">Invoice No: <strong
-                      class="text-slate-800">INV-2025-4829</strong></span>
-                  <span class="text-[10px] text-slate-500 block">Date: 15 Oct 2025</span>
-                </div>
-              </div>
-
-              <!-- Bill To / Bill From -->
-              <div class="grid grid-cols-2 gap-4 text-[10px]">
-                <div>
-                  <span class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Customer Details</span>
-                  <p class="font-semibold text-slate-800">Rahul Sharma</p>
-                  <p class="text-slate-500">Phone: +91 94350 XXXXX<br>Email: rahul@example.com</p>
-                </div>
-                <div>
-                  <span class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Trip Summary</span>
-                  <p class="font-semibold text-slate-800">Silchar Airport (IXS) ⇄ Shillong</p>
-                  <p class="text-slate-500">Vehicle: Toyota Innova Crysta (SUV)<br>Date: 15 Oct 2025</p>
-                </div>
-              </div>
-
-              <!-- Invoice Table -->
-              <table class="w-full text-left border-collapse text-[10px]">
-                <thead>
-                  <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 font-bold">
-                    <th class="py-2 px-3">Description</th>
-                    <th class="py-2 px-3 text-right">SAC Code</th>
-                    <th class="py-2 px-3 text-right">Rate</th>
-                    <th class="py-2 px-3 text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-b border-slate-100">
-                    <td class="py-2 px-3">Premium One-Way Outstation Cab Rental (Silchar Airport to Shillong)</td>
-                    <td class="py-2 px-3 text-right">9964</td>
-                    <td class="py-2 px-3 text-right">₹6,499.00</td>
-                    <td class="py-2 px-3 text-right">₹6,499.00</td>
-                  </tr>
-                  <tr class="border-b border-slate-100">
-                    <td class="py-2 px-3 text-emerald-600">Coupon Discount (NORTHEAST2025)</td>
-                    <td class="py-2 px-3 text-right">—</td>
-                    <td class="py-2 px-3 text-right text-emerald-600">-₹500.00</td>
-                    <td class="py-2 px-3 text-right text-emerald-600">-₹500.00</td>
-                  </tr>
-                  <tr class="border-b border-slate-100">
-                    <td class="py-2 px-3">CGST (2.5%)</td>
-                    <td class="py-2 px-3 text-right">—</td>
-                    <td class="py-2 px-3 text-right">₹150.00</td>
-                    <td class="py-2 px-3 text-right">₹150.00</td>
-                  </tr>
-                  <tr class="border-b border-slate-100">
-                    <td class="py-2 px-3">SGST (2.5%)</td>
-                    <td class="py-2 px-3 text-right">—</td>
-                    <td class="py-2 px-3 text-right">₹150.00</td>
-                    <td class="py-2 px-3 text-right">₹150.00</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <!-- Summary Totals -->
-              <div class="flex justify-between items-start pt-4">
-                <div class="space-y-1">
-                  <span class="block font-bold text-slate-500 uppercase tracking-wider">Payment Status</span>
-                  <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Advance
-                    Paid</span>
-                </div>
-                <div class="w-48 space-y-1.5 text-right">
-                  <div class="flex justify-between text-[10px]">
-                    <span class="text-slate-500">Gross Total:</span>
-                    <span class="font-semibold text-slate-800">₹6,299.00</span>
-                  </div>
-                  <div class="flex justify-between text-[10px]">
-                    <span class="text-slate-500">Advance Paid:</span>
-                    <span class="font-bold text-emerald-600">₹1,500.00</span>
-                  </div>
-                  <div class="flex justify-between text-[10px] border-t border-slate-200 pt-1.5 font-bold">
-                    <span class="text-slate-800">Balance Due:</span>
-                    <span class="text-primary">₹4,799.00</span>
-                  </div>
-                </div>
-              </div>
+          <!-- Right Side: Selected Booking Details -->
+          <div class="xl:col-span-8 space-y-6" id="selected-booking-details-panel">
+            <!-- Loading placeholder initially -->
+            <div class="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground text-sm">
+              <iconify-icon icon="lucide:loader" class="animate-spin text-2xl text-primary mb-2"></iconify-icon>
+              <p>Loading booking details...</p>
             </div>
           </div>
         </div>
-        </div> <!-- End of Trips Tab Content -->
+      </div> <!-- End of Trips Tab Content -->
       </section>
     </main>
 
@@ -492,7 +359,7 @@
       }
     })();
   </script>
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 
 </html>
