@@ -22,9 +22,27 @@
       updateNavbarLabel(navbarSpan, cachedLocation);
     }
 
+    // Allow user to manually override location by clicking on the navbar badge (helps fix IP routing errors)
+    navbarSpan.style.cursor = 'pointer';
+    navbarSpan.title = 'Click to correct location';
+    navbarSpan.addEventListener('click', function() {
+      const current = localStorage.getItem('jg_current_location') || 'Silchar, Assam';
+      const manualLoc = prompt('Enter your current city/location (e.g. Silchar, Assam):', current);
+      if (manualLoc !== null && manualLoc.trim() !== '') {
+        const cleaned = manualLoc.trim();
+        updateNavbarLabel(navbarSpan, cleaned);
+        localStorage.setItem('jg_current_location', cleaned);
+        UIUtils.showToast(`Location set to: ${cleaned}`, 'success');
+
+        // Trigger custom event
+        window.dispatchEvent(new CustomEvent('jg-realtime-location-updated', {
+          detail: { name: cleaned, manual: true }
+        }));
+      }
+    });
+
     // Ask for browser geolocation and track in real-time
     if (navigator.geolocation) {
-      // watchPosition triggers success callback automatically in real-time on movement
       watchId = navigator.geolocation.watchPosition(
         function(position) {
           const lat = position.coords.latitude;
@@ -68,7 +86,7 @@
                 updateNavbarLabel(navbarSpan, locationStr);
                 localStorage.setItem('jg_current_location', locationStr);
                 
-                // Dispatch event so that home page elements can catch real-time coordinates if needed
+                // Dispatch event
                 window.dispatchEvent(new CustomEvent('jg-realtime-location-updated', {
                   detail: { lat: lat, lon: lon, name: locationStr }
                 }));
@@ -81,7 +99,7 @@
         },
         function(error) {
           console.warn('Real-time geolocation tracking error or permission denied:', error);
-          if (!cachedLocation && lastLat === null) {
+          if (!localStorage.getItem('jg_current_location') && lastLat === null) {
             updateNavbarLabel(navbarSpan, 'Select Location');
           }
         },
@@ -92,7 +110,7 @@
         }
       );
     } else {
-      if (!cachedLocation) {
+      if (!localStorage.getItem('jg_current_location')) {
         updateNavbarLabel(navbarSpan, 'Select Location');
       }
     }
