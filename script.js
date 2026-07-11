@@ -15,23 +15,23 @@
       {
         id: 'JG-2025-4829',
         customerName: 'Rahul Sharma',
-        customerPhone: '+91 94350 12345',
+        customerPhone: '+91 94350 XXXXX',
         customerEmail: 'rahul@example.com',
-        route: 'Silchar ⇄ Shillong',
+        route: 'Silchar Airport (IXS) ⇄ Shillong',
         vehicleName: 'Toyota Innova Crysta',
         vehicleType: 'suv',
         driverName: 'Bimal Das',
-        driverPhone: '+91 94350 99999',
+        driverPhone: '+91 94350 XXXXX',
         travelDate: '2025-10-15',
         travelTime: '09:30 AM',
         pickup: 'Silchar Airport (IXS), Assam',
         destination: 'Shillong, Meghalaya',
         baseFare: 6499,
-        gst: 300,
+        gst: 0,
         discount: 500,
-        payableAmount: 6299,
+        payableAmount: 5999,
         advancePaid: 1500,
-        balanceDue: 4799,
+        balanceDue: 4499,
         status: 'Advance Paid' // 'Pending', 'Confirmed', 'Advance Paid', 'Driver Assigned', 'Trip Started', 'Completed', 'Fully Paid', 'Cancelled'
       },
       {
@@ -49,11 +49,11 @@
         pickup: 'Silchar Club Road, Assam',
         destination: 'Guwahati, Assam',
         baseFare: 4499,
-        gst: 200,
+        gst: 0,
         discount: 0,
-        payableAmount: 4699,
+        payableAmount: 4499,
         advancePaid: 1000,
-        balanceDue: 3699,
+        balanceDue: 3499,
         status: 'Advance Paid'
       }
     ];
@@ -708,26 +708,23 @@ document.addEventListener('DOMContentLoaded', function () {
     let discount = localStorage.getItem('jg_coupon_applied') === 'true' ? 500 : 0;
     
     function updateCheckoutFares() {
-      let subtotal = baseFare - discount;
-      let gst = Math.round(subtotal * 0.05);
-      let totalPayable = subtotal + gst;
+      let totalPayable = baseFare - discount;
+      let gst = 0; // GST removed as requested
       let advance = Math.round(totalPayable * 0.25);
       let balance = totalPayable - advance;
 
-      // Update Fare Elements in HTML
-      const baseFareEl = document.querySelector('.space-y-6 div.text-sm div:nth-child(1) span:last-child');
-      const discountEl = document.querySelector('.space-y-6 div.text-sm div:nth-child(2) span:last-child');
-      const gstEl = document.querySelector('.space-y-6 div.text-sm div:nth-child(4) span:last-child');
-      const totalPayableEl = document.querySelector('.border-t.border-border.pt-3 span:last-child');
-      const advanceEl = document.querySelector('.bg-muted div.flex.justify-between.text-sm span:last-child');
-      const balanceEl = document.querySelector('.bg-muted div.flex.justify-between.text-xs span:last-child');
+      // Update Fare Elements in HTML via ID selectors
+      const baseFareEl = document.getElementById('fare-base-val');
+      const discountEl = document.getElementById('fare-discount-val');
+      const totalPayableEl = document.getElementById('fare-total-val');
+      const advanceEl = document.getElementById('fare-advance-val');
+      const balanceEl = document.getElementById('fare-balance-val');
 
       if (baseFareEl) baseFareEl.textContent = `₹${baseFare.toLocaleString()}`;
       if (discountEl) {
         discountEl.textContent = discount > 0 ? `-₹${discount.toLocaleString()}` : `₹0`;
         discountEl.className = discount > 0 ? 'font-semibold text-emerald-600' : 'font-semibold text-primary';
       }
-      if (gstEl) gstEl.textContent = `₹${gst.toLocaleString()}`;
       if (totalPayableEl) totalPayableEl.textContent = `₹${totalPayable.toLocaleString()}`;
       if (advanceEl) advanceEl.textContent = `₹${advance.toLocaleString()}`;
       if (balanceEl) balanceEl.textContent = `₹${balance.toLocaleString()}`;
@@ -1068,11 +1065,11 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
           </div>
 
-          <!-- Professional GST Invoice Layout (Inline Viewer) -->
+          <!-- Professional Invoice Layout (Inline Viewer) -->
           <div class="border border-border rounded-xl overflow-hidden mt-6">
             <div class="bg-muted px-4 py-3 border-b border-border flex items-center justify-between">
               <span class="text-xs font-bold text-primary flex items-center gap-1">
-                <iconify-icon icon="lucide:file-text"></iconify-icon> Professional GST Invoice (${booking.id})
+                <iconify-icon icon="lucide:file-text"></iconify-icon> Professional Travel Invoice (${booking.id})
               </span>
               <button id="invoice-download-btn" class="bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
                 <iconify-icon icon="lucide:download"></iconify-icon> Download PDF
@@ -1086,12 +1083,11 @@ document.addEventListener('DOMContentLoaded', function () {
                   <span class="font-heading font-black text-sm tracking-wide text-primary">JOY GURU TOURS & TRAVELS</span>
                   <p class="text-[10px] text-slate-500 mt-1">
                     Club Road, Silchar, Assam - 788001<br>
-                    GSTIN: 18AABCJ3829K1Z4<br>
                     Email: billing@joygurutravels.com
                   </p>
                 </div>
                 <div class="text-right">
-                  <span class="text-lg font-heading font-bold text-primary block">TAX INVOICE</span>
+                  <span class="text-lg font-heading font-bold text-primary block">TRAVEL INVOICE</span>
                   <span class="text-[10px] text-slate-500 block">Invoice No: <strong class="text-slate-800">INV-${booking.id.substring(3)}</strong></span>
                   <span class="text-[10px] text-slate-500 block">Date: ${booking.travelDate}</span>
                 </div>
@@ -1116,7 +1112,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <thead>
                   <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 font-bold">
                     <th class="py-2 px-3">Description</th>
-                    <th class="py-2 px-3 text-right">SAC Code</th>
                     <th class="py-2 px-3 text-right">Rate</th>
                     <th class="py-2 px-3 text-right">Amount</th>
                   </tr>
@@ -1124,30 +1119,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 <tbody>
                   <tr class="border-b border-slate-100">
                     <td class="py-2 px-3">Premium One-Way Outstation Cab Rental (${booking.route})</td>
-                    <td class="py-2 px-3 text-right">9964</td>
                     <td class="py-2 px-3 text-right">₹${booking.baseFare.toLocaleString()}.00</td>
                     <td class="py-2 px-3 text-right">₹${booking.baseFare.toLocaleString()}.00</td>
                   </tr>
                   ${booking.discount > 0 ? `
                     <tr class="border-b border-slate-100">
                       <td class="py-2 px-3 text-emerald-600">Coupon Discount</td>
-                      <td class="py-2 px-3 text-right">—</td>
                       <td class="py-2 px-3 text-right text-emerald-600">-₹${booking.discount.toLocaleString()}.00</td>
                       <td class="py-2 px-3 text-right text-emerald-600">-₹${booking.discount.toLocaleString()}.00</td>
                     </tr>
                   ` : ''}
-                  <tr class="border-b border-slate-100">
-                    <td class="py-2 px-3">CGST (2.5%)</td>
-                    <td class="py-2 px-3 text-right">—</td>
-                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
-                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
-                  </tr>
-                  <tr class="border-b border-slate-100">
-                    <td class="py-2 px-3">SGST (2.5%)</td>
-                    <td class="py-2 px-3 text-right">—</td>
-                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
-                    <td class="py-2 px-3 text-right">₹${Math.round(booking.gst / 2).toLocaleString()}.00</td>
-                  </tr>
                 </tbody>
               </table>
 
