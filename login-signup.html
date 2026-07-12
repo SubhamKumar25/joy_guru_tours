@@ -182,6 +182,10 @@
                     UIUtils.showToast('Login Successful!', 'success');
                     
                     // Redirect logic
+                    if (StateEngine.isAdmin()) {
+                        window.location.href = "admin-control-center.html";
+                        return;
+                    }
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
                     if (redirect === 'booking') {

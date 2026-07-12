@@ -90,13 +90,22 @@ window.StateEngine = {
   isLoggedIn: function() {
     return localStorage.getItem('jg_logged_in') === 'true';
   },
+  isAdmin: function() {
+    return localStorage.getItem('jg_admin_logged_in') === 'true';
+  },
   login: function(name, email) {
     localStorage.setItem('jg_logged_in', 'true');
     localStorage.setItem('jg_user_name', name || 'Rahul Sharma');
     localStorage.setItem('jg_user_email', email || 'rahul@example.com');
+    if (email && email.toLowerCase().includes('admin')) {
+      localStorage.setItem('jg_admin_logged_in', 'true');
+    } else {
+      localStorage.setItem('jg_admin_logged_in', 'false');
+    }
   },
   logout: function() {
     localStorage.setItem('jg_logged_in', 'false');
+    localStorage.setItem('jg_admin_logged_in', 'false');
     localStorage.removeItem('jg_user_name');
     localStorage.removeItem('jg_user_email');
     localStorage.setItem('jg_demo_mode', 'false');

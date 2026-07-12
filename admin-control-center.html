@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      if (localStorage.getItem('jg_admin_logged_in') !== 'true') {
+        window.location.replace('login-signup.html');
+      }
+    </script>
     <meta name="description" content="Admin Control Center — Exported from UXMagic Copilot">
     <title>Joy Guru Tours &amp; Travels</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,8 +91,8 @@
         </div>
       </div>
       <div class="flex items-center gap-2 sm:gap-4">
-        <span class="text-xs bg-red-100 text-red-800 font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1">
-          <iconify-icon icon="lucide:bell"></iconify-icon> 2 New Bookings
+        <span id="admin-notification-badge" class="text-xs bg-red-100 text-red-800 font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1">
+          <iconify-icon icon="lucide:bell"></iconify-icon> 0 New Alerts
         </span>
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-primary">Administrator</span>
@@ -101,7 +106,7 @@
     <!-- Left Navigation Sidebar -->
     <aside class="lg:col-span-3 space-y-4">
       <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-6">
-        <nav class="space-y-1 text-sm font-medium">
+        <nav class="space-y-1 text-sm font-medium" id="admin-sidebar-nav">
           <a href="#overview" class="flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg">
             <iconify-icon icon="lucide:layout-dashboard" class="text-lg"></iconify-icon> Control Overview
           </a>
@@ -114,156 +119,252 @@
           <a href="#reports" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
             <iconify-icon icon="lucide:chart-bar" class="text-lg"></iconify-icon> Revenue Reports
           </a>
+          <a href="#settings" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:settings" class="text-lg"></iconify-icon> Platform Settings
+          </a>
+          <a href="#profile" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Admin Profile
+          </a>
         </nav>
       </div>
     </aside>
 
     <!-- Admin Content Area -->
     <section class="lg:col-span-9 space-y-8">
-      <!-- High-End Analytics Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
-        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
-          <span class="text-xs text-muted-foreground font-semibold">Total Revenue (Oct)</span>
-          <span class="block text-2xl font-bold text-primary">₹8,45,200</span>
-          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
-            <iconify-icon icon="lucide:arrow-right" class="-rotate-45"></iconify-icon> +18.4% vs last month
-          </span>
+      
+      <!-- Tab 1: Control Overview -->
+      <div id="overview-tab" class="space-y-8">
+        <!-- High-End Analytics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+          <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+            <span class="text-xs text-muted-foreground font-semibold">Total Revenue (Oct)</span>
+            <span class="block text-2xl font-bold text-primary">₹0</span>
+            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+              Completed Trips
+            </span>
+          </div>
+
+          <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+            <span class="text-xs text-muted-foreground font-semibold">Active Bookings</span>
+            <span class="block text-2xl font-bold text-primary">0 Rides</span>
+            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+              Active utilization
+            </span>
+          </div>
+
+          <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+            <span class="text-xs text-muted-foreground font-semibold">Pending Collection</span>
+            <span class="block text-2xl font-bold text-secondary">₹0</span>
+            <span class="text-[10px] text-muted-foreground">To be collected by pilots</span>
+          </div>
+
+          <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
+            <span class="text-xs text-muted-foreground font-semibold">Customer Rating</span>
+            <span class="block text-2xl font-bold text-primary">4.92 / 5.0</span>
+            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+              Based on reviews
+            </span>
+          </div>
         </div>
 
-        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
-          <span class="text-xs text-muted-foreground font-semibold">Active Bookings</span>
-          <span class="block text-2xl font-bold text-primary">42 Rides</span>
-          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
-            <iconify-icon icon="lucide:arrow-right" class="-rotate-45"></iconify-icon> 98% driver utilization
-          </span>
+        <!-- Chart.js Unbounded Canvas Block -->
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <h3 class="font-heading font-bold text-base text-primary">Monthly Booking &amp; Revenue Trends</h3>
+          <div class="h-64 overflow-hidden">
+            <canvas id="adminTrendChart" height="160"></canvas>
+          </div>
         </div>
 
-        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
-          <span class="text-xs text-muted-foreground font-semibold">Pending Collection</span>
-          <span class="block text-2xl font-bold text-secondary">₹1,84,500</span>
-          <span class="text-[10px] text-muted-foreground">To be collected by pilots</span>
-        </div>
+        <!-- Live Booking Table snippet in Overview -->
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-border pb-4">
+            <h3 class="font-heading font-bold text-base text-primary">Upcoming Bookings (Overview)</h3>
+            <button onclick="window.AdminBookings.renderTable(); UIUtils.showToast('Bookings updated', 'success');" class="text-xs text-primary font-bold hover:text-secondary flex items-center gap-1">
+              <iconify-icon icon="lucide:refresh-cw"></iconify-icon> Refresh
+            </button>
+          </div>
 
-        <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-1">
-          <span class="text-xs text-muted-foreground font-semibold">Customer Rating</span>
-          <span class="block text-2xl font-bold text-primary">4.92 / 5.0</span>
-          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
-            Based on 1,420 reviews
-          </span>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-border bg-muted text-muted-foreground font-bold">
+                  <th class="py-3 px-4">Booking ID</th>
+                  <th class="py-3 px-4">Customer</th>
+                  <th class="py-3 px-4">Route</th>
+                  <th class="py-3 px-4">Pilot Assigned</th>
+                  <th class="py-3 px-4">Advance Paid</th>
+                  <th class="py-3 px-4">Remaining Balance</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bookings-overview-body">
+                <!-- Fallback sync via main table script -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Chart.js Unbounded Canvas Block (Strictly wrapped) -->
-      <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
-        <h3 class="font-heading font-bold text-base text-primary">Monthly Booking &amp; Revenue Trends</h3>
-        <div class="h-64 overflow-hidden">
-          <canvas id="adminTrendChart" height="160"></canvas>
-        </div>
-        <!-- Chart.js initialization script -->
-        <script>
-          (function() {
-            const ctx = document.getElementById('adminTrendChart');
-            if (ctx) {
-              new Chart(ctx, {
-                type: 'line',
-                data: {
-                  labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct (Proj)'],
-                  datasets: [
-                    {
-                      label: 'Monthly Bookings',
-                      data: [120, 180, 240, 290, 380, 450],
-                      borderColor: '#0F4C81',
-                      backgroundColor: 'rgba(15, 76, 129, 0.1)',
-                      borderWidth: 3,
-                      tension: 0.4,
-                      fill: true
-                    },
-                    {
-                      label: 'Tours Completed',
-                      data: [40, 65, 80, 95, 140, 180],
-                      borderColor: '#F59E0B',
-                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                      borderWidth: 3,
-                      tension: 0.4,
-                      fill: true
-                    }
-                  ]
-                },
-                options: {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'top',
-                      labels: { font: { family: 'Poppins, sans-serif', size: 11 } }
-                    }
-                  },
-                  scales: {
-                    y: { grid: { color: '#E2E8F0' } },
-                    x: { grid: { display: false } }
-                  }
-                }
-              });
-            }
-          })();
-        </script>
-      </div>
-
-      <!-- Live Booking & Remaining Payment Collection Management -->
-      <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-border pb-4">
-          <h3 class="font-heading font-bold text-base text-primary">Live Booking Management</h3>
-          <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Refreshing live bookings...') : 'Refreshing live bookings...'; alert(msg);" class="text-xs text-primary font-bold hover:text-secondary flex items-center gap-1">
-            <iconify-icon icon="lucide:refresh-cw"></iconify-icon> Refresh
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="border-b border-border bg-muted text-muted-foreground font-bold">
-                <th class="py-3 px-4">Booking ID</th>
-                <th class="py-3 px-4">Customer</th>
-                <th class="py-3 px-4">Route</th>
-                <th class="py-3 px-4">Pilot Assigned</th>
-                <th class="py-3 px-4">Advance Paid</th>
-                <th class="py-3 px-4">Remaining Balance</th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Row 1 -->
-              <tr class="border-b border-border hover:bg-muted/30 transition-all">
-                <td class="py-3.5 px-4 font-bold text-primary">JG-2025-4829</td>
-                <td class="py-3.5 px-4 font-semibold">Rahul Sharma</td>
-                <td class="py-3.5 px-4">Silchar ⇄ Shillong</td>
-                <td class="py-3.5 px-4">Bimal Das</td>
-                <td class="py-3.5 px-4 text-emerald-600 font-bold">₹1,500</td>
-                <td class="py-3.5 px-4 font-bold text-secondary">₹4,799</td>
-                <td class="py-3.5 px-4 text-right space-x-2">
-                  <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Opening remaining payment collector...') : 'Opening remaining payment collector...'; alert(msg);" class="bg-secondary text-secondary-foreground font-bold px-2.5 py-1.5 rounded text-[10px] hover:bg-secondary/95 transition-all">
-                    Collect Balance
-                  </button>
-                </td>
-              </tr>
-              <!-- Row 2 -->
-              <tr class="border-b border-border hover:bg-muted/30 transition-all">
-                <td class="py-3.5 px-4 font-bold text-primary">JG-2025-4830</td>
-                <td class="py-3.5 px-4 font-semibold">Ananya Das</td>
-                <td class="py-3.5 px-4">Silchar ⇄ Guwahati</td>
-                <td class="py-3.5 px-4">Rahul Nath</td>
-                <td class="py-3.5 px-4 text-emerald-600 font-bold">₹2,000</td>
-                <td class="py-3.5 px-4 font-bold text-secondary">₹5,999</td>
-                <td class="py-3.5 px-4 text-right space-x-2">
-                  <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Opening remaining payment collector...') : 'Opening remaining payment collector...'; alert(msg);" class="bg-secondary text-secondary-foreground font-bold px-2.5 py-1.5 rounded text-[10px] hover:bg-secondary/95 transition-all">
-                    Collect Balance
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Tab 2: Bookings Management -->
+      <div id="bookings-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
+            <h3 class="font-heading font-bold text-base text-primary">All Bookings</h3>
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="text" id="booking-search" placeholder="Search by ID, Name, Phone..." class="bg-muted border border-input rounded-lg px-3 py-1.5 text-xs focus:outline-none w-48">
+              <select id="booking-status-filter" class="bg-muted border border-input rounded-lg px-3 py-1.5 text-xs focus:outline-none">
+                <option value="all">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+              <input type="date" id="booking-date-filter" class="bg-muted border border-input rounded-lg px-3 py-1.5 text-xs focus:outline-none">
+              <select id="booking-vehicle-filter" class="bg-muted border border-input rounded-lg px-3 py-1.5 text-xs focus:outline-none">
+                <option value="all">All Vehicles</option>
+                <option value="suv">SUV</option>
+                <option value="sedan">Sedan</option>
+                <option value="hatchback">Hatchback</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-border bg-muted text-muted-foreground font-bold">
+                  <th class="py-3 px-4">Booking ID</th>
+                  <th class="py-3 px-4">Customer</th>
+                  <th class="py-3 px-4">Phone</th>
+                  <th class="py-3 px-4">Pickup</th>
+                  <th class="py-3 px-4">Destination</th>
+                  <th class="py-3 px-4">Date</th>
+                  <th class="py-3 px-4">Time</th>
+                  <th class="py-3 px-4">Vehicle</th>
+                  <th class="py-3 px-4">Advance</th>
+                  <th class="py-3 px-4">Remaining</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Payment</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bookings-table-body">
+                <!-- Loaded dynamically by booking.js -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      <!-- Tab 3: Vehicles & Drivers -->
+      <div id="fleet-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-border pb-4">
+            <h3 class="font-heading font-bold text-base text-primary">Fleet Management</h3>
+            <button onclick="window.AdminFleet.addVehicle()" class="bg-primary text-primary-foreground font-bold px-3 py-1.5 rounded-lg text-xs hover:bg-primary/95 flex items-center gap-1">
+              <iconify-icon icon="lucide:plus-circle"></iconify-icon> Add Vehicle
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="fleet-list-container">
+            <!-- Loaded dynamically by vehicle.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Revenue Reports -->
+      <div id="reports-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4">Financial & Revenue Reports</h3>
+          <div id="reports-summary-container">
+            <!-- Loaded dynamically by reports.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Admin Profile -->
+      <div id="profile-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4">Admin Profile Settings</h3>
+          <div class="flex items-center gap-4 pb-4">
+            <div class="w-16 h-16 rounded-full overflow-hidden border border-border">
+              <img id="profile-avatar-preview" src="" alt="Admin Avatar" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <p class="text-sm font-bold text-primary">Administrator Profile</p>
+              <p class="text-xs text-muted-foreground">Manage your credentials and details</p>
+            </div>
+          </div>
+          <form id="admin-profile-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="space-y-1 col-span-2">
+              <label class="font-bold text-muted-foreground">PHOTO URL</label>
+              <input type="url" id="profile-photo-url-input" placeholder="https://images.unsplash.com/..." class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">FULL NAME</label>
+              <input type="text" id="profile-name-input" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">PHONE NUMBER</label>
+              <input type="text" id="profile-phone-input" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1 col-span-2">
+              <label class="font-bold text-muted-foreground">BUSINESS EMAIL</label>
+              <input type="email" id="profile-email-input" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1 col-span-2">
+              <label class="font-bold text-muted-foreground">NEW PASSWORD (OPTIONAL)</label>
+              <input type="password" id="profile-pass-input" placeholder="Enter new password" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="pt-4 col-span-2 flex justify-end">
+              <button type="submit" class="bg-primary text-primary-foreground font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-all">Save Profile</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tab 6: Platform Settings -->
+      <div id="settings-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4">Global Platform Settings</h3>
+          <form id="admin-settings-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">COMPANY NAME</label>
+              <input type="text" id="settings-company" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">SUPPORT PHONE</label>
+              <input type="text" id="settings-phone" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">WHATSAPP NUMBER</label>
+              <input type="text" id="settings-whatsapp" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">BUSINESS EMAIL</label>
+              <input type="email" id="settings-email" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1 col-span-2">
+              <label class="font-bold text-muted-foreground">BUSINESS ADDRESS</label>
+              <input type="text" id="settings-address" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1 col-span-2">
+              <label class="font-bold text-muted-foreground">REFUND POLICY DETAILS</label>
+              <textarea id="settings-refund" rows="3" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none"></textarea>
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">ACTIVE PROMO CODE</label>
+              <input type="text" id="settings-coupon" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">REQUIRED ADVANCE PAYMENT (%)</label>
+              <input type="number" id="settings-advance" required min="5" max="100" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+            <div class="pt-4 col-span-2 flex justify-end">
+              <button type="submit" class="bg-primary text-primary-foreground font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-all">Save Settings</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
     </section>
   </main>
 
@@ -279,5 +380,102 @@
     <script src="assets/js/i18n.js"></script>
     <script src="assets/js/language.js"></script>
     <script src="assets/js/profile.js"></script>
+
+    <!-- Modular Admin Panel JS Prototype scripts -->
+    <script src="assets/js/admin/notifications.js"></script>
+    <script src="assets/js/admin/dashboard.js"></script>
+    <script src="assets/js/admin/booking.js"></script>
+    <script src="assets/js/admin/payment.js"></script>
+    <script src="assets/js/admin/invoice.js"></script>
+    <script src="assets/js/admin/vehicle.js"></script>
+    <script src="assets/js/admin/reports.js"></script>
+    <script src="assets/js/admin/settings.js"></script>
+    <script src="assets/js/admin/profile.js"></script>
+
+    <!-- Tab Switcher Navigation Router -->
+    <script>
+      (function initTabNavigation() {
+        function switchTab() {
+          const hash = window.location.hash || '#overview';
+          
+          // Hide all tabs
+          const tabs = ['overview', 'bookings', 'fleet', 'reports', 'profile', 'settings'];
+          tabs.forEach(t => {
+            const el = document.getElementById(t + '-tab');
+            if (el) el.classList.add('hidden');
+          });
+
+          // De-activate all sidebar nav links
+          document.querySelectorAll('#admin-sidebar-nav a').forEach(el => {
+            el.className = 'flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all';
+          });
+
+          // Show target tab
+          const targetTab = hash.substring(1) + '-tab';
+          const targetEl = document.getElementById(targetTab);
+          if (targetEl) {
+            targetEl.classList.remove('hidden');
+          }
+
+          // Highlight active sidebar link
+          const activeLink = document.querySelector(`#admin-sidebar-nav a[href="${hash}"]`);
+          if (activeLink) {
+            activeLink.className = 'flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg';
+          }
+          
+          // Sync data views
+          if (hash === '#bookings' && window.AdminBookings) {
+            window.AdminBookings.renderTable();
+          } else if (hash === '#fleet' && window.AdminFleet) {
+            window.AdminFleet.renderFleet();
+          } else if (hash === '#reports' && window.AdminReports) {
+            window.AdminReports.generateSummary();
+          } else if (hash === '#overview' && window.AdminDashboard) {
+            window.AdminDashboard.updateStats();
+            // Sync overview mini table
+            const miniBody = document.getElementById('bookings-overview-body');
+            const mainBody = document.getElementById('bookings-table-body');
+            if (miniBody && mainBody) {
+              miniBody.innerHTML = '';
+              const rows = Array.from(mainBody.children).slice(0, 5); // show top 5
+              rows.forEach(r => {
+                const clone = r.cloneNode(true);
+                // Remove redundant column cell 2, 7, 10, 11 to keep it clean and match the original overview headers
+                // The headers are: Booking ID, Customer, Route, Pilot Assigned, Advance Paid, Remaining Balance, Actions
+                const cells = clone.children;
+                if (cells.length >= 13) {
+                  // Original overview fields: ID, Customer, Route (col index 3 + col index 4), Pilot, Advance, Balance, Actions
+                  const routeText = `${cells[3].innerText.split(',')[0]} ⇄ ${cells[4].innerText.split(',')[0]}`;
+                  const id = cells[0].innerHTML;
+                  const customer = cells[1].innerHTML;
+                  const pilot = cells[7].innerHTML;
+                  const adv = cells[8].innerHTML;
+                  const rem = cells[9].innerHTML;
+                  const actions = cells[12].innerHTML;
+
+                  clone.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-primary">${id}</td>
+                    <td class="py-3 px-4 font-semibold">${customer}</td>
+                    <td class="py-3 px-4">${routeText}</td>
+                    <td class="py-3 px-4">${pilot}</td>
+                    <td class="py-3 px-4 font-bold text-emerald-600">${adv}</td>
+                    <td class="py-3 px-4 font-bold text-secondary">${rem}</td>
+                    <td class="py-3 px-4 text-right">${actions}</td>
+                  `;
+                }
+                miniBody.appendChild(clone);
+              });
+            }
+          }
+        }
+
+        window.addEventListener('hashchange', switchTab);
+        document.addEventListener('DOMContentLoaded', () => {
+          switchTab();
+          // Ensure first sync of mini overview table
+          setTimeout(switchTab, 100);
+        });
+      })();
+    </script>
 </body>
 </html>
