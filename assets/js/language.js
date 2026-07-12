@@ -16,7 +16,10 @@
 
   function injectLanguageSwitcher() {
     // Find navbar right side container
-    let container = document.querySelector('header .flex.items-center.gap-4');
+    let container = document.querySelector('#navbar-location-span') ? document.querySelector('#navbar-location-span').parentElement : null;
+    if (!container) {
+      container = document.querySelector('header .flex.items-center.gap-4') || document.querySelector('header .flex.items-center');
+    }
     let needsRelativeWrapper = false;
 
     // Fallback if container is not found (like in Login & Signup page)
@@ -38,20 +41,20 @@
 
     // Create dropdown switcher element
     const langDiv = document.createElement('div');
-    langDiv.className = 'relative inline-block text-left z-[100]';
+    langDiv.className = 'relative inline-block text-left z-[100] flex-shrink-0';
     langDiv.id = 'language-switcher-container';
 
     const currentLang = localStorage.getItem('jg_selected_lang') || 'en';
     const langLabel = LANG_NAMES[currentLang] || 'English';
 
     langDiv.innerHTML = `
-      <button id="lang-select-btn" class="text-xs bg-muted hover:bg-muted/80 text-primary font-bold p-2 md:px-2.5 md:py-1.5 rounded-lg border border-border flex items-center justify-center gap-1 transition-all select-none">
+      <button id="lang-select-btn" class="w-10 h-10 rounded-full md:w-auto md:h-auto md:rounded-lg flex-shrink-0 bg-muted hover:bg-muted/80 text-primary font-bold border border-border flex items-center justify-center md:gap-1 transition-all select-none md:px-2.5 md:py-1.5">
         <iconify-icon icon="lucide:languages" class="text-secondary text-sm"></iconify-icon>
         <span id="lang-selected-label" class="hidden md:inline">${langLabel}</span>
         <iconify-icon icon="lucide:chevron-down" class="text-[10px] opacity-60 hidden md:inline-block"></iconify-icon>
       </button>
       
-      <div id="lang-dropdown-menu" class="absolute right-0 mt-2 w-32 bg-card border border-border shadow-xl rounded-xl py-1.5 z-[100] hidden animate-fade-in text-left">
+      <div id="lang-dropdown-menu" class="absolute left-0 md:left-auto md:right-0 mt-2 w-32 bg-card border border-border shadow-xl rounded-xl py-1.5 z-[100] hidden animate-fade-in text-left">
         <button data-lang="en" class="w-full text-left px-4 py-2 text-xs font-bold hover:bg-muted text-primary transition-all flex items-center justify-between">
           <span>English</span>
           <iconify-icon icon="lucide:check" class="text-secondary text-xs hidden"></iconify-icon>

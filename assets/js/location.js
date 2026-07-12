@@ -28,7 +28,9 @@
     if (!el) return;
     
     var htmlText = text;
-    if (text !== 'Detecting location…' && text !== 'Select Location' && text !== 'Current Location') {
+    var isLocating = (text === 'Locating...' || text === 'Locating...');
+    
+    if (!isLocating && text !== 'Select Location' && text !== 'Current Location') {
       var parts = text.split(',').map(function(p) { return p.trim(); });
       if (parts.length === 3) {
         // e.g. Club Road, Silchar, Assam -> Hide Club Road and Assam on mobile
@@ -39,7 +41,11 @@
       }
     }
 
-    el.innerHTML = '<iconify-icon icon="lucide:map-pin" class="text-secondary"></iconify-icon> ' + htmlText;
+    if (isLocating) {
+      el.innerHTML = '<iconify-icon icon="lucide:loader-2" class="text-secondary animate-spin flex-shrink-0"></iconify-icon> <span class="text-xs">Locating...</span>';
+    } else {
+      el.innerHTML = '<iconify-icon icon="lucide:map-pin" class="text-secondary flex-shrink-0"></iconify-icon> ' + htmlText;
+    }
     // Make visible if it was hidden
     el.classList.remove('hidden');
   }
@@ -154,7 +160,7 @@
     log('Accuracy (metres)', acc);
 
     // Show a temporary "Detecting..." while we fetch the address
-    updateNavbar('Detecting location…');
+    updateNavbar('Locating...');
 
     reverseGeocode(
       lat,
@@ -322,7 +328,7 @@
 
         document.getElementById('jg-loc-gps-btn').onclick = function() {
           modal.classList.add('hidden');
-          updateNavbar('Detecting location…');
+          updateNavbar('Locating...');
           if (navigator.geolocation) {
              navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, GEO_OPTIONS);
           }
