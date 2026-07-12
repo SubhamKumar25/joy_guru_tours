@@ -18,12 +18,11 @@ desktop.ini
 .gemini/
 .cursorrules
 
-# Build artifacts
-joy-guru-travel-platform/
+# Local dev tools
+node_portable/
 
 # Misc
 *.log
-*.py
-project_report.md
 
+# Vercel
 .vercel

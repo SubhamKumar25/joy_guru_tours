@@ -169,9 +169,7 @@
 
     // Input handlers
     input.addEventListener('focus', function() {
-      if (input.value.trim() === '') {
-        showPrefillSuggestions();
-      } else {
+      if (input.value.trim() !== '') {
         triggerSearch(input.value.trim());
       }
     });
@@ -179,7 +177,7 @@
     input.addEventListener('input', function() {
       const val = input.value.trim();
       if (val === '') {
-        showPrefillSuggestions();
+        removeDropdown();
       } else {
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(() => {
@@ -192,7 +190,9 @@
     input.addEventListener('keydown', function(e) {
       if (!dropdown) {
         if (e.key === 'ArrowDown' || e.key === 'Enter') {
-          showPrefillSuggestions();
+          if (input.value.trim() !== '') {
+             triggerSearch(input.value.trim());
+          }
           e.preventDefault();
         }
         return;
@@ -242,8 +242,34 @@
       `;
       dropdown.appendChild(loader);
 
+      // Extract state from current location to strictly search within that state
+      let searchQuery = query;
+      const currentLocation = localStorage.getItem('jg_current_location');
+      if (currentLocation && currentLocation !== 'Select Location' && currentLocation !== 'Current Location') {
+         const parts = currentLocation.split(',').map(p => p.trim());
+         const state = parts[parts.length - 1]; 
+         if (state && !query.toLowerCase().includes(state.toLowerCase())) {
+             searchQuery = query + ', ' + state;
+         }
+      }
+
       // Call Nominatim API (limitted to India)
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=6`;
+      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=in&limit=6`;
+      
+      const currentLat = localStorage.getItem('jg_current_lat');
+      const currentLon = localStorage.getItem('jg_current_lon');
+      
+      if (currentLat && currentLon) {
+        const lat = parseFloat(currentLat);
+        const lon = parseFloat(currentLon);
+        // Approx 0.5 degrees = ~55km bounding box to bias local results strongly
+        const left = lon - 0.5;
+        const right = lon + 0.5;
+        const bottom = lat - 0.5;
+        const top = lat + 0.5;
+        // bounded=1 enforces strict bounding to this box so they only see local places
+        url += `&viewbox=${left},${top},${right},${bottom}&bounded=1`;
+      }
       
       fetch(url, {
         headers: {

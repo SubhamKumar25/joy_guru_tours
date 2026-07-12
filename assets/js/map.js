@@ -1,173 +1,184 @@
 /**
- * Joy Guru Tours & Travels - Map Preview & OSRM Routing using Leaflet.js
+ * Joy Guru Tours & Travels - Interactive Map Logic (Leaflet + OSRM)
  */
 
-(function() {
-  let map = null;
-  let routeLayer = null;
-  let pickupMarker = null;
-  let destinationMarker = null;
+(function initMapLogic() {
+  document.addEventListener('DOMContentLoaded', () => {
+    let map = null;
+    let routingControl = null;
+    let pickupMarker = null;
+    let dropMarker = null;
+    let polyline = null;
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // Listen for coordinates update event
-    window.addEventListener('jg-locations-updated', function(e) {
-      const pickup = e.detail.pickup;
-      const destination = e.detail.destination;
+    const desktopContainer = document.getElementById('desktop-map-container');
+    const heroTextContent = document.getElementById('hero-text-content');
+    
+    const mobileSheet = document.getElementById('mobile-map-sheet');
+    const closeMobileBtn = document.getElementById('close-mobile-map');
 
-      const container = document.getElementById('map-preview-container');
-      if (!container) return;
+    // UI Elements for ETA and Distance
+    const desktopEta = document.getElementById('desktop-eta');
+    const desktopDist = document.getElementById('desktop-dist');
+    const mobileEta = document.getElementById('mobile-eta');
+    const mobileDist = document.getElementById('mobile-dist');
+    const desktopInfoBox = document.getElementById('desktop-map-info');
+    const mobileInfoBox = document.getElementById('mobile-map-info');
 
-      if (pickup && destination) {
-        // Show map container
-        container.classList.remove('hidden');
-        
-        // Initialize map if needed
-        initMap();
-
-        // Calculate and render route
-        updateRoute(pickup, destination);
-      } else {
-        // Hide map container if inputs are cleared
-        container.classList.add('hidden');
-      }
+    // Default icon
+    const defaultIcon = L.icon({
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
     });
-  });
 
-  function initMap() {
-    if (map !== null) {
-      // Map already initialized, just trigger resize to ensure layout is updated
-      setTimeout(() => { map.invalidateSize(); }, 100);
-      return;
+    const destinationIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    // Toggle Map UI based on viewport
+    function showMapUI() {
+      if (window.innerWidth >= 1024) {
+        // Desktop
+        if (heroTextContent) heroTextContent.classList.add('hidden');
+        if (desktopContainer) desktopContainer.classList.remove('hidden');
+      } else {
+        // Mobile
+        if (mobileSheet) mobileSheet.classList.remove('translate-y-full');
+      }
     }
 
-    // Initialize Leaflet map targeting the 'map' div
-    // Centered around Northeast India (Silchar/Shillong region)
-    map = L.map('map', {
-      zoomControl: true,
-      attributionControl: false
-    }).setView([25.3, 92.2], 8);
+    if (closeMobileBtn) {
+      closeMobileBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        mobileSheet.classList.add('translate-y-full');
+      });
+    }
 
-    // Use OpenStreetMap public tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    }).addTo(map);
-  }
+    function initMap(containerId) {
+      if (map) return map;
+      map = L.map(containerId, {
+        zoomControl: false // We will add custom zoom control if needed
+      }).setView([24.8333, 92.7789], 13); // Default Silchar
 
-  function updateRoute(pickup, destination) {
-    if (!map) return;
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map);
+      
+      L.control.zoom({
+         position: 'topright'
+      }).addTo(map);
 
-    // Clear previous layers/markers
-    if (routeLayer) map.removeLayer(routeLayer);
-    if (pickupMarker) map.removeLayer(pickupMarker);
-    if (destinationMarker) map.removeLayer(destinationMarker);
+      // Locate me button
+      const locateControl = L.control({position: 'bottomright'});
+      locateControl.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        div.innerHTML = `<button style="background: white; border: none; width: 30px; height: 30px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-navigation"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></button>`;
+        div.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          map.locate({setView: true, maxZoom: 16});
+        }
+        return div;
+      };
+      locateControl.addTo(map);
 
-    // Custom marker icons using Leaflet divIcon for matching styles (red for destination, dark for pickup)
-    const pickupIcon = L.divIcon({
-      className: 'custom-map-marker pickup',
-      html: `<div style="background-color: #0f172a; width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-      iconSize: [12, 12],
-      iconAnchor: [6, 6]
-    });
+      return map;
+    }
 
-    const destIcon = L.divIcon({
-      className: 'custom-map-marker destination',
-      html: `<div style="background-color: #e11d48; width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-      iconSize: [12, 12],
-      iconAnchor: [6, 6]
-    });
+    function updateMap(pickup, destination) {
+      // Determine which container to use based on screen size
+      const isDesktop = window.innerWidth >= 1024;
+      const containerId = isDesktop ? 'desktop-map' : 'mobile-map';
+      
+      // Initialize if null
+      if (!map) {
+        initMap(containerId);
+      } else {
+        // Handle map container switch on resize (invalidateSize is required when moving or unhiding)
+        setTimeout(() => map.invalidateSize(), 300);
+      }
 
-    // Add markers
-    pickupMarker = L.marker([pickup.lat, pickup.lon], { icon: pickupIcon }).addTo(map)
-      .bindPopup(`<b>Pickup:</b> ${pickup.name.split(',')[0]}`);
-    
-    destinationMarker = L.marker([destination.lat, destination.lon], { icon: destIcon }).addTo(map)
-      .bindPopup(`<b>Destination:</b> ${destination.name.split(',')[0]}`);
+      // Clear existing markers/lines
+      if (pickupMarker) map.removeLayer(pickupMarker);
+      if (dropMarker) map.removeLayer(dropMarker);
+      if (polyline) map.removeLayer(polyline);
 
-    // Call OSRM API to get driving route
-    const url = `https://router.project-osrm.org/route/v1/driving/${pickup.lon},${pickup.lat};${destination.lon},${destination.lat}?overview=full&geometries=geojson`;
+      pickupMarker = L.marker([pickup.lat, pickup.lon], {icon: defaultIcon}).addTo(map);
+      pickupMarker.bindPopup(`<b>Pickup</b><br>${pickup.name}`).openPopup();
 
-    fetch(url)
+      dropMarker = L.marker([destination.lat, destination.lon], {icon: destinationIcon}).addTo(map);
+      dropMarker.bindPopup(`<b>Drop</b><br>${destination.name}`);
+
+      // Fit bounds to both points
+      const bounds = L.latLngBounds([pickup.lat, pickup.lon], [destination.lat, destination.lon]);
+      map.fitBounds(bounds, { padding: [50, 50] });
+
+      // Fetch Route from OSRM
+      fetchRoute(pickup, destination);
+    }
+
+    function fetchRoute(start, end) {
+      // OSRM coordinates are lon,lat
+      const url = `https://router.project-osrm.org/route/v1/driving/${start.lon},${start.lat};${end.lon},${end.lat}?overview=full&geometries=geojson`;
+      
+      fetch(url)
       .then(res => res.json())
       .then(data => {
-        if (data && data.routes && data.routes.length > 0) {
+        if (data.routes && data.routes.length > 0) {
           const route = data.routes[0];
+          const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); // Leaflet uses lat,lon
+          
+          if (polyline) map.removeLayer(polyline);
+          polyline = L.polyline(coords, {color: '#2563eb', weight: 5, opacity: 0.7}).addTo(map);
+          
+          // Fit bounds to the actual route polyline
+          map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+
+          // Update UI info
           const distanceKm = (route.distance / 1000).toFixed(1);
           const durationMins = Math.round(route.duration / 60);
+          
+          let durationStr = `${durationMins} mins`;
+          if (durationMins > 60) {
+            const hrs = Math.floor(durationMins / 60);
+            const m = durationMins % 60;
+            durationStr = `${hrs} hr ${m} min`;
+          }
 
-          // Render route line on map
-          const geojsonFeature = {
-            type: "Feature",
-            properties: {},
-            geometry: route.geometry
-          };
+          if (desktopEta) desktopEta.textContent = durationStr;
+          if (desktopDist) desktopDist.textContent = `${distanceKm} km`;
+          if (mobileEta) mobileEta.textContent = durationStr;
+          if (mobileDist) mobileDist.textContent = `${distanceKm} km`;
 
-          routeLayer = L.geoJSON(geojsonFeature, {
-            style: {
-              color: '#e11d48', // brand secondary color
-              weight: 4,
-              opacity: 0.8
-            }
-          }).addTo(map);
-
-          // Fit bounds to show entire route with some padding
-          map.fitBounds(routeLayer.getBounds(), { padding: [20, 20] });
-
-          // Update info text
-          displayRouteInfo(distanceKm, durationMins);
-        } else {
-          // Fallback line if OSRM fails
-          const latlngs = [
-            [pickup.lat, pickup.lon],
-            [destination.lat, destination.lon]
-          ];
-          routeLayer = L.polyline(latlngs, { color: '#64748b', weight: 3, dashArray: '5, 5' }).addTo(map);
-          map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
-          displayRouteInfo(null, null);
+          if (desktopInfoBox) desktopInfoBox.classList.remove('hidden');
+          if (mobileInfoBox) mobileInfoBox.classList.remove('hidden');
         }
       })
       .catch(err => {
-        console.error('OSRM Routing API error:', err);
-        // Fallback straight line
-        const latlngs = [
-          [pickup.lat, pickup.lon],
-          [destination.lat, destination.lon]
-        ];
-        routeLayer = L.polyline(latlngs, { color: '#64748b', weight: 3, dashArray: '5, 5' }).addTo(map);
-        map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
-        displayRouteInfo(null, null);
+        console.error('Error fetching route from OSRM:', err);
       });
-  }
-
-  function displayRouteInfo(distance, durationMins) {
-    const distEl = document.getElementById('route-distance');
-    const timeEl = document.getElementById('route-duration');
-    const fareEl = document.getElementById('route-fare');
-
-    if (!distEl || !timeEl) return;
-
-    if (distance !== null) {
-      distEl.innerHTML = `Distance: <strong class="text-primary">${distance} km</strong>`;
-      
-      // Format time nicely
-      let timeStr = `${durationMins} mins`;
-      if (durationMins >= 60) {
-        const hrs = Math.floor(durationMins / 60);
-        const mins = durationMins % 60;
-        timeStr = mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
-      }
-      timeEl.innerHTML = `Time: <strong class="text-primary">${timeStr}</strong>`;
-
-      // Estimate fare: ~24.5 Rs per km (average of all vehicle options), min Rs 3,999 onwards
-      const estFare = Math.max(3999, Math.round(distance * 24.5));
-      if (fareEl) {
-        fareEl.innerHTML = `Est. Fare: <strong class="text-secondary">₹${estFare.toLocaleString()}</strong>`;
-      }
-    } else {
-      distEl.innerHTML = `Distance: <strong class="text-primary">-- km</strong>`;
-      timeEl.innerHTML = `Time: <strong class="text-primary">-- mins</strong>`;
-      if (fareEl) {
-        fareEl.innerHTML = `Est. Fare: <strong class="text-secondary">--</strong>`;
-      }
     }
-  }
+
+    // Listen to autocomplete selections
+    window.addEventListener('jg-locations-updated', (e) => {
+      const { pickup, destination } = e.detail;
+      
+      if (pickup && destination) {
+        showMapUI();
+        updateMap(pickup, destination);
+      }
+    });
+
+  });
 })();

@@ -45,7 +45,7 @@
     const langLabel = LANG_NAMES[currentLang] || 'English';
 
     langDiv.innerHTML = `
-      <button id="lang-select-btn" class="text-xs bg-muted hover:bg-muted/80 text-primary font-bold px-2.5 py-1.5 rounded-lg border border-border flex items-center gap-1 transition-all select-none">
+      <button id="lang-select-btn" class="text-xs bg-muted hover:bg-muted/80 text-primary font-bold p-2 md:px-2.5 md:py-1.5 rounded-lg border border-border flex items-center justify-center gap-1 transition-all select-none">
         <iconify-icon icon="lucide:languages" class="text-secondary text-sm"></iconify-icon>
         <span id="lang-selected-label" class="hidden md:inline">${langLabel}</span>
         <iconify-icon icon="lucide:chevron-down" class="text-[10px] opacity-60 hidden md:inline-block"></iconify-icon>

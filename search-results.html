@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Search Results — Exported from UXMagic Copilot">
-    <title>Joy Guru Tours & Travels | Search Results</title>
+    <title>Joy Guru Tours &amp; Travels</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Poppins:wght@100..900&amp;family=Fira+Code:wght@300..700&amp;family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
@@ -81,11 +81,11 @@
           <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
         </div>
         <div>
-          <span class="font-heading font-bold text-lg tracking-wide text-primary">JOY GURU</span>
-          <span class="block text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
+          <span class="font-heading font-bold text-sm sm:text-lg tracking-wide text-primary leading-tight">JOY GURU</span>
+          <span class="block text-[8px] sm:text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
         </div>
       </div>
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 sm:gap-4">
         <span class="text-xs bg-muted text-muted-foreground font-semibold px-3 py-1.5 rounded-full flex items-center gap-1">
           <iconify-icon icon="lucide:shield-check" class="text-tertiary"></iconify-icon> All vehicles sanitised
         </span>
@@ -263,7 +263,7 @@
             <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹4,999</strong></p>
           </div>
 
-          <button onclick="alert('Proceeding to booking summary and secure payment...')" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+          <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Proceeding to booking summary and secure payment...') : 'Proceeding to booking summary and secure payment...'; alert(msg);" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
             Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
           </button>
         </div>
@@ -326,7 +326,7 @@
             <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹3,499</strong></p>
           </div>
 
-          <button onclick="alert('Proceeding to booking summary and secure payment...')" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+          <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Proceeding to booking summary and secure payment...') : 'Proceeding to booking summary and secure payment...'; alert(msg);" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
             Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
           </button>
         </div>
@@ -389,7 +389,7 @@
             <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹9,499</strong></p>
           </div>
 
-          <button onclick="alert('Proceeding to booking summary and secure payment...')" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+          <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Proceeding to booking summary and secure payment...') : 'Proceeding to booking summary and secure payment...'; alert(msg);" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
             Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
           </button>
         </div>
@@ -408,5 +408,6 @@
     <!-- Custom i18n modules -->
     <script src="assets/js/i18n.js"></script>
     <script src="assets/js/language.js"></script>
+    <script src="assets/js/profile.js"></script>
 </body>
 </html>

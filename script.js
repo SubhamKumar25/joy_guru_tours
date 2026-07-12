@@ -358,17 +358,6 @@ document.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
-  if (isLoggedIn && isLoginPage) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirect = urlParams.get('redirect');
-    if (redirect === 'booking') {
-      window.location.href = "booking-payment.html";
-    } else {
-      window.location.href = "index.html";
-    }
-    return;
-  }
-
   // Smooth scroll for anchor links
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
@@ -1511,3 +1500,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
+
+

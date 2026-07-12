@@ -42,6 +42,14 @@
     initNotifications();
   });
 
+  function isLoggedIn() {
+    // Use StateEngine if available, otherwise check localStorage directly
+    if (window.StateEngine && typeof window.StateEngine.isLoggedIn === 'function') {
+      return window.StateEngine.isLoggedIn();
+    }
+    return localStorage.getItem('jg_logged_in') === 'true';
+  }
+
   function initNotifications() {
     const bellBtn = document.getElementById('notification-bell-btn');
     const dropdown = document.getElementById('notification-dropdown');
@@ -51,7 +59,22 @@
 
     if (!bellBtn || !dropdown || !list) return;
 
-    // Load or seed notifications
+    // ── Guest mode: hide bell, redirect to login on click ──────────────────
+    if (!isLoggedIn()) {
+      // Hide the unread dot badge
+      if (badge) badge.classList.add('hidden');
+
+      // On click → redirect to login
+      bellBtn.onclick = function(e) {
+        e.stopPropagation();
+        window.location.href = 'login-signup.html';
+      };
+
+      // Keep bell button visible but don't render notifications
+      return;
+    }
+
+    // ── Logged-in mode: full notification panel ─────────────────────────────
     let notifications = getNotifications();
     if (notifications.length === 0) {
       notifications = DEFAULT_NOTIFICATIONS;
@@ -65,7 +88,7 @@
     bellBtn.onclick = function(e) {
       e.stopPropagation();
       dropdown.classList.toggle('hidden');
-      
+
       if (!dropdown.classList.contains('hidden')) {
         document.addEventListener('click', outsideClickListener);
       }
@@ -81,10 +104,12 @@
     // Mark all read button click
     if (markReadBtn) {
       markReadBtn.onclick = function() {
-        notifications.forEach(n => n.read = true);
+        notifications.forEach(function(n) { n.read = true; });
         saveNotifications(notifications);
         renderNotificationsList(notifications, list, badge);
-        UIUtils.showToast('All notifications marked as read', 'success');
+        if (window.UIUtils && UIUtils.showToast) {
+          UIUtils.showToast('All notifications marked as read', 'success');
+        }
       };
     }
   }

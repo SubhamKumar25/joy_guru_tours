@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Landing Page — Exported from UXMagic Copilot">
-    <title>Joy Guru Tours & Travels | Premium Northeast India Travel Partner</title>
+    <title>Joy Guru Tours &amp; Travels</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Poppins:wght@100..900&amp;family=Fira+Code:wght@300..700&amp;family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
@@ -75,6 +75,7 @@
     <!-- Custom styling extensions -->
     <link rel="stylesheet" href="assets/css/location.css">
     <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="assets/css/map.css">
 </head>
 <body>
     <div data-page="landing-page">
@@ -89,8 +90,8 @@
           <img src="Assets image/logo.png" alt="Joy Guru Logo" class="w-full h-full object-cover">
         </div>
         <div>
-          <span class="font-heading font-bold text-lg tracking-wide text-primary">JOY GURU</span>
-          <span class="block text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
+          <span class="font-heading font-bold text-sm sm:text-lg tracking-wide text-primary leading-tight">JOY GURU</span>
+          <span class="block text-[8px] sm:text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
         </div>
       </div>
 
@@ -104,8 +105,8 @@
       </nav>
 
       <!-- CTA and Portal Links -->
-      <div class="flex items-center gap-4">
-        <span id="navbar-location-span" class="text-xs bg-accent text-secondary-foreground font-bold px-3 py-1 rounded-full border border-secondary/20 hidden sm:inline-flex items-center gap-1">
+      <div class="flex items-center gap-2 sm:gap-4">
+        <span id="navbar-location-span" class="text-xs bg-accent text-secondary-foreground font-bold px-2 sm:px-3 py-1 rounded-full border border-secondary/20 inline-flex items-center gap-1">
           <iconify-icon icon="lucide:map-pin" class="text-secondary"></iconify-icon> Silchar, Assam
         </span>
 
@@ -129,9 +130,9 @@
           </div>
         </div>
 
-        <button id="login-btn" onclick="window.location.href='login-signup.html'" class="bg-primary hover:bg-primary/95 text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md transition-all flex items-center gap-2">
-          <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Login / Sign In
-        </button>
+        <div id="login-btn" onclick="window.location.href='login-signup.html'" class="cursor-pointer bg-primary hover:bg-primary/95 text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md transition-all flex items-center gap-2">
+          <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Login
+        </div>
       </div>
     </div>
   </header>
@@ -173,6 +174,22 @@
             <span class="text-xs text-primary-foreground/70">Google Rating</span>
           </div>
         </div>
+      </div>
+
+            <!-- Desktop Map Container (Hidden initially) -->
+      <div id="desktop-map-container" class="lg:col-span-7 hidden w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-border relative">
+         <div id="desktop-map" class="w-full h-full relative z-10"></div>
+         <!-- Info Overlay -->
+         <div id="desktop-map-info" class="absolute bottom-6 left-6 right-6 bg-background/95 backdrop-blur-md border border-border shadow-lg p-4 rounded-xl z-[1000] hidden flex justify-between items-center transition-all">
+           <div>
+             <p class="text-xs text-muted-foreground font-semibold">ESTIMATED TIME</p>
+             <p id="desktop-eta" class="text-xl font-bold text-primary">-- mins</p>
+           </div>
+           <div class="text-right">
+             <p class="text-xs text-muted-foreground font-semibold">DISTANCE</p>
+             <p id="desktop-dist" class="text-xl font-bold text-secondary">-- km</p>
+           </div>
+         </div>
       </div>
 
       <!-- Luxury Search Cab Card -->
@@ -476,79 +493,7 @@
   </section>
 
   <!-- Customer Reviews -->
-  <section id="reviews" class="py-16 px-6 bg-muted/20">
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center max-w-2xl mx-auto mb-12">
-        <span class="text-secondary text-xs font-bold tracking-widest uppercase">Testimonials</span>
-        <h2 class="text-3xl font-heading font-bold text-primary mt-1">What Our Travelers Say</h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Review 1 -->
-        <div class="bg-card border border-border p-6 rounded-xl relative">
-          <div class="flex items-center gap-1 text-secondary mb-4">
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-          </div>
-          <p class="text-muted-foreground text-sm leading-relaxed mb-6 italic">
-            "Booked a luxury Innova Crysta for our Meghalaya family trip from Silchar. The driver was extremely polite, and the vehicle was pristine. Highly recommended!"
-          </p>
-          <div class="flex items-center gap-3">
-            <img src="https://randomuser.me/api/portraits/men/12.jpg" alt="Rahul" class="w-10 h-10 rounded-full object-cover">
-            <div>
-              <h5 class="font-heading font-bold text-sm text-primary">Rahul Sharma</h5>
-              <span class="text-xs text-muted-foreground">Business Owner, Silchar</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Review 2 -->
-        <div class="bg-card border border-border p-6 rounded-xl relative">
-          <div class="flex items-center gap-1 text-secondary mb-4">
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-          </div>
-          <p class="text-muted-foreground text-sm leading-relaxed mb-6 italic">
-            "Joy Guru Tours curated a custom tour of Dawki and Shillong for us. The itinerary was perfectly paced, and the hotel choices were stellar. Best tour operators in Assam."
-          </p>
-          <div class="flex items-center gap-3">
-            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Ananya" class="w-10 h-10 rounded-full object-cover">
-            <div>
-              <h5 class="font-heading font-bold text-sm text-primary">Dr. Amit Das</h5>
-              <span class="text-xs text-muted-foreground">Tourist, Bangalore</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Review 3 -->
-        <div class="bg-card border border-border p-6 rounded-xl relative">
-          <div class="flex items-center gap-1 text-secondary mb-4">
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-            <iconify-icon icon="lucide:star" class="text-sm"></iconify-icon>
-          </div>
-          <p class="text-muted-foreground text-sm leading-relaxed mb-6 italic">
-            "Extremely punctual! I had an early morning flight from Silchar Airport. The cab arrived 15 minutes early, beautifully clean, and with a very reassuring driver."
-          </p>
-          <div class="flex items-center gap-3">
-            <img src="https://randomuser.me/api/portraits/men/46.jpg" alt="Preeti" class="w-10 h-10 rounded-full object-cover">
-            <div>
-              <h5 class="font-heading font-bold text-sm text-primary">Preeti Baruah</h5>
-              <span class="text-xs text-muted-foreground">IT Professional, Guwahati</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  
 
   <!-- Sticky Footer -->
   <footer class="bg-primary text-primary-foreground border-t border-border/10 pt-16 pb-8 px-6 mt-auto">
@@ -560,7 +505,7 @@
           </div>
           <div>
             <span class="font-heading font-bold text-lg tracking-wide text-primary-foreground">JOY GURU</span>
-            <span class="block text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
+            <span class="block text-[8px] sm:text-xs font-semibold tracking-widest text-secondary uppercase">Tours &amp; Travels</span>
           </div>
         </div>
         <p class="text-primary-foreground/70 text-xs leading-relaxed">
@@ -630,5 +575,32 @@
     <!-- Custom i18n modules -->
     <script src="assets/js/i18n.js"></script>
     <script src="assets/js/language.js"></script>
+    <script src="assets/js/profile.js"></script>
+
+  <!-- Mobile Map Bottom Sheet -->
+  <div id="mobile-map-sheet" class="fixed inset-x-0 bottom-0 z-[100] transform translate-y-full transition-transform duration-300 ease-out bg-card rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col h-[75vh] md:hidden border-t border-border">
+    <div class="w-full flex justify-center py-3 bg-card rounded-t-3xl absolute top-0 left-0 z-[1000] border-b border-border">
+      <div class="w-12 h-1.5 bg-border rounded-full"></div>
+    </div>
+    <!-- Close button -->
+    <button id="close-mobile-map" class="absolute top-2 right-4 z-[1001] bg-muted hover:bg-border p-2 rounded-full text-foreground shadow-sm transition-all">
+      <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+    </button>
+    
+    <div id="mobile-map" class="w-full flex-grow mt-12 bg-muted relative z-[900]"></div>
+    
+    <!-- Map Info Overlay -->
+    <div id="mobile-map-info" class="absolute bottom-6 left-4 right-4 bg-background/95 backdrop-blur-md border border-border shadow-lg p-4 rounded-xl z-[1000] hidden flex justify-between items-center transition-all">
+       <div>
+         <p class="text-xs text-muted-foreground font-semibold">ESTIMATED TIME</p>
+         <p id="mobile-eta" class="text-xl font-bold text-primary">-- mins</p>
+       </div>
+       <div class="text-right">
+         <p class="text-xs text-muted-foreground font-semibold">DISTANCE</p>
+         <p id="mobile-dist" class="text-xl font-bold text-secondary">-- km</p>
+       </div>
+    </div>
+  </div>
+
 </body>
 </html>

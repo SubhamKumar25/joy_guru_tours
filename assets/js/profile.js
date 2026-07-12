@@ -1,184 +1,134 @@
 /**
- * Joy Guru Tours & Travels - User Profile Management Script
+ * Joy Guru Tours & Travels - Profile Avatar & Dropdown Logic
  */
 
-(function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    // Only run on dashboard page
-    const isDashboard = document.querySelector('[data-page="user-dashboard-invoice"]') || document.getElementById('dashboard') || window.location.pathname.includes('user-dashboard');
-    if (!isDashboard) return;
+(function initProfileLogic() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const isLoggedIn = localStorage.getItem('jg_logged_in') === 'true';
 
-    initProfileManager();
+    // Find login buttons across the navbars
+    const loginBtns = document.querySelectorAll('#login-btn, button, a');
+    loginBtns.forEach(el => {
+      // Only target the primary login buttons
+      if (el.id === 'login-btn' || el.textContent.includes('Portal Login') || el.textContent.includes('Login')) {
+        
+        if (isLoggedIn) {
+          // Clear inline onclick that redirects to login page
+          el.removeAttribute('onclick');
+          el.onclick = null;
+
+          const rawName = localStorage.getItem('jg_user_name') || 'User';
+          const names = rawName.trim().split(' ');
+          
+          let initials = names[0].charAt(0).toUpperCase();
+          if (names.length > 1) {
+             initials += names[names.length - 1].charAt(0).toUpperCase();
+          }
+
+          // Desktop & Mobile BOTH use Initials (as requested)
+          el.innerHTML = `
+            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold text-xs shadow-sm ring-1 ring-primary/30">
+              ${initials}
+            </span>
+          `;
+          
+          // Adjust classes for circle
+          el.classList.remove('px-5', 'py-2.5', 'bg-primary', 'text-primary-foreground');
+          el.classList.add('p-1', 'rounded-full', 'relative', 'hover:bg-transparent', 'bg-transparent', 'shadow-none');
+          
+          // Add CSS custom property for pointer so mobile browsers register clicks reliably
+          el.style.cursor = 'pointer';
+          el.style.webkitTapHighlightColor = 'transparent';
+
+          // Build dropdown for mobile/desktop
+          let profileDropdown = el.querySelector('.profile-dropdown-menu');
+          if (!profileDropdown) {
+             profileDropdown = document.createElement('div');
+             profileDropdown.className = 'profile-dropdown-menu absolute right-0 top-full mt-3 w-56 bg-card border border-border shadow-xl rounded-xl py-2 z-[100] hidden flex-col text-left text-foreground cursor-default animate-fade-in';
+             profileDropdown.innerHTML = `
+               <div class="px-4 py-3 border-b border-border/50 mb-1 bg-muted/30">
+                 <p class="text-xs text-muted-foreground uppercase tracking-widest mb-1">Signed in as</p>
+                 <p class="text-sm font-bold text-primary truncate">${rawName}</p>
+               </div>
+               <a href="javascript:void(0)" class="w-full block text-left px-4 py-2.5 text-sm font-semibold hover:bg-muted text-foreground transition-all flex items-center gap-3" data-target="profile">
+                 <iconify-icon icon="lucide:user" class="text-lg text-muted-foreground"></iconify-icon> My Profile
+               </a>
+               <a href="javascript:void(0)" class="w-full block text-left px-4 py-2.5 text-sm font-semibold hover:bg-muted text-foreground transition-all flex items-center gap-3" data-target="trips">
+                 <iconify-icon icon="lucide:briefcase" class="text-lg text-muted-foreground"></iconify-icon> My Trips
+               </a>
+               <a href="javascript:void(0)" class="w-full block text-left px-4 py-2.5 text-sm font-semibold hover:bg-muted text-foreground transition-all flex items-center gap-3" data-target="payments">
+                 <iconify-icon icon="lucide:credit-card" class="text-lg text-muted-foreground"></iconify-icon> Payments
+               </a>
+               <div class="border-t border-border mt-1 pt-1">
+                 <a href="javascript:void(0)" class="w-full block text-left px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-all flex items-center gap-3" id="profile-logout-btn">
+                   <iconify-icon icon="lucide:log-out" class="text-lg"></iconify-icon> Logout
+                 </a>
+               </div>
+             `;
+             el.appendChild(profileDropdown);
+          }
+
+          // Robust click/touch handler
+          const toggleDropdown = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (profileDropdown.classList.contains('hidden')) {
+              profileDropdown.classList.remove('hidden');
+              profileDropdown.classList.add('flex');
+            } else {
+              profileDropdown.classList.add('hidden');
+              profileDropdown.classList.remove('flex');
+            }
+          };
+
+          // Use both touchend and click for maximum compatibility on iOS/Android
+          el.addEventListener('click', toggleDropdown);
+
+          // Handle dropdown clicks
+          profileDropdown.addEventListener('click', function(e) {
+            e.stopPropagation(); // keep open if clicking inside
+            const btn = e.target.closest('a');
+            if (!btn) return;
+            
+            if (btn.id === 'profile-logout-btn') {
+               localStorage.removeItem('jg_logged_in');
+               localStorage.removeItem('jg_user_name');
+               window.location.href = 'index.html';
+               return;
+            }
+            
+            const target = btn.getAttribute('data-target');
+            if (target) {
+               // Store target to open tab on dashboard
+               localStorage.setItem('jg_dashboard_tab', target);
+               window.location.href = 'user-dashboard.html';
+            }
+          });
+
+          // Close dropdown when clicking outside (mobile & desktop)
+          document.addEventListener('click', function(e) {
+            if (!el.contains(e.target)) {
+              profileDropdown.classList.add('hidden');
+              profileDropdown.classList.remove('flex');
+            }
+          });
+          
+          document.addEventListener('touchstart', function(e) {
+            if (!el.contains(e.target)) {
+              profileDropdown.classList.add('hidden');
+              profileDropdown.classList.remove('flex');
+            }
+          }, {passive: true});
+
+        } else {
+          // Not logged in
+          el.innerHTML = `<iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Login`;
+          el.onclick = function (e) {
+            e.preventDefault();
+            window.location.href = "login-signup.html";
+          };
+        }
+      }
+    });
   });
-
-  function initProfileManager() {
-    const editBtn = document.getElementById('edit-profile-btn');
-    const cancelBtn = document.getElementById('cancel-profile-btn');
-    const saveGroup = document.getElementById('edit-actions-group');
-    const form = document.getElementById('custom-profile-form');
-
-    const inputs = [
-      document.getElementById('profile-photo-url'),
-      document.getElementById('profile-disp-name'),
-      document.getElementById('profile-disp-phone'),
-      document.getElementById('profile-disp-email'),
-      document.getElementById('profile-disp-password')
-    ];
-
-    const avatarImg = document.getElementById('profile-avatar-img');
-
-    if (!editBtn || !cancelBtn || !saveGroup || !form) return;
-
-    // Load initial values from localStorage
-    loadProfileValues();
-
-    // Edit button click
-    editBtn.onclick = function() {
-      // Toggle inputs state
-      inputs.forEach(input => {
-        if (input) {
-          input.disabled = false;
-          input.classList.remove('bg-muted');
-          input.classList.add('bg-background');
-        }
-      });
-
-      // Show/Hide buttons
-      editBtn.classList.add('hidden');
-      saveGroup.classList.remove('hidden');
-    };
-
-    // Cancel button click
-    cancelBtn.onclick = function() {
-      // Reload initial values (discard edits)
-      loadProfileValues();
-
-      // Disable inputs
-      inputs.forEach(input => {
-        if (input) {
-          input.disabled = true;
-          input.classList.remove('bg-background');
-          input.classList.add('bg-muted');
-        }
-      });
-
-      // Show/Hide buttons
-      editBtn.classList.remove('hidden');
-      saveGroup.classList.add('hidden');
-    };
-
-    // Form submit click (Save Changes)
-    form.onsubmit = function(e) {
-      e.preventDefault();
-
-      // Validation
-      const photoUrl = document.getElementById('profile-photo-url').value.trim();
-      const name = document.getElementById('profile-disp-name').value.trim();
-      const phone = document.getElementById('profile-disp-phone').value.trim();
-      const email = document.getElementById('profile-disp-email').value.trim();
-      const password = document.getElementById('profile-disp-password').value.trim();
-
-      if (!name) {
-        UIUtils.showToast('Name is required', 'error');
-        return;
-      }
-      if (!phone || phone.length < 10) {
-        UIUtils.showToast('Please enter a valid mobile number', 'error');
-        return;
-      }
-      if (!email || !email.includes('@')) {
-        UIUtils.showToast('Please enter a valid email address', 'error');
-        return;
-      }
-      if (password && password.length < 4) {
-        UIUtils.showToast('Password must be at least 4 characters long', 'error');
-        return;
-      }
-
-      // Save to LocalStorage
-      localStorage.setItem('jg_user_name', name);
-      localStorage.setItem('jg_user_email', email);
-      localStorage.setItem('jg_user_phone', phone);
-      localStorage.setItem('jg_user_photo', photoUrl);
-      if (password && password !== '••••••••') {
-        localStorage.setItem('jg_user_password', password);
-      }
-
-      // Update avatar preview
-      if (avatarImg) {
-        avatarImg.src = photoUrl;
-      }
-
-      // Update Header Avatar name/initials dynamically
-      updateGlobalHeader(name, photoUrl);
-
-      // Disable inputs again
-      inputs.forEach(input => {
-        if (input) {
-          input.disabled = true;
-          input.classList.remove('bg-background');
-          input.classList.add('bg-muted');
-        }
-      });
-
-      // Show/Hide buttons
-      editBtn.classList.remove('hidden');
-      saveGroup.classList.add('hidden');
-
-      UIUtils.showToast('Profile Saved Successfully!', 'success');
-    };
-
-    function loadProfileValues() {
-      const name = localStorage.getItem('jg_user_name') || 'Rahul Sharma';
-      const email = localStorage.getItem('jg_user_email') || 'rahul@example.com';
-      const phone = localStorage.getItem('jg_user_phone') || '+91 94350 12345';
-      const photo = localStorage.getItem('jg_user_photo') || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
-      const pass = localStorage.getItem('jg_user_password') || '••••••••';
-
-      if (document.getElementById('profile-photo-url')) document.getElementById('profile-photo-url').value = photo;
-      if (document.getElementById('profile-disp-name')) document.getElementById('profile-disp-name').value = name;
-      if (document.getElementById('profile-disp-phone')) document.getElementById('profile-disp-phone').value = phone;
-      if (document.getElementById('profile-disp-email')) document.getElementById('profile-disp-email').value = email;
-      if (document.getElementById('profile-disp-password')) document.getElementById('profile-disp-password').value = pass;
-
-      if (avatarImg) avatarImg.src = photo;
-    }
-
-    function updateGlobalHeader(name, photoUrl) {
-      const parts = name.split(' ').filter(Boolean);
-      const initials = parts.length >= 2
-        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-        : parts[0].substring(0, 2).toUpperCase();
-
-      // Update navbar avatars
-      const navAvatar = document.getElementById('nav-avatar');
-      const navName = document.getElementById('nav-user-name');
-      const sideAvatar = document.getElementById('sidebar-avatar');
-      const sideName = document.getElementById('sidebar-user-name');
-
-      if (navName) navName.textContent = name;
-      if (sideName) sideName.textContent = name;
-
-      // If user has a real custom photo URL, we can display image instead of initials!
-      if (photoUrl && photoUrl.startsWith('http')) {
-        if (navAvatar) {
-          navAvatar.innerHTML = `<img src="${photoUrl}" class="w-full h-full object-cover rounded-full">`;
-          navAvatar.classList.remove('bg-primary');
-        }
-        if (sideAvatar) {
-          sideAvatar.innerHTML = `<img src="${photoUrl}" class="w-full h-full object-cover rounded-full">`;
-          sideAvatar.classList.remove('bg-primary');
-        }
-      } else {
-        if (navAvatar) {
-          navAvatar.textContent = initials;
-          navAvatar.classList.add('bg-primary');
-        }
-        if (sideAvatar) {
-          sideAvatar.textContent = initials;
-          sideAvatar.classList.add('bg-primary');
-        }
-      }
-    }
-  }
 })();

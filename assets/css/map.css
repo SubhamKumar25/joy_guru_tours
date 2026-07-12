@@ -1,0 +1,43 @@
+/**
+ * Joy Guru Tours & Travels - Map Styles
+ */
+
+/* Map Containers */
+#desktop-map-container, #mobile-map-sheet {
+    z-index: 50;
+}
+
+#desktop-map {
+    z-index: 10;
+    min-height: 400px;
+    height: 100%;
+    width: 100%;
+}
+
+#mobile-map {
+    z-index: 10;
+}
+
+/* Ensure Leaflet popups and controls stay above map layers */
+.leaflet-control-container .leaflet-routing-container,
+.leaflet-control-container .leaflet-bar,
+.leaflet-control-container .leaflet-control {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    border-radius: 8px !important;
+}
+
+/* Overriding Leaflet Typography */
+.leaflet-container {
+    font-family: 'Inter', 'Poppins', sans-serif !important;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.leaflet-popup-content {
+    margin: 12px 16px;
+    font-size: 13px;
+}
