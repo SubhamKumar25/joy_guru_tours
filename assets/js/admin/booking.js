@@ -42,8 +42,8 @@
         // Status filter
         let matchStatus = true;
         if (statusFilter !== 'all') {
-          if (statusFilter === 'Pending') matchStatus = b.status === 'Pending';
-          else if (statusFilter === 'Confirmed') matchStatus = (b.status === 'Confirmed' || b.status === 'Advance Paid' || b.status === 'Driver Assigned');
+          if (statusFilter === 'Pending') matchStatus = (b.status === 'Pending' || b.status === 'Requested' || b.status === 'Fare Proposed');
+          else if (statusFilter === 'Confirmed') matchStatus = (b.status === 'Confirmed' || b.status === 'Advance Paid' || b.status === 'Driver Assigned' || b.status === 'Trip Started');
           else if (statusFilter === 'Completed') matchStatus = (b.status === 'Completed' || b.status === 'Fully Paid');
           else if (statusFilter === 'Cancelled') matchStatus = b.status === 'Cancelled';
         }
@@ -77,7 +77,11 @@
         
         // Status Badge Style
         let statusBadge = '';
-        if (b.status === 'Pending') {
+        if (b.status === 'Requested') {
+          statusBadge = '<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Requested</span>';
+        } else if (b.status === 'Fare Proposed') {
+          statusBadge = '<span class="bg-purple-100 text-purple-850 font-bold px-2 py-0.5 rounded text-[10px]">Proposed</span>';
+        } else if (b.status === 'Pending') {
           statusBadge = '<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Pending</span>';
         } else if (b.status === 'Cancelled') {
           statusBadge = '<span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">Cancelled</span>';
@@ -88,11 +92,17 @@
         }
 
         // Payment status
-        const payStatus = b.balanceDue === 0 ? 
-          '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Completed</span>' : 
-          (b.advancePaid > 0 ? 
-            '<span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Advance Paid</span>' : 
-            '<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Unpaid</span>'
+        const payStatus = b.status === 'Requested' ? 
+          '<span class="bg-slate-100 text-slate-650 font-bold px-2 py-0.5 rounded text-[10px]">Awaiting Fare</span>' : 
+          (b.status === 'Fare Proposed' ? 
+            '<span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded text-[10px]">Awaiting Acceptance</span>' : 
+            (b.balanceDue === 0 ? 
+              '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Completed</span>' : 
+              (b.advancePaid > 0 ? 
+                '<span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Advance Paid</span>' : 
+                '<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Unpaid</span>'
+              )
+            )
           );
 
         // Actions buttons
@@ -101,21 +111,30 @@
           <button onclick="window.AdminBookings.editBooking('${b.id}')" class="text-primary hover:text-secondary font-bold text-[10px] px-1 py-0.5">Edit</button>
         `;
 
+        if (b.status === 'Requested') {
+          actions += `<button onclick="window.AdminBookings.openSetFareModal('${b.id}')" class="bg-secondary text-secondary-foreground font-bold px-2 py-1 rounded text-[10px] hover:bg-secondary/90 transition-all ml-1">Set Fare</button>`;
+        }
+        
         if (b.status === 'Pending') {
           actions += `<button onclick="window.AdminBookings.confirmBooking('${b.id}')" class="text-emerald-600 hover:underline font-bold text-[10px] px-1 py-0.5">Confirm</button>`;
         }
         
-        if (b.status !== 'Cancelled' && b.status !== 'Completed' && b.status !== 'Fully Paid') {
+        if (b.status !== 'Cancelled' && b.status !== 'Completed' && b.status !== 'Fully Paid' && b.status !== 'Requested' && b.status !== 'Fare Proposed') {
           actions += `<button onclick="window.AdminBookings.cancelBooking('${b.id}')" class="text-red-600 hover:underline font-bold text-[10px] px-1 py-0.5">Cancel</button>`;
           actions += `<button onclick="window.AdminBookings.completeTrip('${b.id}')" class="text-emerald-600 hover:underline font-bold text-[10px] px-1 py-0.5">Complete</button>`;
           if (b.balanceDue > 0) {
             actions += `<button onclick="window.AdminPayments.openCollectModal('${b.id}')" class="bg-secondary text-secondary-foreground font-bold px-2 py-1 rounded text-[10px] hover:bg-secondary/90 transition-all ml-1">Collect Balance</button>`;
           }
+        } else if (b.status === 'Fare Proposed') {
+          actions += `<button onclick="window.AdminBookings.cancelBooking('${b.id}')" class="text-red-600 hover:underline font-bold text-[10px] px-1 py-0.5">Cancel</button>`;
         }
 
-        if (b.status === 'Completed' || b.status === 'Fully Paid' || b.balanceDue === 0) {
+        if (b.status === 'Completed' || b.status === 'Fully Paid' || (b.status !== 'Requested' && b.status !== 'Fare Proposed' && b.balanceDue === 0)) {
           actions += `<button onclick="window.AdminInvoice.showInvoice('${b.id}')" class="bg-primary text-primary-foreground font-bold px-2 py-1 rounded text-[10px] hover:bg-primary/95 transition-all ml-1">Invoice</button>`;
         }
+
+        const advPaidDisplay = b.status === 'Requested' || b.status === 'Fare Proposed' ? '--' : `₹${b.advancePaid}`;
+        const balDueDisplay = b.status === 'Requested' || b.status === 'Fare Proposed' ? '--' : `₹${b.balanceDue}`;
 
         tr.innerHTML = `
           <td class="py-3 px-4 font-bold text-primary">${b.id}</td>
@@ -126,8 +145,8 @@
           <td class="py-3 px-4 whitespace-nowrap">${b.travelDate}</td>
           <td class="py-3 px-4">${b.travelTime}</td>
           <td class="py-3 px-4 font-semibold">${b.vehicleName}</td>
-          <td class="py-3 px-4 font-semibold text-emerald-600">₹${b.advancePaid}</td>
-          <td class="py-3 px-4 font-semibold text-slate-700">₹${b.balanceDue}</td>
+          <td class="py-3 px-4 font-semibold text-emerald-600">${advPaidDisplay}</td>
+          <td class="py-3 px-4 font-semibold text-slate-700">${balDueDisplay}</td>
           <td class="py-3 px-4">${statusBadge}</td>
           <td class="py-3 px-4">${payStatus}</td>
           <td class="py-3 px-4 text-right whitespace-nowrap">${actions}</td>
@@ -244,10 +263,7 @@
             <button onclick="document.getElementById('admin-detail-modal').remove()" class="bg-primary text-primary-foreground font-bold px-4 py-2 rounded-lg hover:bg-primary/95 transition-all">Close</button>
           </div>
         </div>
-      `;
-    },
-
-    editBooking: function (id) {
+         editBooking: function (id) {
       const bookings = this.getBookings();
       const b = bookings.find(item => item.id === id);
       if (!b) return;
@@ -287,6 +303,16 @@
               <label class="font-bold text-muted-foreground">TRAVEL TIME</label>
               <input type="text" id="edit-cust-time" value="${b.travelTime}" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
             </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="font-bold text-muted-foreground">PROPOSED FARE (₹)</label>
+                <input type="number" id="edit-final-fare" value="${b.finalFare || ''}" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+              </div>
+              <div class="space-y-1">
+                <label class="font-bold text-muted-foreground">ADVANCE REQ (₹)</label>
+                <input type="number" id="edit-advance-req" value="${b.advanceRequired || ''}" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+              </div>
+            </div>
             <div class="space-y-1">
               <label class="font-bold text-muted-foreground">DRIVER PILOT</label>
               <input type="text" id="edit-driver-name" value="${b.driverName || ''}" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
@@ -294,6 +320,8 @@
             <div class="space-y-1">
               <label class="font-bold text-muted-foreground">STATUS</label>
               <select id="edit-status" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+                <option value="Requested" ${b.status === 'Requested' ? 'selected' : ''}>Requested (Reviewing Fare)</option>
+                <option value="Fare Proposed" ${b.status === 'Fare Proposed' ? 'selected' : ''}>Fare Proposed</option>
                 <option value="Pending" ${b.status === 'Pending' ? 'selected' : ''}>Pending</option>
                 <option value="Confirmed" ${b.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
                 <option value="Advance Paid" ${b.status === 'Advance Paid' ? 'selected' : ''}>Advance Paid</option>
@@ -320,10 +348,108 @@
         b.driverName = document.getElementById('edit-driver-name').value.trim();
         b.status = document.getElementById('edit-status').value;
 
+        const fFare = parseInt(document.getElementById('edit-final-fare').value);
+        const aReq = parseInt(document.getElementById('edit-advance-req').value);
+        if (!isNaN(fFare)) b.finalFare = fFare;
+        if (!isNaN(aReq)) b.advanceRequired = aReq;
+        
+        // Update balance due
+        if (b.status === 'Advance Paid' && !isNaN(fFare) && !isNaN(aReq)) {
+          b.advancePaid = aReq;
+          b.balanceDue = fFare - aReq;
+        }
+
         this.saveBookings(bookings);
         document.getElementById('admin-edit-modal').remove();
         UIUtils.showToast(`Booking ${b.id} updated successfully.`, 'success');
       };
+    },
+
+    openSetFareModal: function(id) {
+      const bookings = this.getBookings();
+      const b = bookings.find(item => item.id === id);
+      if (!b) return;
+
+      let modal = document.getElementById('admin-set-fare-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'admin-set-fare-modal';
+        modal.className = 'fixed inset-0 z-[1000] bg-primary/60 backdrop-blur-sm flex items-center justify-center p-4';
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = `
+        <div class="bg-card w-full max-w-md rounded-2xl border border-border overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+          <div class="bg-primary text-primary-foreground p-5 flex items-center justify-between border-b border-border">
+            <h3 class="font-heading font-bold text-base text-secondary flex items-center gap-1.5">
+              <iconify-icon icon="lucide:tag" class="text-lg"></iconify-icon> Propose Fare - ${b.id}
+            </h3>
+            <button onclick="document.getElementById('admin-set-fare-modal').remove()" class="text-primary-foreground/80 hover:text-primary-foreground">
+              <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+            </button>
+          </div>
+          <form id="admin-set-fare-form" class="p-6 space-y-4 overflow-y-auto text-xs">
+            <div class="bg-muted p-3 rounded-lg space-y-2">
+              <p><strong>Route:</strong> ${b.pickup} ⇄ ${b.destination}</p>
+              <p><strong>Date & Time:</strong> ${b.travelDate} @ ${b.travelTime}</p>
+            </div>
+            
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">PROPOSED TOTAL FARE (₹)</label>
+              <input type="number" id="propose-final-fare" placeholder="e.g. 5500" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-ring focus:outline-none">
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">REQUIRED ADVANCE AMOUNT (₹)</label>
+              <input type="number" id="propose-advance-req" placeholder="e.g. 1500" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-ring focus:outline-none">
+              <p class="text-[10px] text-muted-foreground mt-0.5">Recommended 25% advance payment to confirm request.</p>
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-muted-foreground">COORDINATOR INTERNAL NOTES</label>
+              <textarea id="propose-admin-notes" placeholder="Optional notes visible only to admins" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none h-20"></textarea>
+            </div>
+
+            <div class="pt-4 flex gap-3">
+              <button type="button" onclick="document.getElementById('admin-set-fare-modal').remove()" class="flex-1 bg-muted hover:bg-muted/80 text-primary font-bold py-2.5 rounded-lg">Cancel</button>
+              <button type="submit" class="flex-1 bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-2.5 rounded-lg">Send Proposed Fare</button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      const fareInput = document.getElementById('propose-final-fare');
+      const advanceInput = document.getElementById('propose-advance-req');
+      
+      if (fareInput && advanceInput) {
+        fareInput.addEventListener('input', () => {
+          const val = parseFloat(fareInput.value);
+          if (!isNaN(val)) {
+            advanceInput.value = Math.round(val * 0.25);
+          }
+        });
+      }
+
+      document.getElementById('admin-set-fare-form').onsubmit = (e) => {
+        e.preventDefault();
+        const finalFareVal = parseInt(document.getElementById('propose-final-fare').value);
+        const advanceReqVal = parseInt(document.getElementById('propose-advance-req').value);
+        const notesVal = document.getElementById('propose-admin-notes').value.trim();
+
+        b.finalFare = finalFareVal;
+        b.advanceRequired = advanceReqVal;
+        b.adminNotes = notesVal;
+        b.status = 'Fare Proposed';
+        b.balanceDue = finalFareVal;
+
+        this.saveBookings(bookings);
+        document.getElementById('admin-set-fare-modal').remove();
+        
+        if (window.AdminNotifications) {
+          window.AdminNotifications.addNotification(`Proposed fare of ₹${finalFareVal} for booking ${id}`, 'success');
+        }
+
+        UIUtils.showToast(`Fare proposed for booking ${id}! Customer notified.`, 'success');      };
     }
   };
 

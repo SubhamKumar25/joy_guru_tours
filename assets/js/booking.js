@@ -44,6 +44,18 @@
 
   function getStatusStyle(status) {
     switch (status) {
+      case 'Requested':
+        return {
+          bg: 'bg-amber-100 dark:bg-amber-950/40',
+          text: 'text-amber-600 dark:text-amber-400',
+          border: 'border-amber-200 dark:border-amber-900/50'
+        };
+      case 'Fare Proposed':
+        return {
+          bg: 'bg-purple-100 dark:bg-purple-950/40',
+          text: 'text-purple-600 dark:text-purple-400',
+          border: 'border-purple-200 dark:border-purple-900/50'
+        };
       case 'Advance Paid':
         return {
           bg: 'bg-orange-100 dark:bg-orange-950/40',
@@ -73,9 +85,9 @@
         };
       default:
         return {
-          bg: 'bg-orange-100 dark:bg-orange-950/40',
-          text: 'text-orange-600 dark:text-orange-400',
-          border: 'border-orange-200 dark:border-orange-900/50'
+          bg: 'bg-slate-100 dark:bg-slate-850',
+          text: 'text-slate-600 dark:text-slate-400',
+          border: 'border-slate-200 dark:border-slate-800'
         };
     }
   }
@@ -97,6 +109,29 @@
       const style = getStatusStyle(b.status);
       card.className = "bg-card border border-border rounded-xl p-5 shadow-sm space-y-4 hover:border-primary/50 transition-all cursor-pointer flex flex-col justify-between";
       
+      let fareBreakdownHtml = '';
+      if (b.status === 'Requested') {
+        fareBreakdownHtml = `
+          <div class="col-span-full py-1.5 px-3 bg-muted rounded border border-border/50 text-[10px] text-center text-muted-foreground font-semibold">
+            <iconify-icon icon="lucide:clock" class="text-secondary align-middle mr-1"></iconify-icon>
+            Fare review pending by agency coordinator
+          </div>
+        `;
+      } else {
+        fareBreakdownHtml = `
+          <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div>
+              <span class="block text-[9px] text-muted-foreground uppercase font-bold">Advance Req / Paid</span>
+              <span class="font-bold text-emerald-600">₹${(b.advanceRequired || b.advancePaid || 0).toLocaleString()}</span>
+            </div>
+            <div>
+              <span class="block text-[9px] text-muted-foreground uppercase font-bold">Total Fare</span>
+              <span class="font-bold text-secondary">₹${(b.finalFare || 0).toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      }
+
       card.innerHTML = `
         <div class="space-y-4">
           <div class="flex justify-between items-center border-b border-border pb-3">
@@ -132,16 +167,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <div>
-                <span class="block text-[9px] text-muted-foreground uppercase font-bold">Advance Paid</span>
-                <span class="font-bold text-emerald-600">₹${b.advancePaid.toLocaleString()}</span>
-              </div>
-              <div>
-                <span class="block text-[9px] text-muted-foreground uppercase font-bold">Remaining Due</span>
-                <span class="font-bold text-secondary">₹${b.balanceDue.toLocaleString()}</span>
-              </div>
-            </div>
+            ${fareBreakdownHtml}
           </div>
         </div>
 
@@ -149,9 +175,15 @@
           <button class="view-details-btn text-xs text-primary font-bold hover:text-secondary flex items-center gap-1">
             <iconify-icon icon="lucide:info"></iconify-icon> Details
           </button>
-          <button class="download-invoice-btn text-xs text-secondary font-bold hover:underline flex items-center gap-1">
-            <iconify-icon icon="lucide:download"></iconify-icon> Receipt
-          </button>
+          ${b.status === 'Fare Proposed' ? `
+            <button class="accept-pay-btn bg-secondary text-secondary-foreground font-bold px-3 py-1 rounded-lg text-xs hover:bg-secondary/90 transition-all flex items-center gap-1">
+              <iconify-icon icon="lucide:credit-card"></iconify-icon> Accept &amp; Pay
+            </button>
+          ` : `
+            <button class="download-invoice-btn text-xs text-secondary font-bold hover:underline flex items-center gap-1" ${b.status === 'Requested' ? 'style="opacity: 0.4; cursor: not-allowed;" disabled' : ''}>
+              <iconify-icon icon="lucide:download"></iconify-icon> Receipt
+            </button>
+          `}
         </div>
       `;
 
@@ -164,16 +196,29 @@
         showBookingDetails(b);
       };
 
+      // Click to accept proposed fare
+      if (b.status === 'Fare Proposed') {
+        const acceptBtn = card.querySelector('.accept-pay-btn');
+        if (acceptBtn) {
+          acceptBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.location.href = `booking-payment.html?bookingId=${b.id}`;
+          };
+        }
+      }
+
       // Click to download invoice
-      card.querySelector('.download-invoice-btn').onclick = (e) => {
-        e.stopPropagation();
-        triggerPDFDownload(b);
-      };
+      const downloadBtn = card.querySelector('.download-invoice-btn');
+      if (downloadBtn) {
+        downloadBtn.onclick = (e) => {
+          e.stopPropagation();
+          triggerPDFDownload(b);
+        };
+      }
 
       listContainer.appendChild(card);
     });
   }
-
   function showBookingDetails(booking) {
     const detailsPanel = document.getElementById('selected-booking-details-panel');
     if (!detailsPanel) return;
@@ -182,24 +227,32 @@
     
     // Timeline steps configuration
     const stages = [
-      "Booking Requested",
-      "Advance Payment Received",
-      "Booking Confirmed",
-      "Trip Scheduled",
+      "Requested",
+      "Fare Proposed",
+      "Advance Paid",
+      "Confirmed",
+      "Driver Assigned",
+      "Trip Started",
       "Trip Completed",
-      "Remaining Payment Pending",
-      "Full Payment Completed",
-      "Invoice Generated"
+      "Fully Paid"
     ];
 
     // Determine current index based on status
-    let activeStageIndex = 1; // "Advance Payment Received" is step 2 (index 1)
-    if (booking.status === 'Confirmed' || booking.status === 'Booking Confirmed') {
-      activeStageIndex = 2; // "Booking Confirmed" (index 2)
+    let activeStageIndex = 0;
+    if (booking.status === 'Fare Proposed') {
+      activeStageIndex = 1;
+    } else if (booking.status === 'Advance Paid') {
+      activeStageIndex = 2;
+    } else if (booking.status === 'Confirmed' || booking.status === 'Booking Confirmed') {
+      activeStageIndex = 3;
+    } else if (booking.status === 'Driver Assigned') {
+      activeStageIndex = 4;
+    } else if (booking.status === 'Trip Started') {
+      activeStageIndex = 5;
     } else if (booking.status === 'Completed') {
-      activeStageIndex = 4; // "Trip Completed" (index 4)
+      activeStageIndex = 6;
     } else if (booking.status === 'Fully Paid' || booking.status === 'Payment Completed') {
-      activeStageIndex = 7; // "Invoice Generated" (index 7, all done)
+      activeStageIndex = 7;
     }
 
     let timelineHtmlHtml = '';
@@ -281,32 +334,46 @@
           <!-- Professional Travel Invoice -->
           <div class="lg:col-span-5 bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
             <h4 class="font-heading font-bold text-xs text-primary uppercase tracking-wider border-b border-border pb-2">Professional Invoice</h4>
-            <div class="space-y-2 text-xs">
-              <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span class="text-muted-foreground">Vehicle Fare</span>
-                <span class="font-semibold text-primary">₹${booking.baseFare.toLocaleString()}.00</span>
+            ${booking.status === 'Requested' ? `
+              <div class="py-8 text-center space-y-2 text-xs">
+                <iconify-icon icon="lucide:clock" class="text-3xl text-secondary animate-pulse"></iconify-icon>
+                <p class="font-bold text-primary">Awaiting Fare Proposal</p>
+                <p class="text-muted-foreground leading-relaxed">Our coordinator is currently reviewing your route request to discuss custom options and propose a final fare.</p>
               </div>
-              <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span class="text-muted-foreground">Coupon Discount</span>
-                <span class="font-semibold text-emerald-600">-₹${booking.discount.toLocaleString()}.00</span>
+            ` : `
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                  <span class="text-muted-foreground">Proposed Fare</span>
+                  <span class="font-semibold text-primary">₹${(booking.finalFare || 0).toLocaleString()}.00</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                  <span class="text-muted-foreground">Discount</span>
+                  <span class="font-semibold text-emerald-600">-₹${(booking.discount || 0).toLocaleString()}.00</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                  <span class="text-muted-foreground">Advance Paid</span>
+                  <span class="font-semibold text-primary">₹${(booking.advancePaid || 0).toLocaleString()}.00</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                  <span class="text-muted-foreground">Remaining Amount</span>
+                  <span class="font-semibold text-primary">₹${(booking.balanceDue || 0).toLocaleString()}.00</span>
+                </div>
+                <div class="flex justify-between py-2 text-sm font-black border-t border-double border-border mt-3">
+                  <span class="text-primary">Total Booking Fare</span>
+                  <span class="text-secondary">₹${(booking.finalFare || 0).toLocaleString()}.00</span>
+                </div>
               </div>
-              <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span class="text-muted-foreground">Advance Paid</span>
-                <span class="font-semibold text-primary">₹${booking.advancePaid.toLocaleString()}.00</span>
-              </div>
-              <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span class="text-muted-foreground">Remaining Amount</span>
-                <span class="font-semibold text-primary">₹${booking.balanceDue.toLocaleString()}.00</span>
-              </div>
-              <div class="flex justify-between py-2 text-sm font-black border-t border-double border-border mt-3">
-                <span class="text-primary">Final Amount</span>
-                <span class="text-secondary">₹${booking.payableAmount.toLocaleString()}.00</span>
-              </div>
-            </div>
+            `}
 
-            <button id="invoice-download-btn-custom" class="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold py-2.5 rounded-lg text-xs mt-3 flex items-center justify-center gap-1.5 transition-all shadow-sm">
-              <iconify-icon icon="lucide:download"></iconify-icon> Download Travel Receipt
-            </button>
+            ${booking.status === 'Fare Proposed' ? `
+              <button onclick="window.location.href='booking-payment.html?bookingId=${booking.id}'" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-2.5 rounded-lg text-xs mt-3 flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                <iconify-icon icon="lucide:credit-card"></iconify-icon> Pay Advance ₹${(booking.advanceRequired || 0).toLocaleString()}
+              </button>
+            ` : `
+              <button id="invoice-download-btn-custom" class="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold py-2.5 rounded-lg text-xs mt-3 flex items-center justify-center gap-1.5 transition-all shadow-sm" ${booking.status === 'Requested' ? 'style="opacity: 0.4; cursor: not-allowed;" disabled' : ''}>
+                <iconify-icon icon="lucide:download"></iconify-icon> Download Travel Receipt
+              </button>
+            `}
           </div>
         </div>
       </div>

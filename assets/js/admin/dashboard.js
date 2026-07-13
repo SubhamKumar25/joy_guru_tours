@@ -16,7 +16,7 @@
       const todayStr = new Date().toISOString().split('T')[0];
       const todaysBookings = bookings.filter(b => b.travelDate === todayStr).length;
       
-      const pendingBookings = bookings.filter(b => b.status === 'Pending').length;
+      const pendingBookings = bookings.filter(b => b.status === 'Pending' || b.status === 'Requested' || b.status === 'Fare Proposed').length;
       
       // Confirmed bookings (including Advance Paid, Driver Assigned, Trip Started)
       const confirmedBookings = bookings.filter(b => 
@@ -29,14 +29,14 @@
       const completedTrips = bookings.filter(b => b.status === 'Completed' || b.status === 'Fully Paid').length;
       const cancelledTrips = bookings.filter(b => b.status === 'Cancelled').length;
 
-      // Revenue = sum of payable amount for Confirmed/Advance Paid/Completed trips
+      // Revenue = sum of finalFare for Confirmed/Advance Paid/Completed trips
       const totalRevenue = bookings
-        .filter(b => b.status !== 'Cancelled' && b.status !== 'Pending')
-        .reduce((sum, b) => sum + (b.payableAmount || 0), 0);
+        .filter(b => b.status !== 'Cancelled' && b.status !== 'Pending' && b.status !== 'Requested' && b.status !== 'Fare Proposed')
+        .reduce((sum, b) => sum + (b.finalFare || b.payableAmount || 0), 0);
 
       // Pending payments = sum of balanceDue
       const pendingPayments = bookings
-        .filter(b => b.status !== 'Cancelled' && b.status !== 'Completed' && b.status !== 'Fully Paid')
+        .filter(b => b.status !== 'Cancelled' && b.status !== 'Completed' && b.status !== 'Fully Paid' && b.status !== 'Requested')
         .reduce((sum, b) => sum + (b.balanceDue || 0), 0);
 
       // Update UI cards

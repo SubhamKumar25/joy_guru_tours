@@ -159,14 +159,10 @@
           </label>
         </div>
 
-        <!-- Price Range -->
-        <div class="space-y-3 mb-6">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Price Range</h4>
-          <div class="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-            <span>₹4,000</span>
-            <span id="filter-price-label">₹12,000</span>
-          </div>
-          <input type="range" id="filter-price-slider" min="4000" max="12000" value="12000" class="w-full accent-primary">
+        <!-- Price is discussed directly before booking confirmation -->
+        <div class="bg-muted p-3.5 rounded-lg border border-border text-[11px] text-muted-foreground leading-relaxed">
+          <p class="font-bold text-primary mb-1">Custom Pricing Model</p>
+          Final fares are discussed and agreed upon with our travel coordinator before any advance payment is requested.
         </div>
 
 
@@ -252,19 +248,16 @@
         <!-- Live Fare Card & CTA -->
         <div class="md:col-span-4 text-left md:text-right border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-6 space-y-4">
           <div>
-            <span class="text-xs text-muted-foreground block">Total Inclusive Fare</span>
-            <span class="text-2xl font-bold text-primary">₹6,499</span>
-            <span class="block text-[10px] text-tertiary font-semibold">Includes Tolls, State Tax </span>
+            <span class="text-xs text-muted-foreground block">Fare Status</span>
+            <span class="text-xl font-bold text-secondary">Under Review</span>
+            <span class="block text-[10px] text-tertiary font-semibold">Finalized after agency contact</span>
           </div>
-
-          <!-- Advance split info -->
           <div class="text-xs space-y-1">
-            <p class="text-muted-foreground">Pay Advance: <strong class="text-primary">₹1,500</strong></p>
-            <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹4,999</strong></p>
+            <p class="text-muted-foreground">No immediate payment required</p>
           </div>
 
-          <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Proceeding to booking summary and secure payment...') : 'Proceeding to booking summary and secure payment...'; alert(msg);" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
-            Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+          <button class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+            Request This Vehicle <iconify-icon icon="lucide:arrow-right"></iconify-icon>
           </button>
         </div>
       </div>
@@ -315,19 +308,16 @@
         <!-- Live Fare Card & CTA -->
         <div class="md:col-span-4 text-left md:text-right border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-6 space-y-4">
           <div>
-            <span class="text-xs text-muted-foreground block">Total Inclusive Fare</span>
-            <span class="text-2xl font-bold text-primary">₹4,499</span>
-            <span class="block text-[10px] text-tertiary font-semibold">Includes Tolls, State Tax </span>
+            <span class="text-xs text-muted-foreground block">Fare Status</span>
+            <span class="text-xl font-bold text-secondary">Under Review</span>
+            <span class="block text-[10px] text-tertiary font-semibold">Finalized after agency contact</span>
           </div>
-
-          <!-- Advance split info -->
           <div class="text-xs space-y-1">
-            <p class="text-muted-foreground">Pay Advance: <strong class="text-primary">₹1,000</strong></p>
-            <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹3,499</strong></p>
+            <p class="text-muted-foreground">No immediate payment required</p>
           </div>
 
-          <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Proceeding to booking summary and secure payment...') : 'Proceeding to booking summary and secure payment...'; alert(msg);" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
-            Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+          <button class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+            Request This Vehicle <iconify-icon icon="lucide:arrow-right"></iconify-icon>
           </button>
         </div>
       </div>
@@ -378,19 +368,16 @@
         <!-- Live Fare Card & CTA -->
         <div class="md:col-span-4 text-left md:text-right border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-6 space-y-4">
           <div>
-            <span class="text-xs text-muted-foreground block">Total Inclusive Fare</span>
-            <span class="text-2xl font-bold text-primary">₹11,999</span>
-            <span class="block text-[10px] text-tertiary font-semibold">Includes Tolls, State Tax </span>
+            <span class="text-xs text-muted-foreground block">Fare Status</span>
+            <span class="text-xl font-bold text-secondary">Under Review</span>
+            <span class="block text-[10px] text-tertiary font-semibold">Finalized after agency contact</span>
           </div>
-
-          <!-- Advance split info -->
           <div class="text-xs space-y-1">
-            <p class="text-muted-foreground">Pay Advance: <strong class="text-primary">₹2,500</strong></p>
-            <p class="text-muted-foreground">Balance to Driver: <strong class="text-primary">₹9,499</strong></p>
+            <p class="text-muted-foreground">No immediate payment required</p>
           </div>
 
-          <button onclick="const msg = window.i18nEngine ? window.i18nEngine.translateString('Proceeding to booking summary and secure payment...') : 'Proceeding to booking summary and secure payment...'; alert(msg);" class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
-            Select Ride <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+          <button class="w-full bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-3 rounded-lg text-sm shadow transition-all flex items-center justify-center gap-2">
+            Request This Vehicle <iconify-icon icon="lucide:arrow-right"></iconify-icon>
           </button>
         </div>
       </div>

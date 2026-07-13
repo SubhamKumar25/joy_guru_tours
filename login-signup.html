@@ -189,7 +189,27 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
                     if (redirect === 'booking') {
-                        window.location.href = "booking-payment.html";
+                        const tempVehicle = JSON.parse(localStorage.getItem('jg_temp_selected_vehicle'));
+                        const searchData = StateEngine.getActiveSearch();
+                        if (tempVehicle && searchData) {
+                            const bookingData = {
+                                name: localStorage.getItem('jg_user_name') || email.split('@')[0],
+                                phone: '+91 94350 XXXXX',
+                                email: email,
+                                pickup: searchData.pickup,
+                                destination: searchData.destination,
+                                date: searchData.date,
+                                time: searchData.time,
+                                passengers: searchData.passengers || '4 Passengers',
+                                tripType: 'One Way',
+                                vehicleName: tempVehicle.name,
+                                vehicleType: tempVehicle.type,
+                                notes: 'Requested via search results page after login.'
+                            };
+                            StateEngine.createBookingRequest(bookingData);
+                            localStorage.removeItem('jg_temp_selected_vehicle');
+                        }
+                        window.location.href = "user-dashboard.html";
                     } else if (StateEngine.isDemoMode()) {
                         // In demo mode: go to search results as step 3
                         window.location.href = "search-results.html";
@@ -202,13 +222,34 @@
             // Google Login Simulator
             document.getElementById('google-login-btn').onclick = function() {
                 UIUtils.showLoading('Connecting with Google credentials...', 1200, () => {
-                    StateEngine.login('Rahul Sharma (Google)', 'rahul.sharma@gmail.com');
+                    const gEmail = 'rahul.sharma@gmail.com';
+                    StateEngine.login('Rahul Sharma (Google)', gEmail);
                     UIUtils.showToast('Signed in via Google successfully!', 'success');
                     
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
                     if (redirect === 'booking') {
-                        window.location.href = "booking-payment.html";
+                        const tempVehicle = JSON.parse(localStorage.getItem('jg_temp_selected_vehicle'));
+                        const searchData = StateEngine.getActiveSearch();
+                        if (tempVehicle && searchData) {
+                            const bookingData = {
+                                name: 'Rahul Sharma (Google)',
+                                phone: '+91 94350 XXXXX',
+                                email: gEmail,
+                                pickup: searchData.pickup,
+                                destination: searchData.destination,
+                                date: searchData.date,
+                                time: searchData.time,
+                                passengers: searchData.passengers || '4 Passengers',
+                                tripType: 'One Way',
+                                vehicleName: tempVehicle.name,
+                                vehicleType: tempVehicle.type,
+                                notes: 'Requested via search results page after Google login.'
+                            };
+                            StateEngine.createBookingRequest(bookingData);
+                            localStorage.removeItem('jg_temp_selected_vehicle');
+                        }
+                        window.location.href = "user-dashboard.html";
                     } else if (StateEngine.isDemoMode()) {
                         window.location.href = "search-results.html";
                     } else {

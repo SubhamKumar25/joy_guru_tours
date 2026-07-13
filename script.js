@@ -1,6 +1,10 @@
 // Joy Guru Travel Platform — Shared Script (Interactive Prototype Engine)
 // Generated for fully connected high-fidelity experience
 
+// Booking Status Flow:
+// Requested → Fare Proposed → Advance Paid → Confirmed → Driver Assigned → Trip Started → Trip Completed → Fully Paid → Invoice Generated
+// At any point before Trip Started, a booking can be Cancelled.
+
 // Initialize dummy state if not already set
 (function initDefaultState() {
   if (!localStorage.getItem('jg_is_initialized')) {
@@ -10,7 +14,7 @@
     localStorage.setItem('jg_is_initialized', 'true');
     localStorage.setItem('jg_logged_in', 'false');
     
-    // Default bookings array
+    // Default bookings array — demonstrates the new request-based flow
     const defaultBookings = [
       {
         id: 'JG-2025-4829',
@@ -26,13 +30,16 @@
         travelTime: '09:30 AM',
         pickup: 'Silchar Airport (IXS), Assam',
         destination: 'Shillong, Meghalaya',
-        baseFare: 6499,
-        gst: 0,
-        discount: 500,
-        payableAmount: 5999,
+        // Fare set by admin
+        finalFare: 5999,
+        advanceRequired: 1500,
         advancePaid: 1500,
         balanceDue: 4499,
-        status: 'Advance Paid' // 'Pending', 'Confirmed', 'Advance Paid', 'Driver Assigned', 'Trip Started', 'Completed', 'Fully Paid', 'Cancelled'
+        customerNotes: '',
+        adminNotes: 'Regular customer, VIP rate applied.',
+        requestedAt: '2025-10-12T14:30:00',
+        status: 'Advance Paid'
+        // Status Flow: 'Requested' → 'Fare Proposed' → 'Advance Paid' → 'Confirmed' → 'Driver Assigned' → 'Trip Started' → 'Completed' → 'Fully Paid' → 'Cancelled'
       },
       {
         id: 'JG-2025-4830',
@@ -40,21 +47,23 @@
         customerPhone: '+91 94350 54321',
         customerEmail: 'ananya@example.com',
         route: 'Silchar ⇄ Guwahati',
-        vehicleName: 'Swift Dzire / Etios',
-        vehicleType: 'sedan',
-        driverName: 'Rahul Nath',
-        driverPhone: '+91 94350 88888',
+        vehicleName: 'Not Assigned',
+        vehicleType: '',
+        driverName: '',
+        driverPhone: '',
         travelDate: '2025-10-18',
         travelTime: '08:00 AM',
         pickup: 'Silchar Club Road, Assam',
         destination: 'Guwahati, Assam',
-        baseFare: 4499,
-        gst: 0,
-        discount: 0,
-        payableAmount: 4499,
-        advancePaid: 1000,
-        balanceDue: 3499,
-        status: 'Advance Paid'
+        // Fare not yet set — awaiting admin response
+        finalFare: null,
+        advanceRequired: null,
+        advancePaid: 0,
+        balanceDue: 0,
+        customerNotes: 'Need an AC vehicle, family of 4 with 2 children.',
+        adminNotes: '',
+        requestedAt: '2025-10-14T09:15:00',
+        status: 'Requested'
       }
     ];
     localStorage.setItem('jg_bookings', JSON.stringify(defaultBookings));
@@ -69,24 +78,14 @@
       vehicleType: 'suv'
     };
     localStorage.setItem('jg_active_search', JSON.stringify(defaultSearch));
-
-    // Default selected vehicle
-    localStorage.setItem('jg_selected_vehicle', JSON.stringify({
-      name: 'Toyota Innova Crysta',
-      type: 'suv',
-      baseFare: 6499,
-      driver: 'Bimal Das',
-      rating: '4.9 ★',
-      image: 'https://uxmagic.blob.core.windows.net/public/agent-images/luxury-suv-1783757866936-wp7ctnkd6fo.png'
-    }));
-
-    // Default coupon
-    localStorage.setItem('jg_coupon_applied', 'false');
   }
 })();
 
 // Core State Helpers
 window.StateEngine = {
+  // Valid status flow
+  STATUS_FLOW: ['Requested', 'Fare Proposed', 'Advance Paid', 'Confirmed', 'Driver Assigned', 'Trip Started', 'Completed', 'Fully Paid', 'Cancelled'],
+
   isLoggedIn: function() {
     return localStorage.getItem('jg_logged_in') === 'true';
   },
@@ -116,22 +115,52 @@ window.StateEngine = {
   setActiveSearch: function(searchObj) {
     localStorage.setItem('jg_active_search', JSON.stringify(searchObj));
   },
-  getSelectedVehicle: function() {
-    return JSON.parse(localStorage.getItem('jg_selected_vehicle'));
-  },
-  setSelectedVehicle: function(vehicleObj) {
-    localStorage.setItem('jg_selected_vehicle', JSON.stringify(vehicleObj));
-  },
   getBookings: function() {
-    return JSON.parse(localStorage.getItem('jg_bookings'));
+    return JSON.parse(localStorage.getItem('jg_bookings')) || [];
   },
   updateBookings: function(bookingsArray) {
     localStorage.setItem('jg_bookings', JSON.stringify(bookingsArray));
   },
   isDemoMode: function() {
     return localStorage.getItem('jg_demo_mode') === 'true';
+  },
+  // Create a new booking request (used by the booking form)
+  createBookingRequest: function(bookingData) {
+    const bookings = this.getBookings();
+    const nextId = 'JG-' + new Date().getFullYear() + '-' + (4830 + bookings.length);
+    const newBooking = {
+      id: nextId,
+      customerName: bookingData.name || '',
+      customerPhone: bookingData.phone || '',
+      customerEmail: bookingData.email || localStorage.getItem('jg_user_email') || '',
+      route: (bookingData.pickup || '') + ' ⇄ ' + (bookingData.destination || ''),
+      vehicleName: bookingData.vehicleName || 'Not Assigned',
+      vehicleType: bookingData.vehicleType || '',
+      driverName: '',
+      driverPhone: '',
+      travelDate: bookingData.date || '',
+      travelTime: bookingData.time || '',
+      pickup: bookingData.pickup || '',
+      destination: bookingData.destination || '',
+      passengers: bookingData.passengers || '4 Passengers',
+      tripType: bookingData.tripType || 'One Way',
+      returnDate: bookingData.returnDate || '',
+      finalFare: null,
+      advanceRequired: null,
+      advancePaid: 0,
+      balanceDue: 0,
+      customerNotes: bookingData.notes || '',
+      adminNotes: '',
+      requestedAt: new Date().toISOString(),
+      status: 'Requested'
+    };
+    bookings.unshift(newBooking);
+    this.updateBookings(bookings);
+    localStorage.setItem('jg_last_booking_id', nextId);
+    return newBooking;
   }
 };
+
 
 // UI & Animations Utilities
 window.UIUtils = {
@@ -493,70 +522,92 @@ document.addEventListener('DOMContentLoaded', function () {
       searchForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Save inputs to state
         const pickupInputEl = document.getElementById('pickup-location');
         const dropInputEl = document.getElementById('drop-destination');
         const dateInput = document.getElementById('travel-date');
         const timeInput = document.getElementById('travel-time');
+        const nameInput = document.getElementById('customer-name');
+        const phoneInput = document.getElementById('customer-phone');
+        const passengerSelect = document.getElementById('passenger-count');
+        const returnDateInput = document.getElementById('return-date');
+        
+        const isRoundTrip = document.getElementById('type-round-trip') && document.getElementById('type-round-trip').classList.contains('bg-primary');
 
         if (!pickupInputEl || !pickupInputEl.value.trim() || !dropInputEl || !dropInputEl.value.trim()) {
           UIUtils.showToast('Please enter both pickup and destination locations', 'error');
           return;
         }
 
-        const searchObj = {
+        const name = nameInput ? nameInput.value.trim() : 'Rahul Sharma';
+        const phone = phoneInput ? phoneInput.value.trim() : '';
+        const passengers = passengerSelect ? passengerSelect.value : '4 Passengers';
+
+        // Auto login if not logged in
+        if (!StateEngine.isLoggedIn()) {
+          const email = name.toLowerCase().replace(/\s+/g, '') + '@example.com';
+          StateEngine.login(name, email);
+        }
+
+        const bookingData = {
+          name: name,
+          phone: phone,
+          email: localStorage.getItem('jg_user_email') || (name.toLowerCase().replace(/\s+/g, '') + '@example.com'),
           pickup: pickupInputEl.value.trim(),
           destination: dropInputEl.value.trim(),
           date: dateInput && dateInput.value ? dateInput.value : new Date().toISOString().split('T')[0],
-          time: timeInput && timeInput.value ? timeInput.value : '10:00 AM',
-          passengers: '4',
-          vehicleType: 'suv'
+          time: timeInput && timeInput.value ? timeInput.value : '09:30 AM',
+          passengers: passengers,
+          tripType: isRoundTrip ? 'Round Trip' : 'One Way',
+          returnDate: isRoundTrip && returnDateInput ? returnDateInput.value : '',
+          vehicleName: 'Toyota Innova Crysta', // Default requested vehicle
+          vehicleType: 'suv',
+          notes: 'Requested via homepage booking form.'
         };
 
-        StateEngine.setActiveSearch(searchObj);
+        const newBooking = StateEngine.createBookingRequest(bookingData);
 
-        UIUtils.showLoading('Finding Your Ride...', 1200, function() {
-          window.location.href = "search-results.html";
+        UIUtils.showLoading('Submitting Your Request...', 1500, function() {
+          UIUtils.showToast('Booking request submitted successfully!', 'success');
+          window.location.href = "user-dashboard.html";
         });
       });
     }
 
-    // Popular Route clicks
+    // Popular Route clicks — Prefills form and scrolls to it smoothly
     document.querySelectorAll('#routes .group').forEach(routeCard => {
       const heading = routeCard.querySelector('h4').textContent; // e.g. "Silchar ⇄ Shillong"
-      const fareText = routeCard.querySelector('span.text-lg').textContent;
-      const cleanFare = parseInt(fareText.replace(/[^\d]/g, '')) || 5499;
-
       const parts = heading.split('⇄').map(s => s.trim());
       const origin = parts[0] ? parts[0] + ', Assam' : 'Silchar, Assam';
       const destination = parts[1] ? parts[1] + ', Northeast India' : 'Shillong, Meghalaya';
 
       // Bind route card click
       routeCard.style.cursor = 'pointer';
-      routeCard.addEventListener('click', () => {
-        const searchObj = {
-          pickup: origin,
-          destination: destination,
-          date: '2025-10-15',
-          time: '09:30 AM',
-          passengers: '4',
-          vehicleType: 'suv'
-        };
-        StateEngine.setActiveSearch(searchObj);
+      routeCard.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pickupInputEl = document.getElementById('pickup-location');
+        const dropInputEl = document.getElementById('drop-destination');
+        if (pickupInputEl) pickupInputEl.value = origin;
+        if (dropInputEl) dropInputEl.value = destination;
         
-        // Prefill Innova/Dzire details in local storage for this selected route
-        StateEngine.setSelectedVehicle({
-          name: cleanFare > 6000 ? 'Toyota Innova Crysta' : 'Swift Dzire / Etios',
-          type: cleanFare > 6000 ? 'suv' : 'sedan',
-          baseFare: cleanFare,
-          driver: cleanFare > 6000 ? 'Bimal Das' : 'Rahul Nath',
-          rating: '4.9 ★',
-          image: cleanFare > 6000 ? 'https://uxmagic.blob.core.windows.net/public/agent-images/luxury-suv-1783757866936-wp7ctnkd6fo.png' : 'https://uxmagic.blob.core.windows.net/public/agent-images/luxury-suv-1783757866936-wp7ctnkd6fo.png'
-        });
+        // Dispatch location updated event for Map preview if active
+        try {
+          const event = new CustomEvent('jg-locations-updated', {
+            detail: {
+              pickup: { name: origin, lat: 24.8333, lon: 92.7789 },
+              destination: { name: destination, lat: 25.5788, lon: 91.8933 }
+            }
+          });
+          window.dispatchEvent(event);
+        } catch (e) {
+          console.error(e);
+        }
 
-        UIUtils.showLoading('Setting up Route...', 800, () => {
-          window.location.href = "search-results.html";
-        });
+        // Scroll to form
+        const homeSection = document.getElementById('home');
+        if (homeSection) {
+          homeSection.scrollIntoView({ behavior: 'smooth' });
+          UIUtils.showToast(`Prefilled route: ${origin} to ${destination}`, 'success');
+        }
       });
     });
   }
@@ -668,128 +719,122 @@ document.addEventListener('DOMContentLoaded', function () {
           e.stopPropagation();
           const vehicleName = card.querySelector('h3').textContent.split('\n')[0].trim();
           const vehicleType = card.getAttribute('data-type');
-          const baseFare = parseInt(card.getAttribute('data-price')) || 6499;
-          const driver = card.querySelector('.bg-muted strong') ? card.querySelector('.bg-muted strong').textContent : 'Bimal Das';
           
-          StateEngine.setSelectedVehicle({
-            name: vehicleName,
-            type: vehicleType,
-            baseFare: baseFare,
-            driver: driver,
-            rating: '4.9 ★',
-            image: card.querySelector('img') ? card.querySelector('img').getAttribute('src') : 'https://uxmagic.blob.core.windows.net/public/agent-images/luxury-suv-1783757866936-wp7ctnkd6fo.png'
-          });
-
-          UIUtils.showLoading('Preparing Booking Invoice...', 1000, () => {
-            // Force user to log in before checking out if logged out
-            if (StateEngine.isLoggedIn()) {
-              window.location.href = "booking-payment.html";
-            } else {
-              UIUtils.showToast('Please log in to continue booking', 'error');
-              setTimeout(() => {
-                window.location.href = "login-signup.html?redirect=booking";
-              }, 1200);
-            }
-          });
-        });
-      }
-    });
-  }
-
-  // 3. BOOKING & PAYMENT PAGE
-  if (document.querySelector('[data-page="booking-payment"]')) {
-    const selectedVehicle = StateEngine.getSelectedVehicle();
-    const searchData = StateEngine.getActiveSearch();
-
-    // Dynamically calculate fees based on selected vehicle
-    let baseFare = selectedVehicle ? selectedVehicle.baseFare : 6499;
-    let discount = localStorage.getItem('jg_coupon_applied') === 'true' ? 500 : 0;
-    
-    function updateCheckoutFares() {
-      let totalPayable = baseFare - discount;
-      let gst = 0; // GST removed as requested
-      let advance = Math.round(totalPayable * 0.25);
-      let balance = totalPayable - advance;
-
-      // Update Fare Elements in HTML via ID selectors
-      const baseFareEl = document.getElementById('fare-base-val');
-      const discountEl = document.getElementById('fare-discount-val');
-      const totalPayableEl = document.getElementById('fare-total-val');
-      const advanceEl = document.getElementById('fare-advance-val');
-      const balanceEl = document.getElementById('fare-balance-val');
-
-      if (baseFareEl) baseFareEl.textContent = `₹${baseFare.toLocaleString()}`;
-      if (discountEl) {
-        discountEl.textContent = discount > 0 ? `-₹${discount.toLocaleString()}` : `₹0`;
-        discountEl.className = discount > 0 ? 'font-semibold text-emerald-600' : 'font-semibold text-primary';
-      }
-      if (totalPayableEl) totalPayableEl.textContent = `₹${totalPayable.toLocaleString()}`;
-      if (advanceEl) advanceEl.textContent = `₹${advance.toLocaleString()}`;
-      if (balanceEl) balanceEl.textContent = `₹${balance.toLocaleString()}`;
-
-      // Save calculated fares to localStorage for Dashboard / Invoice pages
-      localStorage.setItem('jg_calc_base', baseFare);
-      localStorage.setItem('jg_calc_discount', discount);
-      localStorage.setItem('jg_calc_gst', gst);
-      localStorage.setItem('jg_calc_total', totalPayable);
-      localStorage.setItem('jg_calc_advance', advance);
-      localStorage.setItem('jg_calc_balance', balance);
-    }
-
-    // Load active vehicle details
-    if (selectedVehicle) {
-      const vTitle = document.querySelector('h4.font-heading.font-semibold.text-base');
-      const vDesc = document.querySelector('p.text-xs.text-muted-foreground');
-      const vRating = document.querySelector('div.text-secondary.font-bold');
-
-      if (vTitle) vTitle.textContent = selectedVehicle.name;
-      if (vDesc) {
-        vDesc.textContent = `${selectedVehicle.type === 'suv' ? 'SUV' : selectedVehicle.type === 'sedan' ? 'Sedan' : 'Traveler'} • AC • ${selectedVehicle.type === 'suv' ? '6+1' : selectedVehicle.type === 'sedan' ? '4' : '12'} Seats • Clean Cabin`;
-      }
-      if (vRating) vRating.innerHTML = `<iconify-icon icon="lucide:star" class="text-sm"></iconify-icon> 4.9 (${selectedVehicle.driver})`;
-    }
-
-    // Load Route Details
-    if (searchData) {
-      const pickupEl = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.gap-4 div:nth-child(1) p');
-      const pickupTime = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.gap-4 div:nth-child(1) span:last-child');
-      const dropEl = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.gap-4 div:nth-child(2) p');
-
-      if (pickupEl) pickupEl.textContent = searchData.pickup;
-      if (pickupTime) pickupTime.textContent = `${searchData.date} • ${searchData.time}`;
-      if (dropEl) dropEl.textContent = searchData.destination;
-    }
-
-    // Coupon Apply Event
-    const couponInput = document.getElementById('coupon-input');
-    const couponBtn = document.getElementById('coupon-apply-btn');
-    const couponSuccessMsg = document.getElementById('coupon-success-msg');
-
-    updateCheckoutFares(); // Initial draw
-
-    if (couponBtn && couponInput) {
-      couponBtn.removeAttribute('onclick'); // override standard click
-      couponBtn.textContent = localStorage.getItem('jg_coupon_applied') === 'true' ? 'Applied' : 'Apply';
-      
-      couponBtn.addEventListener('click', function() {
-        const code = couponInput.value.trim().toUpperCase();
-        if (code === 'NORTHEAST2025') {
-          discount = 500;
-          localStorage.setItem('jg_coupon_applied', 'true');
-          couponBtn.textContent = 'Applied';
-          if (couponSuccessMsg) {
-            couponSuccessMsg.style.display = 'block';
-            couponSuccessMsg.innerHTML = `<iconify-icon icon="lucide:circle-check"></iconify-icon> Coupon NORTHEAST2025 applied! Saved ₹500.`;
+          if (!StateEngine.isLoggedIn()) {
+            UIUtils.showToast('Please log in to continue booking', 'error');
+            // Store active search and selection details in temporary localStorage to restore after login
+            localStorage.setItem('jg_temp_selected_vehicle', JSON.stringify({ name: vehicleName, type: vehicleType }));
+            setTimeout(() => {
+              window.location.href = "login-signup.html?redirect=booking";
+            }, 1200);
+            return;
           }
-          UIUtils.showToast('Coupon Applied Successfully!', 'success');
-          updateCheckoutFares();
-        } else {
-          UIUtils.showToast('Invalid Coupon Code', 'error');
-        }
-      });
+
+          const searchData = StateEngine.getActiveSearch() || {
+            pickup: 'Silchar Airport (IXS), Assam',
+            destination: 'Shillong, Meghalaya',
+            date: '2025-10-15',
+            time: '09:30 AM',
+            passengers: '4 Passengers'
+          };
+          
+          const bookingData = {
+            name: localStorage.getItem('jg_user_name') || 'Rahul Sharma',
+            phone: '+91 94350 XXXXX',
+            email: localStorage.getItem('jg_user_email') || 'rahul@example.com',
+            pickup: searchData.pickup,
+            destination: searchData.destination,
+            date: searchData.date,
+            time: searchData.time,
+            passengers: searchData.passengers || '4 Passengers',
+            tripType: 'One Way',
+            vehicleName: vehicleName,
+            vehicleType: vehicleType,
+            notes: 'Requested via search results page.'
+          };
+
+          StateEngine.createBookingRequest(bookingData);
+
+          UIUtils.showLoading('Submitting Booking Request...', 1200, () => {
+            UIUtils.showToast('Booking request submitted!', 'success');
+            window.location.href =   // 3. BOOKING & PAYMENT PAGE
+  if (document.querySelector('[data-page="booking-payment"]')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('bookingId') || localStorage.getItem('jg_last_booking_id');
+    const bookings = StateEngine.getBookings();
+    
+    // Find matching booking
+    const booking = bookings.find(b => b.id === bookingId);
+    
+    if (!booking) {
+      UIUtils.showToast('No booking selection found', 'error');
+      setTimeout(() => {
+        window.location.href = "user-dashboard.html";
+      }, 1500);
+      return;
     }
 
-    // Razorpay Popup Interactions
+    // Guard: if status is still Requested (fare not set by admin yet), block page access
+    if (booking.status === 'Requested') {
+      const mainContainer = document.querySelector('main');
+      if (mainContainer) {
+        mainContainer.innerHTML = `
+          <div class="col-span-full py-16 text-center space-y-6">
+            <iconify-icon icon="lucide:clock-4" class="text-6xl text-secondary animate-pulse"></iconify-icon>
+            <div class="max-w-md mx-auto space-y-2">
+              <h2 class="text-2xl font-bold text-primary">Fare Under Review</h2>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                The travel coordinator is currently reviewing your route request from 
+                <strong>${booking.pickup}</strong> to <strong>${booking.destination}</strong> 
+                to propose a custom fare. We will notify you here once finalized!
+              </p>
+            </div>
+            <a href="user-dashboard.html" class="inline-block bg-primary text-primary-foreground font-bold px-6 py-3 rounded-lg text-xs tracking-wider uppercase hover:bg-primary/95 transition-all">Go to Dashboard</a>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    // Load booking fares dynamically
+    const finalFare = booking.finalFare || 5999;
+    const advanceRequired = booking.advanceRequired || 1500;
+    const balanceDue = finalFare - advanceRequired;
+    
+    // Update HTML Fare labels
+    const baseFareEl = document.getElementById('fare-base-val');
+    const discountEl = document.getElementById('fare-discount-val');
+    const totalPayableEl = document.getElementById('fare-total-val');
+    const advanceEl = document.getElementById('fare-advance-val');
+    const balanceEl = document.getElementById('fare-balance-val');
+
+    if (baseFareEl) baseFareEl.textContent = `₹${finalFare.toLocaleString()}`;
+    if (discountEl) discountEl.textContent = `₹0 (Discussed rate)`;
+    if (totalPayableEl) totalPayableEl.textContent = `₹${finalFare.toLocaleString()}`;
+    if (advanceEl) advanceEl.textContent = `₹${advanceRequired.toLocaleString()}`;
+    if (balanceEl) balanceEl.textContent = `₹${balanceDue.toLocaleString()}`;
+
+    // Load dynamic booking vehicle details
+    const vTitle = document.querySelector('h4.font-heading.font-semibold.text-base');
+    const vDesc = document.querySelector('p.text-xs.text-muted-foreground');
+    const vRating = document.querySelector('div.text-secondary.font-bold');
+
+    if (vTitle) vTitle.textContent = booking.vehicleName;
+    if (vDesc) {
+      vDesc.textContent = `${booking.vehicleType === 'suv' ? 'Premium SUV' : booking.vehicleType === 'sedan' ? 'Executive Sedan' : 'Luxury Traveler'} • AC • ${booking.passengers}`;
+    }
+    if (vRating) vRating.innerHTML = `<iconify-icon icon="lucide:info" class="text-sm"></iconify-icon> Driver will be assigned post advance payment`;
+
+    // Load Dynamic Route details in booking card
+    const pickupEl = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.gap-4 div:nth-child(1) p');
+    const pickupTime = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.gap-4 div:nth-child(1) span:last-child');
+    const dropEl = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.gap-4 div:nth-child(2) p');
+
+    if (pickupEl) pickupEl.textContent = booking.pickup;
+    if (pickupTime) pickupTime.textContent = `${booking.travelDate} • ${booking.travelTime}`;
+    if (dropEl) dropEl.textContent = booking.destination;
+
+    // Razorpay modal
     const razorpayModal = document.getElementById('razorpay-modal');
     const proceedBtn = document.querySelector('button[onclick*="razorpay-modal"]');
     
@@ -797,70 +842,42 @@ document.addEventListener('DOMContentLoaded', function () {
       proceedBtn.removeAttribute('onclick');
       proceedBtn.addEventListener('click', function() {
         if (razorpayModal) {
-          // Pre-populate amount in Razorpay modal dynamically
           const razorpayAmountEl = razorpayModal.querySelector('.bg-muted.px-5.py-3 span:last-child');
-          const advancePayable = localStorage.getItem('jg_calc_advance') || '1,500';
-          if (razorpayAmountEl) razorpayAmountEl.textContent = `₹${parseInt(advancePayable).toLocaleString()}.00`;
+          if (razorpayAmountEl) razorpayAmountEl.textContent = `₹${advanceRequired.toLocaleString()}.00`;
           
+          const bookingIdEl = razorpayModal.querySelector('.bg-muted.px-5.py-3 span:first-child strong');
+          if (bookingIdEl) bookingIdEl.textContent = booking.id;
+
           razorpayModal.classList.remove('hidden');
-          DemoAssistant.renderGuide(); // render guide again for step 5
         }
       });
     }
 
-    // Simulating Success Inside Razorpay Modal
+    // Simulate Payment success inside Razorpay modal
     const simBtn = razorpayModal ? razorpayModal.querySelector('button[onclick*="Simulate Success"]') : null;
     if (simBtn) {
       simBtn.removeAttribute('onclick');
       simBtn.addEventListener('click', function() {
-        // Change text to processing
         simBtn.textContent = "Processing...";
         simBtn.disabled = true;
 
         setTimeout(function() {
-          // Close Razorpay Modal
           if (razorpayModal) razorpayModal.classList.add('hidden');
           
-          // Show simulated main loading screen
           UIUtils.showLoading('Confirming payment with Razorpay...', 1500, function() {
-            // Generate dynamic booking ID
-            const bookingId = 'JG-' + new Date().toISOString().slice(2,10).replace(/-/g,'') + '-' + Math.floor(100 + Math.random() * 900);
-            
-            // Append booking object to local state
+            // Find current bookings array
             const currentBookings = StateEngine.getBookings();
-            const newBooking = {
-              id: bookingId,
-              customerName: localStorage.getItem('jg_user_name') || 'Rahul Sharma',
-              customerPhone: '+91 94350 12345',
-              customerEmail: localStorage.getItem('jg_user_email') || 'rahul@example.com',
-              route: `${searchData ? searchData.pickup.split(',')[0] : 'Silchar Airport'} ⇄ ${searchData ? searchData.destination.split(',')[0] : 'Shillong'}`,
-              vehicleName: selectedVehicle ? selectedVehicle.name : 'Toyota Innova Crysta',
-              vehicleType: selectedVehicle ? selectedVehicle.type : 'suv',
-              driverName: selectedVehicle ? selectedVehicle.driver : 'Bimal Das',
-              driverPhone: '+91 94350 99999',
-              travelDate: searchData ? searchData.date : '2025-10-15',
-              travelTime: searchData ? searchData.time : '09:30 AM',
-              pickup: searchData ? searchData.pickup : 'Silchar Airport (IXS), Assam',
-              destination: searchData ? searchData.destination : 'Shillong, Meghalaya',
-              baseFare: parseInt(localStorage.getItem('jg_calc_base')) || 6499,
-              gst: parseInt(localStorage.getItem('jg_calc_gst')) || 300,
-              discount: parseInt(localStorage.getItem('jg_calc_discount')) || 500,
-              payableAmount: parseInt(localStorage.getItem('jg_calc_total')) || 6299,
-              advancePaid: parseInt(localStorage.getItem('jg_calc_advance')) || 1500,
-              balanceDue: parseInt(localStorage.getItem('jg_calc_balance')) || 4799,
-              status: 'Advance Paid'
-            };
-            
-            currentBookings.unshift(newBooking); // add as most recent
-            StateEngine.updateBookings(currentBookings);
-            
-            // Set active booking ID in state
-            localStorage.setItem('jg_last_booking_id', bookingId);
-            
-            // Toast Success
-            UIUtils.showToast('Payment Completed! Booking Confirmed.', 'success');
+            const bIndex = currentBookings.findIndex(b => b.id === booking.id);
+            if (bIndex !== -1) {
+              currentBookings[bIndex].status = 'Advance Paid';
+              currentBookings[bIndex].advancePaid = advanceRequired;
+              currentBookings[bIndex].balanceDue = balanceDue;
+              StateEngine.updateBookings(currentBookings);
+            }
 
-            // Redirect to User Dashboard
+            UIUtils.showToast('Payment Completed! Booking Request Confirmed.', 'success');
+
+            // Redirect back to Dashboard
             setTimeout(() => {
               window.location.href = "user-dashboard.html?success=true";
             }, 1000);

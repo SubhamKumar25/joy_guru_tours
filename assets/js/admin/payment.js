@@ -28,7 +28,7 @@
             <div class="bg-muted p-4 rounded-xl space-y-2">
               <div class="flex justify-between"><span>Booking ID:</span><strong>${b.id}</strong></div>
               <div class="flex justify-between"><span>Customer:</span><strong>${b.customerName}</strong></div>
-              <div class="flex justify-between"><span>Total Payable:</span><strong>₹${b.payableAmount}</strong></div>
+              <div class="flex justify-between"><span>Total Proposed Fare:</span><strong>₹${b.finalFare || b.payableAmount}</strong></div>
               <div class="flex justify-between text-emerald-600"><span>Advance Paid:</span><strong>₹${b.advancePaid}</strong></div>
               <div class="flex justify-between text-secondary text-sm font-bold border-t border-border pt-2 mt-2">
                 <span>Collect Balance Due:</span>
@@ -95,6 +95,7 @@
       document.getElementById('admin-payment-collect-form').onsubmit = (e) => {
         e.preventDefault();
         const method = document.querySelector('input[name="adminpaychannel"]:checked').value;
+        const total = b.finalFare || b.payableAmount;
         
         // Update booking payment state
         b.advancePaid += b.balanceDue; // Fully paid
@@ -103,7 +104,7 @@
 
         // Trigger notification
         if (window.AdminNotifications) {
-          window.AdminNotifications.addNotification(`Remaining payment of ₹${b.payableAmount - b.advancePaid} collected via ${method.toUpperCase()} for ${b.id}`, 'success');
+          window.AdminNotifications.addNotification(`Remaining payment of ₹${total - b.advancePaid} collected via ${method.toUpperCase()} for ${b.id}`, 'success');
         }
 
         // Save
