@@ -261,43 +261,57 @@
             // Signup submission (Trigger OTP)
             const signupForm = document.getElementById('signup-form');
             const otpModal = document.getElementById('otp-modal');
-            signupForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const name = document.getElementById('signup-name').value.trim();
-                const email = document.getElementById('signup-email').value.trim();
-                const phone = document.getElementById('signup-phone').value.trim();
-                const pass = document.getElementById('signup-password').value.trim();
+            if (signupForm) {
+                signupForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const name = document.getElementById('signup-name').value.trim();
+                    const email = document.getElementById('signup-email').value.trim();
+                    const phone = document.getElementById('signup-phone').value.trim();
+                    const pass = document.getElementById('signup-password').value.trim();
 
-                if (!name || !email || !phone || !pass) {
-                    UIUtils.showToast('Please fill out all details', 'error');
-                    return;
-                }
+                    if (!name || !email || !phone || !pass) {
+                        UIUtils.showToast('Please fill out all details', 'error');
+                        return;
+                    }
 
-                // Show OTP modal
-                otpModal.classList.remove('hidden');
-            });
+                    // Show OTP modal
+                    if (otpModal) otpModal.classList.remove('hidden');
+                });
+            }
 
-            document.getElementById('otp-cancel-btn').onclick = () => otpModal.classList.add('hidden');
+            const otpCancelBtn = document.getElementById('otp-cancel-btn');
+            if (otpCancelBtn) {
+                otpCancelBtn.onclick = () => {
+                    if (otpModal) otpModal.classList.add('hidden');
+                };
+            }
             
-            document.getElementById('otp-verify-btn').onclick = () => {
-                const code = document.getElementById('otp-code-input').value.trim();
-                if (code === '1234') {
-                    otpModal.classList.add('hidden');
-                    UIUtils.showLoading('Creating secure account profile...', 1200, () => {
-                        UIUtils.showToast('Account verified! Please login.', 'success');
-                        // Reset forms and switch to login tab
-                        signupForm.reset();
-                        tabLogin.click();
-                    });
-                } else {
-                    UIUtils.showToast('Invalid verification code', 'error');
-                }
-            };
+            const otpVerifyBtn = document.getElementById('otp-verify-btn');
+            if (otpVerifyBtn) {
+                otpVerifyBtn.onclick = () => {
+                    const code = document.getElementById('otp-code-input').value.trim();
+                    if (code === '1234') {
+                        if (otpModal) otpModal.classList.add('hidden');
+                        UIUtils.showLoading('Creating secure account profile...', 1200, () => {
+                            UIUtils.showToast('Account verified! Please login.', 'success');
+                            if (signupForm) signupForm.reset();
+                            const tabLogin = document.getElementById('tab-login');
+                            if (tabLogin) tabLogin.click();
+                        });
+                    } else {
+                        UIUtils.showToast('Invalid verification code', 'error');
+                    }
+                };
+            }
 
             // Forgot Password modal toggle
-            document.getElementById('forgot-pass-btn').onclick = () => {
-                document.getElementById('forgot-modal').classList.remove('hidden');
-            };
+            const forgotPassBtn = document.getElementById('forgot-pass-btn');
+            if (forgotPassBtn) {
+                forgotPassBtn.onclick = () => {
+                    const forgotModal = document.getElementById('forgot-modal');
+                    if (forgotModal) forgotModal.classList.remove('hidden');
+                };
+            }
         });
     </script>
     <script src="assets/js/profile.js"></script>

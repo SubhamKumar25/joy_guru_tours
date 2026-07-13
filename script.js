@@ -757,7 +757,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
           UIUtils.showLoading('Submitting Booking Request...', 1200, () => {
             UIUtils.showToast('Booking request submitted!', 'success');
-            window.location.href =   // 3. BOOKING & PAYMENT PAGE
+            window.location.href = "user-dashboard.html";
+          });
+        });
+      }
+    });
+  }
+
+  // 3. BOOKING & PAYMENT PAGE
   if (document.querySelector('[data-page="booking-payment"]')) {
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('bookingId') || localStorage.getItem('jg_last_booking_id');
