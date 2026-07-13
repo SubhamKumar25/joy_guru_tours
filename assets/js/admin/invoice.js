@@ -69,26 +69,20 @@
               </thead>
               <tbody>
                 <tr class="border-b border-border/50">
-                  <td class="py-3 px-3">Vehicle Base Rental Fare (${b.vehicleName})</td>
-                  <td class="py-3 px-3 text-right">₹${baseFare}</td>
+                  <td class="py-3 px-3">Proposed Total Fare (${b.vehicleName})</td>
+                  <td class="py-3 px-3 text-right">₹${(b.finalFare || b.payableAmount || 0).toLocaleString()}</td>
                 </tr>
-                ${discount > 0 ? `
-                <tr class="border-b border-border/50 text-red-600">
-                  <td class="py-3 px-3">Coupon Discount (Promo)</td>
-                  <td class="py-3 px-3 text-right">-₹${discount}</td>
-                </tr>` : ''}
                 <tr class="border-b border-border/50 text-emerald-600 font-semibold">
                   <td class="py-3 px-3">Advance Paid (Receipt #1)</td>
-                  <td class="py-3 px-3 text-right">-₹${b.payableAmount - b.balanceDue - (b.balanceDue === 0 ? b.payableAmount - b.advancePaid : 0)}</td>
+                  <td class="py-3 px-3 text-right">-₹${(b.advancePaid || 0).toLocaleString()}</td>
                 </tr>
-                ${b.balanceDue === 0 ? `
-                <tr class="border-b border-border/50 text-emerald-600 font-semibold">
-                  <td class="py-3 px-3">Remaining Balance Settled</td>
-                  <td class="py-3 px-3 text-right">-₹${b.payableAmount - b.advancePaid}</td>
-                </tr>` : ''}
+                <tr class="border-b border-border/50 text-slate-600 font-semibold">
+                  <td class="py-3 px-3">Remaining Balance Due</td>
+                  <td class="py-3 px-3 text-right">₹${(b.balanceDue || 0).toLocaleString()}</td>
+                </tr>
                 <tr class="font-bold text-primary text-sm bg-muted/50 border-t-2 border-primary/50">
-                  <td class="py-3 px-3">Final Settled Amount</td>
-                  <td class="py-3 px-3 text-right">₹${b.payableAmount}</td>
+                  <td class="py-3 px-3">Total Settled Amount</td>
+                  <td class="py-3 px-3 text-right">₹${((b.finalFare || b.payableAmount || 0) - b.balanceDue).toLocaleString()}</td>
                 </tr>
               </tbody>
             </table>

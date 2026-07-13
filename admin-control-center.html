@@ -108,22 +108,34 @@
       <div class="bg-card border border-border rounded-xl p-5 shadow-sm space-y-6">
         <nav class="space-y-1 text-sm font-medium" id="admin-sidebar-nav">
           <a href="#overview" class="flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg">
-            <iconify-icon icon="lucide:layout-dashboard" class="text-lg"></iconify-icon> Control Overview
+            <iconify-icon icon="lucide:layout-dashboard" class="text-lg"></iconify-icon> Dashboard
           </a>
           <a href="#bookings" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
-            <iconify-icon icon="lucide:calendar" class="text-lg"></iconify-icon> Bookings Management
+            <iconify-icon icon="lucide:calendar" class="text-lg"></iconify-icon> Bookings
+          </a>
+          <a href="#payments" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:credit-card" class="text-lg"></iconify-icon> Payments
+          </a>
+          <a href="#customers" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:users" class="text-lg"></iconify-icon> Customers
           </a>
           <a href="#fleet" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
-            <iconify-icon icon="lucide:car" class="text-lg"></iconify-icon> Vehicles &amp; Drivers
+            <iconify-icon icon="lucide:car" class="text-lg"></iconify-icon> Vehicles
+          </a>
+          <a href="#invoices" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+            <iconify-icon icon="lucide:file-text" class="text-lg"></iconify-icon> Invoices
           </a>
           <a href="#reports" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
-            <iconify-icon icon="lucide:chart-bar" class="text-lg"></iconify-icon> Revenue Reports
+            <iconify-icon icon="lucide:chart-bar" class="text-lg"></iconify-icon> Reports
           </a>
           <a href="#settings" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
-            <iconify-icon icon="lucide:settings" class="text-lg"></iconify-icon> Platform Settings
+            <iconify-icon icon="lucide:settings" class="text-lg"></iconify-icon> Settings
           </a>
           <a href="#profile" class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
-            <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Admin Profile
+            <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Profile
+          </a>
+          <a href="#" id="admin-menu-logout" class="flex items-center gap-2.5 text-rose-600 hover:bg-rose-50 px-4 py-2.5 rounded-lg transition-all font-bold">
+            <iconify-icon icon="lucide:log-out" class="text-lg"></iconify-icon> Logout
           </a>
         </nav>
       </div>
@@ -270,6 +282,78 @@
         </div>
       </div>
 
+      <!-- Tab: Payments Management -->
+      <div id="payments-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4">Payment Transactions & Dues</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-border bg-muted/50 text-muted-foreground font-bold">
+                  <th class="py-3 px-4">Booking ID</th>
+                  <th class="py-3 px-4">Customer Name</th>
+                  <th class="py-3 px-4">Proposed Total</th>
+                  <th class="py-3 px-4">Advance Paid</th>
+                  <th class="py-3 px-4">Remaining Balance</th>
+                  <th class="py-3 px-4">Payment Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-payments-tbody">
+                <!-- Dynamically populated from JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Customer Directory -->
+      <div id="customers-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4">Customer Directory</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-border bg-muted/50 text-muted-foreground font-bold">
+                  <th class="py-3 px-4">Customer Name</th>
+                  <th class="py-3 px-4">Phone</th>
+                  <th class="py-3 px-4">Email</th>
+                  <th class="py-3 px-4">Total Bookings</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-customers-tbody">
+                <!-- Dynamically populated from JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Invoices Management -->
+      <div id="invoices-tab" class="space-y-8 hidden">
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+          <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4">Generated GST Invoices</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-border bg-muted/50 text-muted-foreground font-bold">
+                  <th class="py-3 px-4">Invoice Number</th>
+                  <th class="py-3 px-4">Booking ID</th>
+                  <th class="py-3 px-4">Customer</th>
+                  <th class="py-3 px-4">Date</th>
+                  <th class="py-3 px-4">Final Fare</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-invoices-tbody">
+                <!-- Dynamically populated from JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- Tab 4: Revenue Reports -->
       <div id="reports-tab" class="space-y-8 hidden">
         <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
@@ -395,11 +479,147 @@
     <!-- Tab Switcher Navigation Router -->
     <script>
       (function initTabNavigation() {
+        function renderAdminPayments() {
+          const tbody = document.getElementById('admin-payments-tbody');
+          if (!tbody) return;
+          const bookings = StateEngine.getBookings() || [];
+          tbody.innerHTML = '';
+
+          if (bookings.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-muted-foreground">No payments found.</td></tr>`;
+            return;
+          }
+
+          bookings.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-border hover:bg-muted/30 transition-all text-slate-800 dark:text-slate-200 text-xs";
+            
+            const total = b.finalFare || b.payableAmount || 0;
+            const balance = b.balanceDue || 0;
+            
+            let statusBadge = '';
+            if (b.status === 'Requested') {
+              statusBadge = '<span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-bold">Waiting</span>';
+            } else if (b.status === 'Fare Proposed') {
+              statusBadge = '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Advance Pending</span>';
+            } else if (b.status === 'Cancelled') {
+              statusBadge = '<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-bold">Cancelled</span>';
+            } else if (b.status === 'Completed' || b.status === 'Fully Paid') {
+              statusBadge = '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Completed</span>';
+            } else {
+              statusBadge = '<span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Advance Paid</span>';
+            }
+
+            const actionBtn = (b.status !== 'Completed' && b.status !== 'Fully Paid' && b.status !== 'Cancelled' && b.status !== 'Requested' && b.status !== 'Fare Proposed')
+              ? `<button onclick="window.AdminPayments.openCollectModal('${b.id}')" class="bg-secondary text-secondary-foreground font-bold px-2 py-1 rounded text-[10px] hover:bg-secondary/95 transition-all shadow-sm">Collect Balance</button>`
+              : `<span class="text-muted-foreground text-[10px] font-semibold">N/A</span>`;
+
+            tr.innerHTML = `
+              <td class="py-3 px-4 font-bold text-primary">${b.id}</td>
+              <td class="py-3 px-4 font-semibold">${b.customerName}</td>
+              <td class="py-3 px-4 font-semibold">₹${total.toLocaleString()}</td>
+              <td class="py-3 px-4 text-emerald-600 font-bold">₹${(b.advancePaid || 0).toLocaleString()}</td>
+              <td class="py-3 px-4 font-bold text-secondary">₹${balance.toLocaleString()}</td>
+              <td class="py-3 px-4">${statusBadge}</td>
+              <td class="py-3 px-4 text-right">${actionBtn}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+
+        function renderAdminCustomers() {
+          const tbody = document.getElementById('admin-customers-tbody');
+          if (!tbody) return;
+          const bookings = StateEngine.getBookings() || [];
+          tbody.innerHTML = '';
+
+          const customersMap = {};
+          bookings.forEach(b => {
+            const key = b.customerPhone || b.customerName;
+            if (!customersMap[key]) {
+              customersMap[key] = {
+                name: b.customerName,
+                phone: b.customerPhone || 'N/A',
+                email: b.customerEmail || 'N/A',
+                bookingsCount: 0
+              };
+            }
+            customersMap[key].bookingsCount++;
+          });
+
+          const customers = Object.values(customersMap);
+
+          if (customers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-muted-foreground">No customers found.</td></tr>`;
+            return;
+          }
+
+          customers.forEach(c => {
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-border hover:bg-muted/30 transition-all text-slate-800 dark:text-slate-200 text-xs";
+            
+            tr.innerHTML = `
+              <td class="py-3 px-4 font-semibold">${c.name}</td>
+              <td class="py-3 px-4 font-bold text-primary">${c.phone}</td>
+              <td class="py-3 px-4">${c.email}</td>
+              <td class="py-3 px-4 font-bold text-secondary">${c.bookingsCount} Booking(s)</td>
+              <td class="py-3 px-4 text-right">
+                <button onclick="window.filterBookingsByCustomer('${c.phone}')" class="text-primary font-bold hover:underline">View History</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+
+        window.filterBookingsByCustomer = function(phone) {
+          window.location.hash = '#bookings';
+          setTimeout(() => {
+            const searchInput = document.getElementById('booking-search');
+            if (searchInput) {
+              searchInput.value = phone;
+              searchInput.dispatchEvent(new Event('input'));
+            }
+          }, 150);
+        };
+
+        function renderAdminInvoices() {
+          const tbody = document.getElementById('admin-invoices-tbody');
+          if (!tbody) return;
+          const bookings = StateEngine.getBookings() || [];
+          tbody.innerHTML = '';
+
+          const invoiceBookings = bookings.filter(b => b.status !== 'Requested');
+
+          if (invoiceBookings.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-muted-foreground">No invoices generated yet.</td></tr>`;
+            return;
+          }
+
+          invoiceBookings.forEach((b, idx) => {
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-border hover:bg-muted/30 transition-all text-slate-800 dark:text-slate-200 text-xs";
+            
+            const total = b.finalFare || b.payableAmount || 0;
+            
+            tr.innerHTML = `
+              <td class="py-3 px-4 font-bold text-primary">INV-2026-${1000 + idx}</td>
+              <td class="py-3 px-4 font-semibold">${b.id}</td>
+              <td class="py-3 px-4 font-semibold">${b.customerName}</td>
+              <td class="py-3 px-4">${b.travelDate}</td>
+              <td class="py-3 px-4 font-bold">₹${total.toLocaleString()}</td>
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <button onclick="window.AdminInvoice.showInvoice('${b.id}')" class="text-secondary font-bold hover:underline">View Invoice</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+
         function switchTab() {
           const hash = window.location.hash || '#overview';
           
           // Hide all tabs
-          const tabs = ['overview', 'bookings', 'fleet', 'reports', 'profile', 'settings'];
+          const tabs = ['overview', 'bookings', 'fleet', 'reports', 'profile', 'settings', 'payments', 'customers', 'invoices'];
           tabs.forEach(t => {
             const el = document.getElementById(t + '-tab');
             if (el) el.classList.add('hidden');
@@ -430,6 +650,12 @@
             window.AdminFleet.renderFleet();
           } else if (hash === '#reports' && window.AdminReports) {
             window.AdminReports.generateSummary();
+          } else if (hash === '#payments') {
+            renderAdminPayments();
+          } else if (hash === '#customers') {
+            renderAdminCustomers();
+          } else if (hash === '#invoices') {
+            renderAdminInvoices();
           } else if (hash === '#overview' && window.AdminDashboard) {
             window.AdminDashboard.updateStats();
             // Sync overview mini table
@@ -440,28 +666,9 @@
               const rows = Array.from(mainBody.children).slice(0, 5); // show top 5
               rows.forEach(r => {
                 const clone = r.cloneNode(true);
-                // Remove redundant column cell 2, 7, 10, 11 to keep it clean and match the original overview headers
-                // The headers are: Booking ID, Customer, Route, Pilot Assigned, Advance Paid, Remaining Balance, Actions
                 const cells = clone.children;
-                if (cells.length >= 13) {
-                  // Original overview fields: ID, Customer, Route (col index 3 + col index 4), Pilot, Advance, Balance, Actions
-                  const routeText = `${cells[3].innerText.split(',')[0]} ⇄ ${cells[4].innerText.split(',')[0]}`;
-                  const id = cells[0].innerHTML;
-                  const customer = cells[1].innerHTML;
-                  const pilot = cells[7].innerHTML;
-                  const adv = cells[8].innerHTML;
-                  const rem = cells[9].innerHTML;
-                  const actions = cells[12].innerHTML;
-
-                  clone.innerHTML = `
-                    <td class="py-3 px-4 font-bold text-primary">${id}</td>
-                    <td class="py-3 px-4 font-semibold">${customer}</td>
-                    <td class="py-3 px-4">${routeText}</td>
-                    <td class="py-3 px-4">${pilot}</td>
-                    <td class="py-3 px-4 font-bold text-emerald-600">${adv}</td>
-                    <td class="py-3 px-4 font-bold text-secondary">${rem}</td>
-                    <td class="py-3 px-4 text-right">${actions}</td>
-                  `;
+                if (cells.length >= 7) {
+                  // Keep cells as is or map properly
                 }
                 miniBody.appendChild(clone);
               });
@@ -469,10 +676,19 @@
           }
         }
 
+        const adminMenuLogout = document.getElementById('admin-menu-logout');
+        if (adminMenuLogout) {
+          adminMenuLogout.onclick = (e) => {
+            e.preventDefault();
+            localStorage.setItem('jg_logged_in', 'false');
+            localStorage.setItem('jg_is_admin', 'false');
+            window.location.href = 'index.html';
+          };
+        }
+
         window.addEventListener('hashchange', switchTab);
         document.addEventListener('DOMContentLoaded', () => {
           switchTab();
-          // Ensure first sync of mini overview table
           setTimeout(switchTab, 100);
         });
       })();

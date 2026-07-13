@@ -14,11 +14,16 @@
 
   function initCustomBookings() {
     renderCustomBookingsList();
+    renderDashboardStats();
+    renderInvoicesList();
+    setupTabSwitcher();
 
     // Listen to changes in bookings (e.g. if balance collected in Admin page)
     window.addEventListener('storage', function(e) {
       if (e.key === 'jg_bookings') {
         renderCustomBookingsList();
+        renderDashboardStats();
+        renderInvoicesList();
       }
     });
 
@@ -29,9 +34,135 @@
       const lastBookingId = localStorage.getItem('jg_last_booking_id');
       const latest = bookings.find(b => b.id === lastBookingId) || bookings[0];
       if (latest) {
+        const menuBookings = document.getElementById('menu-bookings');
+        if (menuBookings) menuBookings.click();
         showBookingDetails(latest);
       }
     }
+  }
+
+  function renderDashboardStats() {
+    const bookings = getBookings();
+    const welcomeUserName = document.getElementById('welcome-user-name');
+    if (welcomeUserName) {
+      const name = localStorage.getItem('jg_user_name') || 'Rahul Sharma';
+      welcomeUserName.textContent = name.replace(/\(Google\)/i, '').trim();
+    }
+    const statTotal = document.getElementById('stat-total-bookings');
+    if (statTotal) statTotal.textContent = bookings.length;
+
+    const statPending = document.getElementById('stat-pending-fare');
+    if (statPending) {
+      statPending.textContent = bookings.filter(b => b.status === 'Requested' || b.status === 'Fare Proposed').length;
+    }
+
+    const statActive = document.getElementById('stat-active-trips');
+    if (statActive) {
+      statActive.textContent = bookings.filter(b => b.status !== 'Cancelled' && b.status !== 'Requested' && b.status !== 'Fare Proposed').length;
+    }
+  }
+
+  function renderInvoicesList() {
+    const invoicesTbody = document.getElementById('invoices-list-tbody');
+    if (!invoicesTbody) return;
+
+    const bookings = getBookings();
+    invoicesTbody.innerHTML = '';
+    
+    // Invoices are available for bookings where fare is proposed or later
+    const invoiceBookings = bookings.filter(b => b.status !== 'Requested');
+    if (invoiceBookings.length === 0) {
+      invoicesTbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-muted-foreground text-xs">No invoices generated yet. Invoices become available once fare is proposed.</td></tr>`;
+      return;
+    }
+
+    invoiceBookings.forEach((b, idx) => {
+      const tr = document.createElement('tr');
+      tr.className = "border-b border-border hover:bg-muted/30 transition-all text-slate-800 dark:text-slate-200";
+      
+      const total = b.finalFare || b.payableAmount || 0;
+      
+      tr.innerHTML = `
+        <td class="py-3 px-4 font-bold text-primary">INV-2026-${1000 + idx}</td>
+        <td class="py-3 px-4 font-semibold">${b.id}</td>
+        <td class="py-3 px-4">${b.pickup.split(',')[0]} ⇄ ${b.destination.split(',')[0]}</td>
+        <td class="py-3 px-4">${b.travelDate}</td>
+        <td class="py-3 px-4 font-bold">₹${total.toLocaleString()}</td>
+        <td class="py-3 px-4 text-right whitespace-nowrap">
+          <button onclick="window.downloadUserInvoice('${b.id}')" class="text-secondary font-bold hover:underline">View Invoice</button>
+        </td>
+      `;
+      invoicesTbody.appendChild(tr);
+    });
+  }
+
+  window.downloadUserInvoice = function(bookingId) {
+    if (window.AdminInvoice) {
+      window.AdminInvoice.showInvoice(bookingId);
+    } else {
+      UIUtils.showToast("Invoice service loading...", "warning");
+    }
+  };
+
+  function setupTabSwitcher() {
+    const tabs = [
+      { btnId: 'menu-dashboard', contentId: 'dashboard-tab-content' },
+      { btnId: 'menu-bookings', contentId: 'trips-tab-content' },
+      { btnId: 'menu-payments', contentId: 'payments-tab-content' },
+      { btnId: 'menu-invoices', contentId: 'invoices-tab-content' },
+      { btnId: 'menu-profile', contentId: 'profile-tab-content' },
+      { btnId: 'menu-support', contentId: 'support-tab-content' }
+    ];
+
+    const tabButtons = tabs.map(t => document.getElementById(t.btnId)).filter(Boolean);
+    const tabContents = tabs.map(t => document.getElementById(t.contentId)).filter(Boolean);
+
+    function switchTab(activeBtnId, activeContentId) {
+      tabButtons.forEach(btn => {
+        if (btn.id === activeBtnId) {
+          btn.className = "flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg";
+        } else {
+          btn.className = "flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all";
+        }
+      });
+
+      tabContents.forEach(content => {
+        if (content.id === activeContentId) {
+          content.classList.remove('hidden');
+        } else {
+          content.classList.add('hidden');
+        }
+      });
+
+      if (activeContentId !== 'trips-tab-content') {
+        const listView = document.getElementById('trips-list-view');
+        const detailsView = document.getElementById('trip-details-view');
+        if (listView) listView.classList.remove('hidden');
+        if (detailsView) detailsView.classList.add('hidden');
+      }
+    }
+
+    tabs.forEach(t => {
+      const btn = document.getElementById(t.btnId);
+      if (btn) {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          switchTab(t.btnId, t.contentId);
+        };
+      }
+    });
+
+    const menuLogout = document.getElementById('menu-logout');
+    if (menuLogout) {
+      menuLogout.onclick = (e) => {
+        e.preventDefault();
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) logoutBtn.click();
+      };
+    }
+
+    // Set Dashboard active initially
+    switchTab('menu-dashboard', 'dashboard-tab-content');
   }
 
   function getBookings() {

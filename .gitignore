@@ -1,28 +1,47 @@
 # Dependencies
 node_modules/
 package-lock.json
+jspm_packages/
+.npm/
 
-# IDE
+# Local Dev Tools & Portables
+node_portable/
+
+# Environment Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# IDE / Editor Settings
 .vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 *.swp
 *.swo
 
-# OS
+# OS Metadata
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Agents / AI
+# Logs & Caching
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.cache/
+
+# Agents / AI Configs
 .agents/
 .gemini/
 .cursorrules
 
-# Local dev tools
-node_portable/
-
-# Misc
-*.log
-
-# Vercel
-.vercel
+# Vercel Deployment Target
+.vercel/

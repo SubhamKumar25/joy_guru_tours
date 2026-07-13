@@ -138,17 +138,33 @@
 
           <!-- Sidebar Menu Links -->
           <nav class="space-y-1 text-sm font-medium">
-            <a href="#profile" id="menu-profile"
+            <a href="#dashboard" id="menu-dashboard"
               class="flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg">
-              <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> My Profile
+              <iconify-icon icon="lucide:layout-dashboard" class="text-lg"></iconify-icon> Dashboard
             </a>
-            <a href="#trips" id="menu-trips"
+            <a href="#bookings" id="menu-bookings"
               class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
-              <iconify-icon icon="lucide:car" class="text-lg"></iconify-icon> My Trips
+              <iconify-icon icon="lucide:car" class="text-lg"></iconify-icon> My Bookings
             </a>
             <a href="#payments" id="menu-payments"
               class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
               <iconify-icon icon="lucide:credit-card" class="text-lg"></iconify-icon> Payments
+            </a>
+            <a href="#invoices" id="menu-invoices"
+              class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+              <iconify-icon icon="lucide:file-text" class="text-lg"></iconify-icon> Invoices
+            </a>
+            <a href="#profile" id="menu-profile"
+              class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+              <iconify-icon icon="lucide:user" class="text-lg"></iconify-icon> Profile
+            </a>
+            <a href="#support" id="menu-support"
+              class="flex items-center gap-2.5 text-muted-foreground hover:text-primary hover:bg-muted px-4 py-2.5 rounded-lg transition-all">
+              <iconify-icon icon="lucide:phone-call" class="text-lg"></iconify-icon> Support
+            </a>
+            <a href="#" id="menu-logout"
+              class="flex items-center gap-2.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 px-4 py-2.5 rounded-lg transition-all font-bold">
+              <iconify-icon icon="lucide:log-out" class="text-lg"></iconify-icon> Logout
             </a>
           </nav>
         </div>
@@ -156,8 +172,122 @@
 
       <!-- Main Dashboard Content -->
       <section class="lg:col-span-9 space-y-8">
+        <!-- Dashboard Home Tab Content -->
+        <div id="dashboard-tab-content" class="space-y-8">
+          <!-- Welcome Message -->
+          <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <h3 class="font-heading font-bold text-xl text-primary flex items-center gap-2">
+              <iconify-icon icon="lucide:hand" class="text-secondary"></iconify-icon> Welcome Back, <span id="welcome-user-name">Rahul Sharma</span>!
+            </h3>
+            <p class="text-xs text-muted-foreground mt-1">Here is a quick overview of your outstation travel bookings and active requests.</p>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="bg-card border border-border rounded-xl p-5 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <iconify-icon icon="lucide:car" class="text-2xl"></iconify-icon>
+              </div>
+              <div>
+                <span class="block text-xs text-muted-foreground font-semibold">Total Requests</span>
+                <span id="stat-total-bookings" class="text-2xl font-bold text-primary">0</span>
+              </div>
+            </div>
+
+            <div class="bg-card border border-border rounded-xl p-5 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                <iconify-icon icon="lucide:clock" class="text-2xl"></iconify-icon>
+              </div>
+              <div>
+                <span class="block text-xs text-muted-foreground font-semibold">Review Pending</span>
+                <span id="stat-pending-fare" class="text-2xl font-bold text-amber-600">0</span>
+              </div>
+            </div>
+
+            <div class="bg-card border border-border rounded-xl p-5 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                <iconify-icon icon="lucide:shield-check" class="text-2xl"></iconify-icon>
+              </div>
+              <div>
+                <span class="block text-xs text-muted-foreground font-semibold">Active & Completed</span>
+                <span id="stat-active-trips" class="text-2xl font-bold text-emerald-800">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Travel CTA Card -->
+          <div class="bg-primary text-primary-foreground rounded-xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6 border border-border/10">
+            <div class="space-y-1 text-center md:text-left">
+              <h4 class="font-heading font-bold text-base text-secondary">Planning a new journey?</h4>
+              <p class="text-xs text-primary-foreground/80">Submit a route request in 30 seconds. Our coordinator will contact you to confirm the fare.</p>
+            </div>
+            <a href="index.html#home" class="bg-secondary text-secondary-foreground font-bold px-5 py-3 rounded-lg text-xs uppercase tracking-wider hover:bg-secondary/90 transition-all shrink-0">
+              Request A New Ride
+            </a>
+          </div>
+        </div>
+
+        <!-- Invoices Tab Content -->
+        <div id="invoices-tab-content" class="space-y-8 hidden">
+          <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+            <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4 flex items-center gap-2">
+              <iconify-icon icon="lucide:file-text" class="text-secondary"></iconify-icon> Invoice History & Travel Receipts
+            </h3>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="border-b border-border bg-muted/50 text-muted-foreground font-bold">
+                    <th class="py-3 px-4">Invoice No</th>
+                    <th class="py-3 px-4">Booking ID</th>
+                    <th class="py-3 px-4">Route</th>
+                    <th class="py-3 px-4">Travel Date</th>
+                    <th class="py-3 px-4">Total Fare</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="invoices-list-tbody">
+                  <!-- Dynamically populated from JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Tab Content -->
+        <div id="support-tab-content" class="space-y-8 hidden">
+          <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+            <h3 class="font-heading font-bold text-base text-primary border-b border-border pb-4 flex items-center gap-2">
+              <iconify-icon icon="lucide:phone-call" class="text-secondary"></iconify-icon> Customer Support Desk
+            </h3>
+            
+            <div class="max-w-md mx-auto text-center space-y-6 py-8">
+              <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto text-3xl">
+                <iconify-icon icon="lucide:headset"></iconify-icon>
+              </div>
+              <div class="space-y-2">
+                <h4 class="text-base font-bold text-primary">Need help with your booking?</h4>
+                <p class="text-xs text-muted-foreground leading-relaxed">Our tour planning coordinators are available 24 hours a day, 7 days a week to assist with routes, vehicle selections, and billing details.</p>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                <a href="tel:+919435000000" class="flex items-center justify-center gap-2 bg-primary hover:bg-primary/95 text-primary-foreground font-bold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+                  <iconify-icon icon="lucide:phone"></iconify-icon> Call support coordinator
+                </a>
+                <a href="https://wa.me/919435000000" target="_blank" class="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+                  <iconify-icon icon="lucide:message-square"></iconify-icon> Chat on WhatsApp
+                </a>
+              </div>
+
+              <div class="border-t border-border pt-4 text-[11px] text-muted-foreground">
+                Email support: <strong>support@joygurutravels.com</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Profile Tab Content (Ola/Rapido Inspired) -->
-        <div id="profile-tab-content" class="space-y-8">
+        <div id="profile-tab-content" class="space-y-8 hidden">
           <!-- Profile Main Details Card -->
           <div class="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
             <div class="flex items-center justify-between border-b border-border pb-4">
