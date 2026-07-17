@@ -167,7 +167,7 @@
         document.addEventListener('DOMContentLoaded', function() {
                         // Login submission handler
             const loginForm = document.getElementById('login-form');
-            loginForm.addEventListener('submit', function(e) {
+            loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const email = document.getElementById('login-email').value.trim();
                 const pass = document.getElementById('login-password').value.trim();
@@ -177,8 +177,23 @@
                     return;
                 }
 
-                UIUtils.showLoading('Authenticating dashboard access...', 1500, () => {
-                    StateEngine.login(email.split('@')[0], email);
+                UIUtils.showLoading('Authenticating dashboard access...', 1500, async () => {
+                    try {
+                        const result = await StateEngine.apiFetch('/auth/login', {
+                            method: 'POST',
+                            body: JSON.stringify({ email, password: pass })
+                        });
+                        
+                        if (result && result.success) {
+                            StateEngine.login(result.name, result.email, result.token, result.role);
+                        } else {
+                            StateEngine.login(email.split('@')[0], email);
+                        }
+                    } catch (err) {
+                        console.warn('API login failed, falling back to offline demo:', err.message);
+                        StateEngine.login(email.split('@')[0], email);
+                    }
+
                     UIUtils.showToast('Login Successful!', 'success');
                     
                     // Redirect logic
@@ -206,12 +221,11 @@
                                 vehicleType: tempVehicle.type,
                                 notes: 'Requested via search results page after login.'
                             };
-                            StateEngine.createBookingRequest(bookingData);
+                            await StateEngine.createBookingRequestAsync(bookingData);
                             localStorage.removeItem('jg_temp_selected_vehicle');
                         }
                         window.location.href = "user-dashboard.html";
                     } else if (StateEngine.isDemoMode()) {
-                        // In demo mode: go to search results as step 3
                         window.location.href = "search-results.html";
                     } else {
                         window.location.href = "index.html";
@@ -221,9 +235,35 @@
 
             // Google Login Simulator
             document.getElementById('google-login-btn').onclick = function() {
-                UIUtils.showLoading('Connecting with Google credentials...', 1200, () => {
+                UIUtils.showLoading('Connecting with Google credentials...', 1200, async () => {
                     const gEmail = 'rahul.sharma@gmail.com';
-                    StateEngine.login('Rahul Sharma (Google)', gEmail);
+                    const gName = 'Rahul Sharma';
+                    
+                    try {
+                        let result;
+                        try {
+                            result = await StateEngine.apiFetch('/auth/login', {
+                                method: 'POST',
+                                body: JSON.stringify({ email: gEmail, password: 'password123' })
+                            });
+                        } catch (err) {
+                            // Register on failure
+                            result = await StateEngine.apiFetch('/auth/register', {
+                                method: 'POST',
+                                body: JSON.stringify({ name: gName, email: gEmail, password: 'password123', phone: '+91 94350 12345' })
+                            });
+                        }
+                        
+                        if (result && result.success) {
+                            StateEngine.login(result.name || gName, result.email || gEmail, result.token, result.role);
+                        } else {
+                            StateEngine.login(gName, gEmail);
+                        }
+                    } catch (err) {
+                        console.warn('API Google login failed, fallback to local:', err.message);
+                        StateEngine.login(gName, gEmail);
+                    }
+
                     UIUtils.showToast('Signed in via Google successfully!', 'success');
                     
                     const urlParams = new URLSearchParams(window.location.search);
@@ -233,7 +273,7 @@
                         const searchData = StateEngine.getActiveSearch();
                         if (tempVehicle && searchData) {
                             const bookingData = {
-                                name: 'Rahul Sharma (Google)',
+                                name: 'Rahul Sharma',
                                 phone: '+91 94350 XXXXX',
                                 email: gEmail,
                                 pickup: searchData.pickup,
@@ -246,7 +286,7 @@
                                 vehicleType: tempVehicle.type,
                                 notes: 'Requested via search results page after Google login.'
                             };
-                            StateEngine.createBookingRequest(bookingData);
+                            await StateEngine.createBookingRequestAsync(bookingData);
                             localStorage.removeItem('jg_temp_selected_vehicle');
                         }
                         window.location.href = "user-dashboard.html";

@@ -615,8 +615,13 @@
           });
         }
 
-        function switchTab() {
+        async function switchTab() {
           const hash = window.location.hash || '#overview';
+
+          // Refresh database bookings on target tabs
+          if (['#overview', '#bookings', '#payments', '#customers', '#invoices'].includes(hash)) {
+            await StateEngine.getBookingsAsync();
+          }
           
           // Hide all tabs
           const tabs = ['overview', 'bookings', 'fleet', 'reports', 'profile', 'settings', 'payments', 'customers', 'invoices'];

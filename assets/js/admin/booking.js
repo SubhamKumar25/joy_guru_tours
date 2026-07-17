@@ -167,47 +167,55 @@
       if (status) status.addEventListener('change', triggerSearch);
       if (date) date.addEventListener('change', triggerSearch);
       if (vehicle) vehicle.addEventListener('change', triggerSearch);
-    },
-
-    confirmBooking: function (id) {
-      const bookings = this.getBookings();
-      const b = bookings.find(item => item.id === id);
+        confirmBooking: async function (id) {
+      const b = this.getBookings().find(item => item.id === id);
       if (b) {
-        b.status = 'Confirmed';
+        const payload = { status: 'Confirmed' };
+        await StateEngine.updateBookingAsync(id, payload);
         if (window.AdminNotifications) {
           window.AdminNotifications.addNotification(`Booking ${id} is Confirmed`, 'success');
         }
-        this.saveBookings(bookings);
+        this.renderTable();
+        if (window.AdminDashboard) {
+          window.AdminDashboard.updateStats();
+          window.AdminDashboard.initChart();
+        }
         UIUtils.showToast(`Booking ${id} confirmed successfully.`, 'success');
       }
     },
 
-    cancelBooking: function (id) {
+    cancelBooking: async function (id) {
       if (confirm(`Are you sure you want to cancel booking ${id}?`)) {
-        const bookings = this.getBookings();
-        const b = bookings.find(item => item.id === id);
+        const b = this.getBookings().find(item => item.id === id);
         if (b) {
-          b.status = 'Cancelled';
+          const payload = { status: 'Cancelled' };
+          await StateEngine.updateBookingAsync(id, payload);
           if (window.AdminNotifications) {
             window.AdminNotifications.addNotification(`Booking ${id} was cancelled by administrator`, 'warning');
           }
-          this.saveBookings(bookings);
+          this.renderTable();
+          if (window.AdminDashboard) {
+            window.AdminDashboard.updateStats();
+            window.AdminDashboard.initChart();
+          }
           UIUtils.showToast(`Booking ${id} has been cancelled.`, 'error');
         }
       }
     },
 
-    completeTrip: function (id) {
-      const bookings = this.getBookings();
-      const b = bookings.find(item => item.id === id);
+    completeTrip: async function (id) {
+      const b = this.getBookings().find(item => item.id === id);
       if (b) {
-        b.status = 'Completed';
-        // Auto-pay remaining if not done
-        b.balanceDue = 0;
+        const payload = { status: 'Completed', balanceDue: 0 };
+        await StateEngine.updateBookingAsync(id, payload);
         if (window.AdminNotifications) {
           window.AdminNotifications.addNotification(`Trip ${id} completed`, 'success');
         }
-        this.saveBookings(bookings);
+        this.renderTable();
+        if (window.AdminDashboard) {
+          window.AdminDashboard.updateStats();
+          window.AdminDashboard.initChart();
+        }
         UIUtils.showToast(`Trip ${id} marked as completed!`, 'success');
       }
     },
@@ -263,7 +271,10 @@
             <button onclick="document.getElementById('admin-detail-modal').remove()" class="bg-primary text-primary-foreground font-bold px-4 py-2 rounded-lg hover:bg-primary/95 transition-all">Close</button>
           </div>
         </div>
-         editBooking: function (id) {
+      `;
+    },
+
+    editBooking: function (id) {
       const bookings = this.getBookings();
       const b = bookings.find(item => item.id === id);
       if (!b) return;
@@ -339,29 +350,39 @@
         </div>
       `;
 
-      document.getElementById('admin-booking-edit-form').onsubmit = (e) => {
+      document.getElementById('admin-booking-edit-form').onsubmit = async (e) => {
         e.preventDefault();
-        b.customerName = document.getElementById('edit-cust-name').value.trim();
-        b.customerPhone = document.getElementById('edit-cust-phone').value.trim();
-        b.travelDate = document.getElementById('edit-cust-date').value;
-        b.travelTime = document.getElementById('edit-cust-time').value.trim();
-        b.driverName = document.getElementById('edit-driver-name').value.trim();
-        b.status = document.getElementById('edit-status').value;
-
+        
         const fFare = parseInt(document.getElementById('edit-final-fare').value);
         const aReq = parseInt(document.getElementById('edit-advance-req').value);
-        if (!isNaN(fFare)) b.finalFare = fFare;
-        if (!isNaN(aReq)) b.advanceRequired = aReq;
+        const status = document.getElementById('edit-status').value;
         
-        // Update balance due
-        if (b.status === 'Advance Paid' && !isNaN(fFare) && !isNaN(aReq)) {
-          b.advancePaid = aReq;
-          b.balanceDue = fFare - aReq;
+        const payload = {
+          customerName: document.getElementById('edit-cust-name').value.trim(),
+          customerPhone: document.getElementById('edit-cust-phone').value.trim(),
+          travelDate: document.getElementById('edit-cust-date').value,
+          travelTime: document.getElementById('edit-cust-time').value.trim(),
+          driverName: document.getElementById('edit-driver-name').value.trim(),
+          status: status
+        };
+
+        if (!isNaN(fFare)) payload.finalFare = fFare;
+        if (!isNaN(aReq)) payload.advanceRequired = aReq;
+        
+        if (status === 'Advance Paid' && !isNaN(fFare) && !isNaN(aReq)) {
+          payload.advancePaid = aReq;
+          payload.balanceDue = fFare - aReq;
         }
 
-        this.saveBookings(bookings);
+        await StateEngine.updateBookingAsync(id, payload);
+        
         document.getElementById('admin-edit-modal').remove();
-        UIUtils.showToast(`Booking ${b.id} updated successfully.`, 'success');
+        this.renderTable();
+        if (window.AdminDashboard) {
+          window.AdminDashboard.updateStats();
+          window.AdminDashboard.initChart();
+        }
+        UIUtils.showToast(`Booking ${id} updated successfully.`, 'success');
       };
     },
 
@@ -398,18 +419,18 @@
               <label class="font-bold text-muted-foreground">PROPOSED TOTAL FARE (₹)</label>
               <input type="number" id="propose-final-fare" placeholder="e.g. 5500" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-ring focus:outline-none">
             </div>
-
+ 
             <div class="space-y-1">
               <label class="font-bold text-muted-foreground">REQUIRED ADVANCE AMOUNT (₹)</label>
               <input type="number" id="propose-advance-req" placeholder="e.g. 1500" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-ring focus:outline-none">
               <p class="text-[10px] text-muted-foreground mt-0.5">Recommended 25% advance payment to confirm request.</p>
             </div>
-
+ 
             <div class="space-y-1">
               <label class="font-bold text-muted-foreground">COORDINATOR INTERNAL NOTES</label>
               <textarea id="propose-admin-notes" placeholder="Optional notes visible only to admins" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none h-20"></textarea>
             </div>
-
+ 
             <div class="pt-4 flex gap-3">
               <button type="button" onclick="document.getElementById('admin-set-fare-modal').remove()" class="flex-1 bg-muted hover:bg-muted/80 text-primary font-bold py-2.5 rounded-lg">Cancel</button>
               <button type="submit" class="flex-1 bg-secondary hover:bg-secondary/95 text-secondary-foreground font-bold py-2.5 rounded-lg">Send Proposed Fare</button>
@@ -417,7 +438,7 @@
           </form>
         </div>
       `;
-
+ 
       const fareInput = document.getElementById('propose-final-fare');
       const advanceInput = document.getElementById('propose-advance-req');
       
@@ -429,27 +450,35 @@
           }
         });
       }
-
-      document.getElementById('admin-set-fare-form').onsubmit = (e) => {
+ 
+      document.getElementById('admin-set-fare-form').onsubmit = async (e) => {
         e.preventDefault();
         const finalFareVal = parseInt(document.getElementById('propose-final-fare').value);
         const advanceReqVal = parseInt(document.getElementById('propose-advance-req').value);
         const notesVal = document.getElementById('propose-admin-notes').value.trim();
-
-        b.finalFare = finalFareVal;
-        b.advanceRequired = advanceReqVal;
-        b.adminNotes = notesVal;
-        b.status = 'Fare Proposed';
-        b.balanceDue = finalFareVal;
-
-        this.saveBookings(bookings);
+ 
+        const payload = {
+          finalFare: finalFareVal,
+          advanceRequired: advanceReqVal,
+          adminNotes: notesVal,
+          status: 'Fare Proposed',
+          balanceDue: finalFareVal
+        };
+ 
+        await StateEngine.updateBookingAsync(id, payload);
         document.getElementById('admin-set-fare-modal').remove();
+        this.renderTable();
+        if (window.AdminDashboard) {
+          window.AdminDashboard.updateStats();
+          window.AdminDashboard.initChart();
+        }
         
         if (window.AdminNotifications) {
           window.AdminNotifications.addNotification(`Proposed fare of ₹${finalFareVal} for booking ${id}`, 'success');
         }
-
-        UIUtils.showToast(`Fare proposed for booking ${id}! Customer notified.`, 'success');      };
+ 
+        UIUtils.showToast(`Fare proposed for booking ${id}! Customer notified.`, 'success');
+      };
     }
   };
 

@@ -85,6 +85,7 @@
 window.StateEngine = {
   // Valid status flow
   STATUS_FLOW: ['Requested', 'Fare Proposed', 'Advance Paid', 'Confirmed', 'Driver Assigned', 'Trip Started', 'Completed', 'Fully Paid', 'Cancelled'],
+  apiUrl: window.location.origin + '/api',
 
   isLoggedIn: function() {
     return localStorage.getItem('jg_logged_in') === 'true';
@@ -92,11 +93,12 @@ window.StateEngine = {
   isAdmin: function() {
     return localStorage.getItem('jg_admin_logged_in') === 'true';
   },
-  login: function(name, email) {
+  login: function(name, email, token, role) {
     localStorage.setItem('jg_logged_in', 'true');
     localStorage.setItem('jg_user_name', name || 'Rahul Sharma');
     localStorage.setItem('jg_user_email', email || 'rahul@example.com');
-    if (email && email.toLowerCase().includes('admin')) {
+    if (token) localStorage.setItem('jg_token', token);
+    if (role === 'admin' || (email && email.toLowerCase().includes('admin'))) {
       localStorage.setItem('jg_admin_logged_in', 'true');
     } else {
       localStorage.setItem('jg_admin_logged_in', 'false');
@@ -107,6 +109,7 @@ window.StateEngine = {
     localStorage.setItem('jg_admin_logged_in', 'false');
     localStorage.removeItem('jg_user_name');
     localStorage.removeItem('jg_user_email');
+    localStorage.removeItem('jg_token');
     localStorage.setItem('jg_demo_mode', 'false');
   },
   getActiveSearch: function() {
@@ -124,8 +127,40 @@ window.StateEngine = {
   isDemoMode: function() {
     return localStorage.getItem('jg_demo_mode') === 'true';
   },
-  // Create a new booking request (used by the booking form)
+  
+  // API Fetch Wrapper
+  apiFetch: async function(endpoint, options = {}) {
+    const token = localStorage.getItem('jg_token');
+    options.headers = options.headers || {};
+    options.headers['Content-Type'] = 'application/json';
+    if (token) {
+      options.headers['Authorization'] = 'Bearer ' + token;
+    }
+    const res = await fetch(this.apiUrl + endpoint, options);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: 'API Request failed' }));
+      throw new Error(err.message || 'API request failed');
+    }
+    return await res.json();
+  },
+
+  // Async API Calls with local Storage Syncing
+  getBookingsAsync: async function() {
+    try {
+      const endpoint = this.isAdmin() ? '/bookings' : '/bookings/my';
+      const result = await this.apiFetch(endpoint);
+      if (result && result.success) {
+        localStorage.setItem('jg_bookings', JSON.stringify(result.data));
+        return result.data;
+      }
+    } catch (err) {
+      console.warn('API getBookings failed, fallback to local cache:', err.message);
+    }
+    return this.getBookings();
+  },
+
   createBookingRequest: function(bookingData) {
+    // Synchronous placeholder logic
     const bookings = this.getBookings();
     const nextId = 'JG-' + new Date().getFullYear() + '-' + (4830 + bookings.length);
     const newBooking = {
@@ -158,6 +193,68 @@ window.StateEngine = {
     this.updateBookings(bookings);
     localStorage.setItem('jg_last_booking_id', nextId);
     return newBooking;
+  },
+
+  createBookingRequestAsync: async function(bookingData) {
+    try {
+      const payload = {
+        customerName: bookingData.name || '',
+        customerPhone: bookingData.phone || '',
+        customerEmail: bookingData.email || localStorage.getItem('jg_user_email') || '',
+        pickup: bookingData.pickup || '',
+        destination: bookingData.destination || '',
+        travelDate: bookingData.date || '',
+        travelTime: bookingData.time || '',
+        passengerCount: parseInt(bookingData.passengers) || 1,
+        specialRequest: bookingData.notes || '',
+        vehicleName: bookingData.vehicleName || 'Not Assigned',
+        vehicleType: bookingData.vehicleType || ''
+      };
+      
+      const result = await this.apiFetch('/bookings', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      if (result && result.success) {
+        const bookings = this.getBookings();
+        bookings.unshift(result.data);
+        this.updateBookings(bookings);
+        localStorage.setItem('jg_last_booking_id', result.data.id);
+        return result.data;
+      }
+    } catch (err) {
+      console.warn('API createBooking failed, fallback to local cache:', err.message);
+      return this.createBookingRequest(bookingData);
+    }
+  },
+
+  updateBookingAsync: async function(bookingId, updatePayload) {
+    try {
+      const result = await this.apiFetch('/bookings/' + bookingId, {
+        method: 'PUT',
+        body: JSON.stringify(updatePayload)
+      });
+      if (result && result.success) {
+        const bookings = this.getBookings();
+        const idx = bookings.findIndex(b => b.id === bookingId);
+        if (idx !== -1) {
+          bookings[idx] = result.data;
+          this.updateBookings(bookings);
+        }
+        return result.data;
+      }
+    } catch (err) {
+      console.warn('API updateBooking failed, fallback to local update:', err.message);
+      // Fallback local update
+      const bookings = this.getBookings();
+      const b = bookings.find(item => item.id === bookingId);
+      if (b) {
+        Object.assign(b, updatePayload);
+        this.updateBookings(bookings);
+        return b;
+      }
+    }
   }
 };
 
@@ -542,31 +639,50 @@ document.addEventListener('DOMContentLoaded', function () {
         const phone = phoneInput ? phoneInput.value.trim() : '';
         const passengers = passengerSelect ? passengerSelect.value : '4 Passengers';
 
-        // Auto login if not logged in
-        if (!StateEngine.isLoggedIn()) {
-          const email = name.toLowerCase().replace(/\s+/g, '') + '@example.com';
-          StateEngine.login(name, email);
-        }
+        UIUtils.showLoading('Submitting Your Request...', 1800, async function() {
+          // Auto login if not logged in
+          if (!StateEngine.isLoggedIn()) {
+            const email = name.toLowerCase().replace(/\s+/g, '') + '@example.com';
+            try {
+              const regResult = await StateEngine.apiFetch('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ name, email, password: 'password123', phone })
+              });
+              if (regResult && regResult.success) {
+                StateEngine.login(regResult.name, regResult.email, regResult.token, regResult.role);
+              }
+            } catch (err) {
+              try {
+                const logResult = await StateEngine.apiFetch('/auth/login', {
+                  method: 'POST',
+                  body: JSON.stringify({ email, password: 'password123' })
+                });
+                if (logResult && logResult.success) {
+                  StateEngine.login(logResult.name, logResult.email, logResult.token, logResult.role);
+                }
+              } catch (loginErr) {
+                StateEngine.login(name, email);
+              }
+            }
+          }
 
-        const bookingData = {
-          name: name,
-          phone: phone,
-          email: localStorage.getItem('jg_user_email') || (name.toLowerCase().replace(/\s+/g, '') + '@example.com'),
-          pickup: pickupInputEl.value.trim(),
-          destination: dropInputEl.value.trim(),
-          date: dateInput && dateInput.value ? dateInput.value : new Date().toISOString().split('T')[0],
-          time: timeInput && timeInput.value ? timeInput.value : '09:30 AM',
-          passengers: passengers,
-          tripType: isRoundTrip ? 'Round Trip' : 'One Way',
-          returnDate: isRoundTrip && returnDateInput ? returnDateInput.value : '',
-          vehicleName: 'Toyota Innova Crysta', // Default requested vehicle
-          vehicleType: 'suv',
-          notes: 'Requested via homepage booking form.'
-        };
+          const updatedBookingData = {
+            name: name,
+            phone: phone,
+            email: localStorage.getItem('jg_user_email') || (name.toLowerCase().replace(/\s+/g, '') + '@example.com'),
+            pickup: pickupInputEl.value.trim(),
+            destination: dropInputEl.value.trim(),
+            date: dateInput && dateInput.value ? dateInput.value : new Date().toISOString().split('T')[0],
+            time: timeInput && timeInput.value ? timeInput.value : '09:30 AM',
+            passengers: passengers,
+            tripType: isRoundTrip ? 'Round Trip' : 'One Way',
+            returnDate: isRoundTrip && returnDateInput ? returnDateInput.value : '',
+            vehicleName: 'Toyota Innova Crysta', // Default requested vehicle
+            vehicleType: 'suv',
+            notes: 'Requested via homepage booking form.'
+          };
 
-        const newBooking = StateEngine.createBookingRequest(bookingData);
-
-        UIUtils.showLoading('Submitting Your Request...', 1500, function() {
+          await StateEngine.createBookingRequestAsync(updatedBookingData);
           UIUtils.showToast('Booking request submitted successfully!', 'success');
           window.location.href = "user-dashboard.html";
         });

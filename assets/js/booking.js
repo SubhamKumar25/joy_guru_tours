@@ -12,7 +12,8 @@
     setTimeout(initCustomBookings, 50);
   });
 
-  function initCustomBookings() {
+  async function initCustomBookings() {
+    await StateEngine.getBookingsAsync();
     renderCustomBookingsList();
     renderDashboardStats();
     renderInvoicesList();
