@@ -3,17 +3,22 @@
   const STORAGE_KEY = 'jg_admin_vehicles';
 
   window.AdminFleet = {
-    init: function () {
+    init: async function () {
+      await this.syncVehicles();
       this.renderFleet();
     },
 
+    syncVehicles: async function () {
+      try {
+        const vehicles = await StateEngine.getVehiclesAsync();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles));
+      } catch (err) {
+        console.warn('Failed to sync fleet from server:', err);
+      }
+    },
+
     getVehicles: function () {
-      const defaults = [
-        { id: 1, name: 'Toyota Innova Crysta', type: 'suv', number: 'AS-11-AA-4829', capacity: 7, price: 6499, status: 'Available' },
-        { id: 2, name: 'Swift Dzire / Etios', type: 'sedan', number: 'AS-11-BB-8830', capacity: 4, price: 4499, status: 'Available' },
-        { id: 3, name: 'Maruti Suzuki Alto', type: 'hatchback', number: 'AS-11-CC-1122', capacity: 4, price: 2999, status: 'Maintenance' }
-      ];
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaults;
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     },
 
     saveVehicles: function (vehicles) {
@@ -27,6 +32,15 @@
       if (!listEl) return;
 
       listEl.innerHTML = '';
+
+      if (vehicles.length === 0) {
+        listEl.innerHTML = `
+          <div class="col-span-full py-8 text-center text-xs text-muted-foreground bg-card rounded-xl border border-border">
+            No vehicles registered in the fleet yet.
+          </div>
+        `;
+        return;
+      }
 
       vehicles.forEach(v => {
         const item = document.createElement('div');
@@ -48,21 +62,22 @@
               <span class="text-[9px] uppercase bg-muted text-muted-foreground px-1.5 py-0.5 rounded font-bold">${v.type}</span>
             </div>
             <p class="text-muted-foreground">Licence: <strong>${v.number}</strong> | Seats: <strong>${v.capacity}</strong></p>
-            <p class="text-slate-800 font-semibold">Rate: ₹${v.price}/day</p>
-          </div>
-          <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-            ${statusBadge}
-            <div class="space-x-1">
-              <button onclick="window.AdminFleet.editVehicle(${v.id})" class="text-primary hover:text-secondary font-bold text-[10px] px-2 py-1 bg-muted rounded">Edit</button>
-              <button onclick="window.AdminFleet.deleteVehicle(${v.id})" class="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1 bg-red-50 rounded">Delete</button>
+            <div class="flex items-center gap-2 pt-1">
+              <span>Rate: <strong>₹${v.price}/km</strong></span>
+              <span>•</span>
+              ${statusBadge}
             </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="window.AdminFleet.editVehicle(${v.id})" class="text-primary hover:text-secondary font-bold text-[10px] px-2 py-1 bg-muted rounded">Edit</button>
+            <button onclick="window.AdminFleet.deleteVehicle(${v.id})" class="text-red-500 hover:text-red-700 font-bold text-[10px] px-2 py-1 bg-red-50 rounded">Delete</button>
           </div>
         `;
         listEl.appendChild(item);
       });
     },
 
-    addVehicle: function () {
+    openAddModal: function () {
       let modal = document.getElementById('admin-fleet-modal');
       if (!modal) {
         modal = document.createElement('div');
@@ -75,7 +90,7 @@
         <div class="bg-card w-full max-w-md rounded-2xl border border-border overflow-hidden shadow-2xl flex flex-col">
           <div class="bg-primary text-primary-foreground p-5 flex items-center justify-between border-b border-border">
             <h3 class="font-heading font-bold text-base text-secondary flex items-center gap-1.5">
-              <iconify-icon icon="lucide:plus-circle" class="text-lg"></iconify-icon> Add New Vehicle
+              <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon> Add New Vehicle
             </h3>
             <button onclick="document.getElementById('admin-fleet-modal').remove()" class="text-primary-foreground/80 hover:text-primary-foreground">
               <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
@@ -84,7 +99,7 @@
           <form id="admin-fleet-add-form" class="p-6 space-y-3 text-xs">
             <div class="space-y-1">
               <label class="font-bold text-muted-foreground">VEHICLE NAME</label>
-              <input type="text" id="add-v-name" required placeholder="Toyota Fortuner" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+              <input type="text" id="add-v-name" required placeholder="Toyota Innova Crysta" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
@@ -93,6 +108,7 @@
                   <option value="suv">SUV</option>
                   <option value="sedan">Sedan</option>
                   <option value="hatchback">Hatchback</option>
+                  <option value="tempo">Tempo Traveller</option>
                 </select>
               </div>
               <div class="space-y-1">
@@ -106,8 +122,8 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
-                <label class="font-bold text-muted-foreground">RATE PER DAY (₹)</label>
-                <input type="number" id="add-v-price" required placeholder="6500" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+                <label class="font-bold text-muted-foreground">RATE PER KM (₹)</label>
+                <input type="number" id="add-v-price" required placeholder="18" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
               </div>
               <div class="space-y-1">
                 <label class="font-bold text-muted-foreground">STATUS</label>
@@ -126,23 +142,26 @@
         </div>
       `;
 
-      document.getElementById('admin-fleet-add-form').onsubmit = (e) => {
+      document.getElementById('admin-fleet-add-form').onsubmit = async (e) => {
         e.preventDefault();
-        const vehicles = this.getVehicles();
-        const newV = {
-          id: Date.now(),
+        const payload = {
           name: document.getElementById('add-v-name').value.trim(),
           type: document.getElementById('add-v-type').value,
           capacity: parseInt(document.getElementById('add-v-capacity').value),
           number: document.getElementById('add-v-number').value.trim(),
-          price: parseInt(document.getElementById('add-v-price').value),
+          price: parseFloat(document.getElementById('add-v-price').value),
           status: document.getElementById('add-v-status').value
         };
 
-        vehicles.push(newV);
-        this.saveVehicles(vehicles);
-        document.getElementById('admin-fleet-modal').remove();
-        UIUtils.showToast(`Vehicle ${newV.name} added successfully.`, 'success');
+        try {
+          await StateEngine.addVehicleAsync(payload);
+          await this.syncVehicles();
+          this.renderFleet();
+          document.getElementById('admin-fleet-modal').remove();
+          UIUtils.showToast(`Vehicle ${payload.name} added successfully.`, 'success');
+        } catch (err) {
+          UIUtils.showToast('Failed to add vehicle: ' + err.message, 'error');
+        }
       };
     },
 
@@ -181,6 +200,7 @@
                   <option value="suv" ${v.type === 'suv' ? 'selected' : ''}>SUV</option>
                   <option value="sedan" ${v.type === 'sedan' ? 'selected' : ''}>Sedan</option>
                   <option value="hatchback" ${v.type === 'hatchback' ? 'selected' : ''}>Hatchback</option>
+                  <option value="tempo" ${v.type === 'tempo' ? 'selected' : ''}>Tempo Traveller</option>
                 </select>
               </div>
               <div class="space-y-1">
@@ -194,7 +214,7 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
-                <label class="font-bold text-muted-foreground">RATE PER DAY (₹)</label>
+                <label class="font-bold text-muted-foreground">RATE PER KM (₹)</label>
                 <input type="number" id="edit-v-price" value="${v.price}" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
               </div>
               <div class="space-y-1">
@@ -214,36 +234,44 @@
         </div>
       `;
 
-      document.getElementById('admin-fleet-edit-form').onsubmit = (e) => {
+      document.getElementById('admin-fleet-edit-form').onsubmit = async (e) => {
         e.preventDefault();
-        v.name = document.getElementById('edit-v-name').value.trim();
-        v.type = document.getElementById('edit-v-type').value;
-        v.capacity = parseInt(document.getElementById('edit-v-capacity').value);
-        v.number = document.getElementById('edit-v-number').value.trim();
-        v.price = parseInt(document.getElementById('edit-v-price').value);
-        v.status = document.getElementById('edit-v-status').value;
+        const payload = {
+          name: document.getElementById('edit-v-name').value.trim(),
+          type: document.getElementById('edit-v-type').value,
+          capacity: parseInt(document.getElementById('edit-v-capacity').value),
+          number: document.getElementById('edit-v-number').value.trim(),
+          price: parseFloat(document.getElementById('edit-v-price').value),
+          status: document.getElementById('edit-v-status').value
+        };
 
-        this.saveVehicles(vehicles);
-        document.getElementById('admin-fleet-modal').remove();
-        UIUtils.showToast(`Vehicle ${v.name} updated.`, 'success');
+        try {
+          await StateEngine.updateVehicleAsync(v.id, payload);
+          await this.syncVehicles();
+          this.renderFleet();
+          document.getElementById('admin-fleet-modal').remove();
+          UIUtils.showToast(`Vehicle ${payload.name} updated successfully.`, 'success');
+        } catch (err) {
+          UIUtils.showToast('Failed to update vehicle: ' + err.message, 'error');
+        }
       };
     },
 
-    deleteVehicle: function (id) {
+    deleteVehicle: async function (id) {
       if (confirm('Are you sure you want to delete this vehicle?')) {
-        let vehicles = this.getVehicles();
-        vehicles = vehicles.filter(item => item.id !== id);
-        this.saveVehicles(vehicles);
-        UIUtils.showToast('Vehicle deleted successfully.', 'error');
+        try {
+          await StateEngine.deleteVehicleAsync(id);
+          await this.syncVehicles();
+          this.renderFleet();
+          UIUtils.showToast('Vehicle deleted successfully.', 'success');
+        } catch (err) {
+          UIUtils.showToast('Failed to delete vehicle: ' + err.message, 'error');
+        }
       }
     }
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Sync local storage on load
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      window.AdminFleet.saveVehicles(window.AdminFleet.getVehicles());
-    }
     window.AdminFleet.init();
   });
 })();

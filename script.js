@@ -255,6 +255,75 @@ window.StateEngine = {
         return b;
       }
     }
+  },
+
+  getVehiclesAsync: async function() {
+    try {
+      const result = await this.apiFetch('/vehicles');
+      if (result && result.success) {
+        localStorage.setItem('jg_admin_vehicles', JSON.stringify(result.data));
+        return result.data;
+      }
+    } catch (err) {
+      console.warn('API getVehicles failed, fallback to local cache:', err.message);
+    }
+    return JSON.parse(localStorage.getItem('jg_admin_vehicles')) || [];
+  },
+
+  addVehicleAsync: async function(vehiclePayload) {
+    try {
+      const result = await this.apiFetch('/vehicles', {
+        method: 'POST',
+        body: JSON.stringify(vehiclePayload)
+      });
+      if (result && result.success) {
+        const vehicles = JSON.parse(localStorage.getItem('jg_admin_vehicles')) || [];
+        vehicles.push(result.data);
+        localStorage.setItem('jg_admin_vehicles', JSON.stringify(vehicles));
+        return result.data;
+      }
+    } catch (err) {
+      console.warn('API addVehicle failed:', err.message);
+      throw err;
+    }
+  },
+
+  updateVehicleAsync: async function(vehicleId, vehiclePayload) {
+    try {
+      const result = await this.apiFetch('/vehicles/' + vehicleId, {
+        method: 'PUT',
+        body: JSON.stringify(vehiclePayload)
+      });
+      if (result && result.success) {
+        const vehicles = JSON.parse(localStorage.getItem('jg_admin_vehicles')) || [];
+        const idx = vehicles.findIndex(v => v.id === vehicleId);
+        if (idx !== -1) {
+          vehicles[idx] = result.data;
+          localStorage.setItem('jg_admin_vehicles', JSON.stringify(vehicles));
+        }
+        return result.data;
+      }
+    } catch (err) {
+      console.warn('API updateVehicle failed:', err.message);
+      throw err;
+    }
+  },
+
+  deleteVehicleAsync: async function(vehicleId) {
+    try {
+      const result = await this.apiFetch('/vehicles/' + vehicleId, {
+        method: 'DELETE'
+      });
+      if (result && result.success) {
+        const vehicles = JSON.parse(localStorage.getItem('jg_admin_vehicles')) || [];
+        const filtered = vehicles.filter(v => v.id !== vehicleId);
+        localStorage.setItem('jg_admin_vehicles', JSON.stringify(filtered));
+        return true;
+      }
+    } catch (err) {
+      console.warn('API deleteVehicle failed:', err.message);
+      throw err;
+    }
   }
 };
 
