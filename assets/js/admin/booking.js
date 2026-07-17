@@ -167,7 +167,9 @@
       if (status) status.addEventListener('change', triggerSearch);
       if (date) date.addEventListener('change', triggerSearch);
       if (vehicle) vehicle.addEventListener('change', triggerSearch);
-        confirmBooking: async function (id) {
+    },
+
+    confirmBooking: async function (id) {
       const b = this.getBookings().find(item => item.id === id);
       if (b) {
         const payload = { status: 'Confirmed' };
