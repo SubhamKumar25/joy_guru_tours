@@ -71,7 +71,12 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-md w-full mx-auto px-6 py-12 flex flex-col justify-center relative z-10">
         <div class="bg-card border border-border shadow-2xl rounded-2xl overflow-hidden p-6 sm:p-8 space-y-6">
-            <!-- Tabs Removed -->
+            
+            <!-- Tabs System for Login / Signup -->
+            <div class="flex border-b border-border">
+                <button id="tab-login" class="flex-1 pb-3 text-sm font-bold border-b-2 border-primary text-primary transition-all">Sign In</button>
+                <button id="tab-signup" class="flex-1 pb-3 text-sm font-bold border-b-2 border-transparent text-muted-foreground hover:text-primary transition-all">Create Account</button>
+            </div>
 
             <!-- Login Section -->
             <div id="login-section" class="space-y-4">
@@ -85,7 +90,7 @@
                         <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                             <iconify-icon icon="lucide:mail" class="text-primary"></iconify-icon> EMAIL ADDRESS
                         </label>
-                        <input id="login-email" type="email" placeholder="Enter email" class="w-full bg-muted border border-input rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                        <input id="login-email" type="email" placeholder="Enter email" required class="w-full bg-muted border border-input rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
                     </div>
 
                     <div class="space-y-1">
@@ -95,7 +100,7 @@
                             </label>
                             <button type="button" id="forgot-pass-btn" class="text-[10px] text-secondary font-bold hover:underline">Forgot?</button>
                         </div>
-                        <input id="login-password" type="password" placeholder="Enter password" class="w-full bg-muted border border-input rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                        <input id="login-password" type="password" placeholder="Enter password" required class="w-full bg-muted border border-input rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
                     </div>
 
                     <button type="submit" id="login-submit-btn" class="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
@@ -113,9 +118,51 @@
                 </button>
             </div>
 
-            </main>
+            <!-- Sign Up Section -->
+            <div id="signup-section" class="space-y-4 hidden">
+                <div class="text-center space-y-1">
+                    <h2 class="text-xl font-heading font-bold text-primary">Create Account</h2>
+                    <p class="text-xs text-muted-foreground">Register to save trips and access billing profile</p>
+                </div>
 
-    <!-- OTP Verification Overlay Modal (Hidden by default) -->
+                <form id="signup-form" class="space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                            <iconify-icon icon="lucide:user" class="text-primary"></iconify-icon> FULL NAME
+                        </label>
+                        <input id="signup-name" type="text" placeholder="John Doe" required class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                            <iconify-icon icon="lucide:mail" class="text-primary"></iconify-icon> EMAIL ADDRESS
+                        </label>
+                        <input id="signup-email" type="email" placeholder="email@example.com" required class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                            <iconify-icon icon="lucide:phone" class="text-primary"></iconify-icon> PHONE NUMBER
+                        </label>
+                        <input id="signup-phone" type="tel" placeholder="+91 XXXXX XXXXX" required class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                            <iconify-icon icon="lucide:lock" class="text-primary"></iconify-icon> PASSWORD
+                        </label>
+                        <input id="signup-password" type="password" placeholder="Min. 6 characters" required minlength="6" class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                    </div>
+
+                    <button type="submit" id="signup-submit-btn" class="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold py-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+                        Create Account <iconify-icon icon="lucide:arrow-right" class="text-base"></iconify-icon>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- OTP Verification Overlay Modal -->
     <div id="otp-modal" class="fixed inset-0 z-50 bg-primary/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-card w-full max-w-sm rounded-2xl border border-border p-6 shadow-2xl text-center space-y-4 animate-scale-up">
             <div class="w-12 h-12 rounded-full bg-accent text-secondary flex items-center justify-center mx-auto text-2xl shadow-sm">
@@ -154,18 +201,106 @@
         </div>
     </div>
 
+    <!-- Google Account Selection Modal -->
+    <div id="google-account-modal" class="fixed inset-0 z-50 bg-primary/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-card w-full max-w-sm rounded-2xl border border-border p-6 shadow-2xl space-y-4 animate-scale-up text-left">
+            <div class="flex items-center justify-between border-b border-border pb-3">
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="logos:google-icon" class="text-lg"></iconify-icon>
+                    <span class="font-heading font-bold text-sm text-primary">Choose an account</span>
+                </div>
+                <button onclick="document.getElementById('google-account-modal').classList.add('hidden')" class="text-muted-foreground hover:text-primary text-lg">
+                    <iconify-icon icon="lucide:x"></iconify-icon>
+                </button>
+            </div>
+            
+            <p class="text-xs text-muted-foreground">to continue to <strong>Joy Guru Tours & Travels</strong></p>
+            
+            <div class="space-y-2.5">
+                <!-- Google Account 1 -->
+                <button id="google-acc-rahul" class="w-full flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted transition-all text-left">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">RS</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold truncate text-foreground">Rahul Sharma</p>
+                        <p class="text-[10px] text-muted-foreground truncate">rahul.sharma@gmail.com</p>
+                    </div>
+                </button>
+
+                <!-- Google Account 2 -->
+                <button id="google-acc-priya" class="w-full flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted transition-all text-left">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">PP</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold truncate text-foreground">Priya Patel</p>
+                        <p class="text-[10px] text-muted-foreground truncate">priya.patel@gmail.com</p>
+                    </div>
+                </button>
+
+                <!-- Custom Account Selector -->
+                <button id="google-acc-custom-toggle" class="w-full flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted transition-all text-left">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center text-xs">
+                        <iconify-icon icon="lucide:user-plus"></iconify-icon>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-semibold text-foreground">Use another account</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Custom User Google Flow -->
+            <div id="google-custom-form-container" class="hidden border-t border-border pt-3 space-y-3">
+                <p class="text-xs font-semibold text-primary">Enter Google Profile Details</p>
+                <div class="space-y-2">
+                    <input id="google-custom-name" type="text" placeholder="Name (e.g., Ramesh Kumar)" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none">
+                    <input id="google-custom-email" type="email" placeholder="Email (e.g., ramesh@gmail.com)" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none">
+                    <input id="google-custom-phone" type="tel" placeholder="Phone (e.g., +91 94350 99999)" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none">
+                </div>
+                <button id="google-custom-submit-btn" class="w-full bg-primary text-primary-foreground text-xs font-bold py-2 rounded-lg hover:bg-primary/95">
+                    Sign In &amp; Register Custom Google ID
+                </button>
+            </div>
+
+            <!-- Delete saved cache and session button -->
+            <div class="border-t border-border pt-3">
+                <button id="clear-session-btn" class="w-full flex items-center justify-center gap-1.5 p-2 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-all text-xs font-bold">
+                    <iconify-icon icon="lucide:trash-2"></iconify-icon> Delete Saved Sessions &amp; Clear Cached Data
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
-    <footer class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60">
+    <footer class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60 relative z-10">
         <p>© 2025 Joy Guru Tours &amp; Travels. All Rights Reserved. Portal secured by SSL.</p>
     </footer>
 
     <script src="script.js?v=9"></script>
-    <!-- Custom i18n modules -->
     <script src="assets/js/i18n.js"></script>
     <script src="assets/js/language.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-                        // Login submission handler
+            // Tabs toggle logic
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+            const loginSection = document.getElementById('login-section');
+            const signupSection = document.getElementById('signup-section');
+
+            if (tabLogin && tabSignup) {
+                tabLogin.addEventListener('click', () => {
+                    tabLogin.className = "flex-1 pb-3 text-sm font-bold border-b-2 border-primary text-primary transition-all";
+                    tabSignup.className = "flex-1 pb-3 text-sm font-bold border-b-2 border-transparent text-muted-foreground hover:text-primary transition-all";
+                    loginSection.classList.remove('hidden');
+                    signupSection.classList.add('hidden');
+                });
+
+                tabSignup.addEventListener('click', () => {
+                    tabSignup.className = "flex-1 pb-3 text-sm font-bold border-b-2 border-primary text-primary transition-all";
+                    tabLogin.className = "flex-1 pb-3 text-sm font-bold border-b-2 border-transparent text-muted-foreground hover:text-primary transition-all";
+                    signupSection.classList.remove('hidden');
+                    loginSection.classList.add('hidden');
+                });
+            }
+
+            // Login submission handler
             const loginForm = document.getElementById('login-form');
             loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -186,121 +321,52 @@
                         
                         if (result && result.success) {
                             StateEngine.login(result.name, result.email, result.token, result.role);
-                        } else {
-                            StateEngine.login(email.split('@')[0], email);
+                            UIUtils.showToast('Login Successful!', 'success');
+                            
+                            // Redirect logic
+                            if (StateEngine.isAdmin()) {
+                                window.location.href = "admin-control-center.html";
+                                return;
+                            }
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const redirect = urlParams.get('redirect');
+                            if (redirect === 'booking') {
+                                const tempVehicle = JSON.parse(localStorage.getItem('jg_temp_selected_vehicle'));
+                                const searchData = StateEngine.getActiveSearch();
+                                if (tempVehicle && searchData) {
+                                    const bookingData = {
+                                        name: localStorage.getItem('jg_user_name') || result.name,
+                                        phone: result.phone || '+91 94350 12345',
+                                        email: result.email,
+                                        pickup: searchData.pickup,
+                                        destination: searchData.destination,
+                                        date: searchData.date,
+                                        time: searchData.time,
+                                        passengers: searchData.passengers || '4 Passengers',
+                                        tripType: 'One Way',
+                                        vehicleName: tempVehicle.name,
+                                        vehicleType: tempVehicle.type,
+                                        notes: 'Requested via search results page after login.'
+                                    };
+                                    await StateEngine.createBookingRequestAsync(bookingData);
+                                    localStorage.removeItem('jg_temp_selected_vehicle');
+                                }
+                                window.location.href = "user-dashboard.html";
+                            } else {
+                                window.location.href = "index.html";
+                            }
                         }
                     } catch (err) {
-                        console.warn('API login failed, falling back to offline demo:', err.message);
-                        StateEngine.login(email.split('@')[0], email);
-                    }
-
-                    UIUtils.showToast('Login Successful!', 'success');
-                    
-                    // Redirect logic
-                    if (StateEngine.isAdmin()) {
-                        window.location.href = "admin-control-center.html";
-                        return;
-                    }
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirect = urlParams.get('redirect');
-                    if (redirect === 'booking') {
-                        const tempVehicle = JSON.parse(localStorage.getItem('jg_temp_selected_vehicle'));
-                        const searchData = StateEngine.getActiveSearch();
-                        if (tempVehicle && searchData) {
-                            const bookingData = {
-                                name: localStorage.getItem('jg_user_name') || email.split('@')[0],
-                                phone: '+91 94350 XXXXX',
-                                email: email,
-                                pickup: searchData.pickup,
-                                destination: searchData.destination,
-                                date: searchData.date,
-                                time: searchData.time,
-                                passengers: searchData.passengers || '4 Passengers',
-                                tripType: 'One Way',
-                                vehicleName: tempVehicle.name,
-                                vehicleType: tempVehicle.type,
-                                notes: 'Requested via search results page after login.'
-                            };
-                            await StateEngine.createBookingRequestAsync(bookingData);
-                            localStorage.removeItem('jg_temp_selected_vehicle');
-                        }
-                        window.location.href = "user-dashboard.html";
-                    } else if (StateEngine.isDemoMode()) {
-                        window.location.href = "search-results.html";
-                    } else {
-                        window.location.href = "index.html";
+                        UIUtils.showToast(err.message || 'Invalid email or password credentials', 'error');
                     }
                 });
             });
 
-            // Google Login Simulator
-            document.getElementById('google-login-btn').onclick = function() {
-                UIUtils.showLoading('Connecting with Google credentials...', 1200, async () => {
-                    const gEmail = 'rahul.sharma@gmail.com';
-                    const gName = 'Rahul Sharma';
-                    
-                    try {
-                        let result;
-                        try {
-                            result = await StateEngine.apiFetch('/auth/login', {
-                                method: 'POST',
-                                body: JSON.stringify({ email: gEmail, password: 'password123' })
-                            });
-                        } catch (err) {
-                            // Register on failure
-                            result = await StateEngine.apiFetch('/auth/register', {
-                                method: 'POST',
-                                body: JSON.stringify({ name: gName, email: gEmail, password: 'password123', phone: '+91 94350 12345' })
-                            });
-                        }
-                        
-                        if (result && result.success) {
-                            StateEngine.login(result.name || gName, result.email || gEmail, result.token, result.role);
-                        } else {
-                            StateEngine.login(gName, gEmail);
-                        }
-                    } catch (err) {
-                        console.warn('API Google login failed, fallback to local:', err.message);
-                        StateEngine.login(gName, gEmail);
-                    }
-
-                    UIUtils.showToast('Signed in via Google successfully!', 'success');
-                    
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirect = urlParams.get('redirect');
-                    if (redirect === 'booking') {
-                        const tempVehicle = JSON.parse(localStorage.getItem('jg_temp_selected_vehicle'));
-                        const searchData = StateEngine.getActiveSearch();
-                        if (tempVehicle && searchData) {
-                            const bookingData = {
-                                name: 'Rahul Sharma',
-                                phone: '+91 94350 XXXXX',
-                                email: gEmail,
-                                pickup: searchData.pickup,
-                                destination: searchData.destination,
-                                date: searchData.date,
-                                time: searchData.time,
-                                passengers: searchData.passengers || '4 Passengers',
-                                tripType: 'One Way',
-                                vehicleName: tempVehicle.name,
-                                vehicleType: tempVehicle.type,
-                                notes: 'Requested via search results page after Google login.'
-                            };
-                            await StateEngine.createBookingRequestAsync(bookingData);
-                            localStorage.removeItem('jg_temp_selected_vehicle');
-                        }
-                        window.location.href = "user-dashboard.html";
-                    } else if (StateEngine.isDemoMode()) {
-                        window.location.href = "search-results.html";
-                    } else {
-                        window.location.href = "index.html";
-                    }
-                });
-            };
-
             // Signup submission (Trigger OTP)
             const signupForm = document.getElementById('signup-form');
             const otpModal = document.getElementById('otp-modal');
+            let signupData = {}; // temporary storage for OTP phase
+
             if (signupForm) {
                 signupForm.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -313,8 +379,12 @@
                         UIUtils.showToast('Please fill out all details', 'error');
                         return;
                     }
+                    if (pass.length < 6) {
+                        UIUtils.showToast('Password must be at least 6 characters long', 'error');
+                        return;
+                    }
 
-                    // Show OTP modal
+                    signupData = { name, email, phone, password: pass };
                     if (otpModal) otpModal.classList.remove('hidden');
                 });
             }
@@ -332,17 +402,140 @@
                     const code = document.getElementById('otp-code-input').value.trim();
                     if (code === '1234') {
                         if (otpModal) otpModal.classList.add('hidden');
-                        UIUtils.showLoading('Creating secure account profile...', 1200, () => {
-                            UIUtils.showToast('Account verified! Please login.', 'success');
-                            if (signupForm) signupForm.reset();
-                            const tabLogin = document.getElementById('tab-login');
-                            if (tabLogin) tabLogin.click();
+                        UIUtils.showLoading('Creating secure account profile...', 1200, async () => {
+                            try {
+                                const result = await StateEngine.apiFetch('/auth/register', {
+                                    method: 'POST',
+                                    body: JSON.stringify(signupData)
+                                });
+                                
+                                if (result && result.success) {
+                                    UIUtils.showToast('Account registered successfully!', 'success');
+                                    StateEngine.login(result.name, result.email, result.token, result.role);
+                                    if (signupForm) signupForm.reset();
+                                    
+                                    // Redirect
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    const redirect = urlParams.get('redirect');
+                                    if (redirect === 'booking') {
+                                        window.location.href = "user-dashboard.html";
+                                    } else {
+                                        window.location.href = "index.html";
+                                    }
+                                }
+                            } catch (err) {
+                                UIUtils.showToast(err.message || 'Registration failed', 'error');
+                            }
                         });
                     } else {
                         UIUtils.showToast('Invalid verification code', 'error');
                     }
                 };
             }
+
+            // Google Login Modal Trigger
+            const googleLoginBtn = document.getElementById('google-login-btn');
+            const googleModal = document.getElementById('google-account-modal');
+            
+            if (googleLoginBtn && googleModal) {
+                googleLoginBtn.onclick = function() {
+                    googleModal.classList.remove('hidden');
+                    document.getElementById('google-custom-form-container').classList.add('hidden');
+                };
+            }
+
+            // Google Accounts choices listeners
+            document.getElementById('google-acc-rahul').onclick = () => {
+                handleGoogleAuthentication('Rahul Sharma', 'rahul.sharma@gmail.com', '+91 94350 12345');
+            };
+
+            document.getElementById('google-acc-priya').onclick = () => {
+                handleGoogleAuthentication('Priya Patel', 'priya.patel@gmail.com', '+91 94350 54321');
+            };
+
+            document.getElementById('google-acc-custom-toggle').onclick = () => {
+                const container = document.getElementById('google-custom-form-container');
+                container.classList.toggle('hidden');
+            };
+
+            document.getElementById('google-custom-submit-btn').onclick = () => {
+                const name = document.getElementById('google-custom-name').value.trim();
+                const email = document.getElementById('google-custom-email').value.trim();
+                const phone = document.getElementById('google-custom-phone').value.trim();
+
+                if (!name || !email || !phone) {
+                    UIUtils.showToast('Please fill out all custom Google profile details', 'error');
+                    return;
+                }
+
+                handleGoogleAuthentication(name, email, phone);
+            };
+
+            async function handleGoogleAuthentication(name, email, phone) {
+                UIUtils.showLoading('Connecting with Google credentials...', 1200, async () => {
+                    try {
+                        let result;
+                        try {
+                            // Try to login with standard password for simulated Google profiles
+                            result = await StateEngine.apiFetch('/auth/login', {
+                                method: 'POST',
+                                body: JSON.stringify({ email, password: 'password123' })
+                            });
+                        } catch (err) {
+                            // Register on failure
+                            result = await StateEngine.apiFetch('/auth/register', {
+                                method: 'POST',
+                                body: JSON.stringify({ name, email, phone, password: 'password123' })
+                            });
+                        }
+                        
+                        if (result && result.success) {
+                            StateEngine.login(result.name, result.email, result.token, result.role);
+                            UIUtils.showToast(`Signed in as ${result.name} successfully!`, 'success');
+                            googleModal.classList.add('hidden');
+                            
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const redirect = urlParams.get('redirect');
+                            if (redirect === 'booking') {
+                                const tempVehicle = JSON.parse(localStorage.getItem('jg_temp_selected_vehicle'));
+                                const searchData = StateEngine.getActiveSearch();
+                                if (tempVehicle && searchData) {
+                                    const bookingData = {
+                                        name: result.name,
+                                        phone: result.phone || phone,
+                                        email: result.email,
+                                        pickup: searchData.pickup,
+                                        destination: searchData.destination,
+                                        date: searchData.date,
+                                        time: searchData.time,
+                                        passengers: searchData.passengers || '4 Passengers',
+                                        tripType: 'One Way',
+                                        vehicleName: tempVehicle.name,
+                                        vehicleType: tempVehicle.type,
+                                        notes: 'Requested via search results page after Google login.'
+                                    };
+                                    await StateEngine.createBookingRequestAsync(bookingData);
+                                    localStorage.removeItem('jg_temp_selected_vehicle');
+                                }
+                                window.location.href = "user-dashboard.html";
+                            } else {
+                                window.location.href = "index.html";
+                            }
+                        }
+                    } catch (err) {
+                        UIUtils.showToast(err.message || 'Google Authentication failed', 'error');
+                    }
+                });
+            }
+
+            // Clear Cache and Session Option
+            document.getElementById('clear-session-btn').onclick = function() {
+                localStorage.clear();
+                UIUtils.showToast('All saved login sessions, tokens and cached profiles deleted successfully!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            };
 
             // Forgot Password modal toggle
             const forgotPassBtn = document.getElementById('forgot-pass-btn');
