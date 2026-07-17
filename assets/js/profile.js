@@ -130,5 +130,104 @@
         }
       }
     });
+    // Customer Dashboard Profile Editing Handler
+    const editBtn = document.getElementById('edit-profile-btn');
+    const cancelBtn = document.getElementById('cancel-profile-btn');
+    const actionGroup = document.getElementById('edit-actions-group');
+    const profileForm = document.getElementById('custom-profile-form');
+    
+    const fields = ['profile-disp-name', 'profile-disp-phone', 'profile-disp-email', 'profile-disp-password', 'profile-photo-url'];
+    
+    const initProfileFormValues = () => {
+      const rawName = localStorage.getItem('jg_user_name') || '';
+      const rawEmail = localStorage.getItem('jg_user_email') || '';
+      const rawPhone = localStorage.getItem('jg_user_phone') || '+91 94350 12345';
+      const rawAvatar = localStorage.getItem('jg_user_avatar') || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+      
+      const nameEl = document.getElementById('profile-disp-name');
+      const phoneEl = document.getElementById('profile-disp-phone');
+      const emailEl = document.getElementById('profile-disp-email');
+      const photoEl = document.getElementById('profile-photo-url');
+      const imgEl = document.getElementById('profile-avatar-img');
+      
+      if (nameEl) nameEl.value = rawName;
+      if (phoneEl) phoneEl.value = rawPhone;
+      if (emailEl) emailEl.value = rawEmail;
+      if (photoEl) photoEl.value = rawAvatar;
+      if (imgEl) imgEl.src = rawAvatar;
+    };
+
+    if (editBtn) {
+      initProfileFormValues();
+      
+      editBtn.addEventListener('click', () => {
+        fields.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && id !== 'profile-disp-email') {
+            el.removeAttribute('disabled');
+            el.classList.remove('bg-muted');
+          }
+        });
+        editBtn.classList.add('hidden');
+        if (actionGroup) actionGroup.classList.remove('hidden');
+      });
+    }
+
+    const disableForm = () => {
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.setAttribute('disabled', 'true');
+          el.classList.add('bg-muted');
+        }
+      });
+      if (editBtn) editBtn.classList.remove('hidden');
+      if (actionGroup) actionGroup.classList.add('hidden');
+    };
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        disableForm();
+        initProfileFormValues();
+      });
+    }
+
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const payload = {
+          name: document.getElementById('profile-disp-name').value.trim(),
+          phone: document.getElementById('profile-disp-phone').value.trim(),
+          avatarUrl: document.getElementById('profile-photo-url').value.trim()
+        };
+        
+        const passwordVal = document.getElementById('profile-disp-password').value;
+        if (passwordVal && passwordVal !== '••••••••') {
+          payload.password = passwordVal;
+        }
+        
+        try {
+          const result = await StateEngine.apiFetch('/auth/me', {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+          
+          if (result && result.success) {
+            localStorage.setItem('jg_user_name', result.data.name);
+            localStorage.setItem('jg_user_phone', result.data.phone);
+            localStorage.setItem('jg_user_avatar', result.data.avatarUrl);
+            
+            UIUtils.showToast('Profile updated successfully!', 'success');
+            disableForm();
+            initProfileFormValues();
+            
+            if (window.updateUserDisplay) window.updateUserDisplay();
+          }
+        } catch (err) {
+          UIUtils.showToast(err.message || 'Failed to save profile', 'error');
+        }
+      });
+    }
   });
 })();

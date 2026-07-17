@@ -984,21 +984,42 @@ document.addEventListener('DOMContentLoaded', function () {
         simBtn.textContent = "Processing...";
         simBtn.disabled = true;
 
-        setTimeout(function() {
+        setTimeout(async function() {
           if (razorpayModal) razorpayModal.classList.add('hidden');
           
-          UIUtils.showLoading('Confirming payment with Razorpay...', 1500, function() {
-            // Find current bookings array
-            const currentBookings = StateEngine.getBookings();
-            const bIndex = currentBookings.findIndex(b => b.id === booking.id);
-            if (bIndex !== -1) {
-              currentBookings[bIndex].status = 'Advance Paid';
-              currentBookings[bIndex].advancePaid = advanceRequired;
-              currentBookings[bIndex].balanceDue = balanceDue;
-              StateEngine.updateBookings(currentBookings);
+          UIUtils.showLoading('Confirming payment with Razorpay...', 1500, async function() {
+            try {
+              const payload = {
+                bookingId: booking.id,
+                amount: advanceRequired,
+                razorpay_order_id: 'order_' + booking.id + '_' + Date.now().toString().slice(-4),
+                razorpay_payment_id: 'pay_' + Math.floor(Math.random() * 900000),
+                razorpay_signature: 'dummy_signature'
+              };
+              
+              const result = await StateEngine.apiFetch('/payments/razorpay-verify', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+              });
+              
+              if (result && result.success) {
+                await StateEngine.getBookingsAsync();
+                UIUtils.showToast('Payment Completed! Booking Request Confirmed.', 'success');
+              } else {
+                UIUtils.showToast('Payment verification failed.', 'error');
+              }
+            } catch (err) {
+              console.warn('API verify failed, fallback to local update:', err.message);
+              const currentBookings = StateEngine.getBookings();
+              const bIndex = currentBookings.findIndex(b => b.id === booking.id);
+              if (bIndex !== -1) {
+                currentBookings[bIndex].status = 'Advance Paid';
+                currentBookings[bIndex].advancePaid = advanceRequired;
+                currentBookings[bIndex].balanceDue = balanceDue;
+                StateEngine.updateBookings(currentBookings);
+              }
+              UIUtils.showToast('Payment Completed! Booking Request Confirmed.', 'success');
             }
-
-            UIUtils.showToast('Payment Completed! Booking Request Confirmed.', 'success');
 
             // Redirect back to Dashboard
             setTimeout(() => {

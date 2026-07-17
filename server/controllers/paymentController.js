@@ -250,9 +250,87 @@ const downloadInvoicePDF = async (req, res, next) => {
   }
 };
 
+const crypto = require('crypto');
+
+// @desc    Handle Razorpay Webhook notification
+// @route   POST /api/payments/webhook
+// @access  Public
+const handleRazorpayWebhook = async (req, res, next) => {
+  try {
+    const signature = req.headers['x-razorpay-signature'];
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    if (secret && signature) {
+      const shasum = crypto.createHmac('sha256', secret);
+      shasum.update(JSON.stringify(req.body));
+      const digest = shasum.digest('hex');
+
+      if (digest !== signature) {
+        res.status(400);
+        return next(new Error('Invalid webhook signature'));
+      }
+    }
+
+    const event = req.body.event;
+    console.log(`[RAZORPAY WEBHOOK] Event received: ${event}`);
+
+    if (event === 'payment.captured') {
+      const paymentEntity = req.body.payload.payment.entity;
+      const orderId = paymentEntity.order_id;
+      const paymentId = paymentEntity.id;
+      const amount = paymentEntity.amount / 100;
+
+      let booking = null;
+      if (paymentEntity.notes && paymentEntity.notes.bookingId) {
+        booking = await Booking.findOne({ id: paymentEntity.notes.bookingId });
+      }
+
+      if (!booking && orderId) {
+        const parts = orderId.split('_');
+        if (parts.length > 1) {
+          booking = await Booking.findOne({ id: parts[1] });
+        }
+      }
+
+      if (booking) {
+        const existingPayment = await Payment.findOne({ transactionId: paymentId });
+        if (!existingPayment) {
+          const payment = await Payment.create({
+            bookingId: booking.id,
+            amount,
+            paymentMethod: 'razorpay',
+            paymentStatus: 'Completed',
+            transactionId: paymentId,
+            gatewayResponse: req.body
+          });
+
+          if (booking.status === 'Fare Proposed' || booking.status === 'Advance Required' || booking.status === 'Requested') {
+            booking.advancePaid = payment.amount;
+            booking.balanceDue = booking.finalFare - booking.advancePaid;
+            booking.status = 'Advance Paid';
+          } else {
+            booking.advancePaid += payment.amount;
+            booking.balanceDue = booking.finalFare - booking.advancePaid;
+            if (booking.balanceDue <= 0) {
+              booking.status = 'Completed';
+            }
+          }
+          await booking.save();
+          console.log(`[RAZORPAY WEBHOOK] Booking ${booking.id} updated successfully via webhook.`);
+        }
+      }
+    }
+
+    res.json({ status: 'ok' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createRazorpayOrder,
   verifyRazorpayPayment,
   getInvoices,
-  downloadInvoicePDF
+  downloadInvoicePDF,
+  handleRazorpayWebhook
 };
