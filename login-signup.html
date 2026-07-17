@@ -42,6 +42,7 @@
       }
     </style>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="bg-background text-foreground font-sans min-h-screen flex flex-col justify-between relative">
     <!-- Background Image with Overlay -->
@@ -113,9 +114,7 @@
                     <span class="relative bg-card px-3 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">or continue with</span>
                 </div>
 
-                <button id="google-login-btn" class="w-full border border-border hover:bg-muted py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-semibold">
-                    <iconify-icon icon="logos:google-icon" class="text-base"></iconify-icon> Google
-                </button>
+                <div id="google-login-btn" class="w-full flex justify-center mt-2"></div>
             </div>
 
             <!-- Sign Up Section -->
@@ -201,72 +200,6 @@
         </div>
     </div>
 
-    <!-- Google Account Selection Modal -->
-    <div id="google-account-modal" class="fixed inset-0 z-50 bg-primary/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-card w-full max-w-sm rounded-2xl border border-border p-6 shadow-2xl space-y-4 animate-scale-up text-left">
-            <div class="flex items-center justify-between border-b border-border pb-3">
-                <div class="flex items-center gap-2">
-                    <iconify-icon icon="logos:google-icon" class="text-lg"></iconify-icon>
-                    <span class="font-heading font-bold text-sm text-primary">Choose an account</span>
-                </div>
-                <button onclick="document.getElementById('google-account-modal').classList.add('hidden')" class="text-muted-foreground hover:text-primary text-lg">
-                    <iconify-icon icon="lucide:x"></iconify-icon>
-                </button>
-            </div>
-            
-            <p class="text-xs text-muted-foreground">to continue to <strong>Joy Guru Tours & Travels</strong></p>
-            
-            <div class="space-y-2.5">
-                <!-- Google Account 1 -->
-                <button id="google-acc-rahul" class="w-full flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted transition-all text-left">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">RS</div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold truncate text-foreground">Rahul Sharma</p>
-                        <p class="text-[10px] text-muted-foreground truncate">rahul.sharma@gmail.com</p>
-                    </div>
-                </button>
-
-                <!-- Google Account 2 -->
-                <button id="google-acc-priya" class="w-full flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted transition-all text-left">
-                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">PP</div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold truncate text-foreground">Priya Patel</p>
-                        <p class="text-[10px] text-muted-foreground truncate">priya.patel@gmail.com</p>
-                    </div>
-                </button>
-
-                <!-- Custom Account Selector -->
-                <button id="google-acc-custom-toggle" class="w-full flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted transition-all text-left">
-                    <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center text-xs">
-                        <iconify-icon icon="lucide:user-plus"></iconify-icon>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-xs font-semibold text-foreground">Use another account</p>
-                    </div>
-                </button>
-            </div>
-
-            <!-- Custom User Google Flow -->
-            <div id="google-custom-form-container" class="hidden border-t border-border pt-3 space-y-3">
-                <p class="text-xs font-semibold text-primary">Enter Google Profile Details</p>
-                <div class="space-y-2">
-                    <input id="google-custom-name" type="text" placeholder="Name (e.g., Ramesh Kumar)" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none">
-                    <input id="google-custom-email" type="email" placeholder="Email (e.g., ramesh@gmail.com)" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none">
-                    <input id="google-custom-phone" type="tel" placeholder="Phone (e.g., +91 94350 99999)" class="w-full bg-muted border border-input rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none">
-                </div>
-                <button id="google-custom-submit-btn" class="w-full bg-primary text-primary-foreground text-xs font-bold py-2 rounded-lg hover:bg-primary/95">
-                    Sign In &amp; Register Custom Google ID
-                </button>
-            </div>
-
-            <!-- Delete saved cache and session button -->
-            <div class="border-t border-border pt-3">
-                <button id="clear-session-btn" class="w-full flex items-center justify-center gap-1.5 p-2 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-all text-xs font-bold">
-                    <iconify-icon icon="lucide:trash-2"></iconify-icon> Delete Saved Sessions &amp; Clear Cached Data
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <footer class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60 relative z-10">
@@ -433,66 +366,19 @@
                 };
             }
 
-            // Google Login Modal Trigger
-            const googleLoginBtn = document.getElementById('google-login-btn');
-            const googleModal = document.getElementById('google-account-modal');
-            
-            if (googleLoginBtn && googleModal) {
-                googleLoginBtn.onclick = function() {
-                    googleModal.classList.remove('hidden');
-                    document.getElementById('google-custom-form-container').classList.add('hidden');
-                };
-            }
-
-            // Google Accounts choices listeners
-            document.getElementById('google-acc-rahul').onclick = () => {
-                handleGoogleAuthentication('Rahul Sharma', 'rahul.sharma@gmail.com', '+91 94350 12345');
-            };
-
-            document.getElementById('google-acc-priya').onclick = () => {
-                handleGoogleAuthentication('Priya Patel', 'priya.patel@gmail.com', '+91 94350 54321');
-            };
-
-            document.getElementById('google-acc-custom-toggle').onclick = () => {
-                const container = document.getElementById('google-custom-form-container');
-                container.classList.toggle('hidden');
-            };
-
-            document.getElementById('google-custom-submit-btn').onclick = () => {
-                const name = document.getElementById('google-custom-name').value.trim();
-                const email = document.getElementById('google-custom-email').value.trim();
-                const phone = document.getElementById('google-custom-phone').value.trim();
-
-                if (!name || !email || !phone) {
-                    UIUtils.showToast('Please fill out all custom Google profile details', 'error');
-                    return;
-                }
-
-                handleGoogleAuthentication(name, email, phone);
-            };
-
-            async function handleGoogleAuthentication(name, email, phone) {
-                UIUtils.showLoading('Connecting with Google credentials...', 1200, async () => {
+            // Real Google Identity Services (Google One Tap & Login Button) Integration
+            window.handleCredentialResponse = async function(response) {
+                const idToken = response.credential;
+                UIUtils.showLoading('Authenticating with Google credentials...', 1500, async () => {
                     try {
-                        let result;
-                        try {
-                            // Try to login with standard password for simulated Google profiles
-                            result = await StateEngine.apiFetch('/auth/login', {
-                                method: 'POST',
-                                body: JSON.stringify({ email, password: 'password123' })
-                            });
-                        } catch (err) {
-                            // Register on failure
-                            result = await StateEngine.apiFetch('/auth/register', {
-                                method: 'POST',
-                                body: JSON.stringify({ name, email, phone, password: 'password123' })
-                            });
-                        }
+                        const result = await StateEngine.apiFetch('/auth/google-login', {
+                            method: 'POST',
+                            body: JSON.stringify({ idToken })
+                        });
                         
                         if (result && result.success) {
                             StateEngine.login(result.name, result.email, result.token, result.role);
                             UIUtils.showToast(`Signed in as ${result.name} successfully!`, 'success');
-                            googleModal.classList.add('hidden');
                             
                             const urlParams = new URLSearchParams(window.location.search);
                             const redirect = urlParams.get('redirect');
@@ -502,7 +388,7 @@
                                 if (tempVehicle && searchData) {
                                     const bookingData = {
                                         name: result.name,
-                                        phone: result.phone || phone,
+                                        phone: result.phone || '',
                                         email: result.email,
                                         pickup: searchData.pickup,
                                         destination: searchData.destination,
@@ -526,16 +412,37 @@
                         UIUtils.showToast(err.message || 'Google Authentication failed', 'error');
                     }
                 });
-            }
-
-            // Clear Cache and Session Option
-            document.getElementById('clear-session-btn').onclick = function() {
-                localStorage.clear();
-                UIUtils.showToast('All saved login sessions, tokens and cached profiles deleted successfully!', 'success');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
             };
+
+            // Initialize Google Identity Services
+            const initGoogleOAuth = async () => {
+                try {
+                    const settingsRes = await fetch('/api/settings');
+                    const settingsData = await settingsRes.json();
+                    const clientId = (settingsData && settingsData.success && settingsData.data.googleClientId) || '716276469997-fakeclientid.apps.googleusercontent.com';
+                    
+                    if (window.google && window.google.accounts) {
+                        google.accounts.id.initialize({
+                            client_id: clientId,
+                            callback: window.handleCredentialResponse
+                        });
+                        
+                        google.accounts.id.renderButton(
+                            document.getElementById("google-login-btn"),
+                            { theme: "outline", size: "large", width: 380 }
+                        );
+                        
+                        google.accounts.id.prompt();
+                    } else {
+                        console.warn('Google GSI script not loaded yet, retrying...');
+                        setTimeout(initGoogleOAuth, 1000);
+                    }
+                } catch (err) {
+                    console.error('Failed to initialize Google OAuth:', err);
+                }
+            };
+            
+            initGoogleOAuth();
 
             // Forgot Password modal toggle
             const forgotPassBtn = document.getElementById('forgot-pass-btn');

@@ -231,6 +231,46 @@ async function testAuth() {
     if (r.status === 200 && r.body.token) log('PASS', 'AUTH', 'Password hashing: bcrypt verified (login works)');
     else log('FAIL', 'AUTH', 'Password hashing verification', `Got ${r.status}`);
   } catch (e) { log('FAIL', 'AUTH', 'Password hashing verification', e.message); }
+
+  // 1.21 Google Login — missing ID token
+  try {
+    const r = await request('POST', '/api/auth/google-login', {});
+    if (r.status === 400) log('PASS', 'AUTH', 'Google Login: missing token returns 400');
+    else log('FAIL', 'AUTH', 'Google Login: missing token should return 400', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'AUTH', 'Google Login: missing token', e.message); }
+
+  // 1.22 Google Login — invalid ID token
+  try {
+    const r = await request('POST', '/api/auth/google-login', { idToken: 'invalid_token_999' });
+    if (r.status === 400) log('PASS', 'AUTH', 'Google Login: invalid token returns 400');
+    else log('FAIL', 'AUTH', 'Google Login: invalid token should return 400', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'AUTH', 'Google Login: invalid token', e.message); }
+
+  // 1.23 Google Login — valid test ID token (new registration)
+  let googleUserToken = null;
+  try {
+    const r = await request('POST', '/api/auth/google-login', { idToken: 'test_google_id_token_123' });
+    if (r.status === 200 && r.body.success && r.body.token) {
+      googleUserToken = r.body.token;
+      log('PASS', 'AUTH', 'Google Login: valid test token creates new MongoDB user');
+    } else log('FAIL', 'AUTH', 'Google Login: valid test token registration', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'AUTH', 'Google Login: valid test token registration', e.message); }
+
+  // 1.24 Google Login — existing login (no duplicate user creation)
+  try {
+    const r = await request('POST', '/api/auth/google-login', { idToken: 'test_google_id_token_123' });
+    if (r.status === 200 && r.body.success && r.body.token) {
+      log('PASS', 'AUTH', 'Google Login: existing user logs in correctly (no duplicate creation)');
+    } else log('FAIL', 'AUTH', 'Google Login: existing user login', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'AUTH', 'Google Login: existing user login', e.message); }
+
+  // 1.25 Google Login JWT — get profile with Google JWT on protected route
+  try {
+    const r = await request('GET', '/api/auth/me', null, googleUserToken);
+    if (r.status === 200 && r.body.success && r.body.data.email === 'google_qa_test@testmail.com') {
+      log('PASS', 'AUTH', 'Google JWT: successfully accesses protected route (/me)');
+    } else log('FAIL', 'Google JWT access check', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'Google JWT access check', e.message); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -990,7 +1030,7 @@ async function testCloudinary() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  14. CLEANUP — Delete test booking
+//  14. CLEANUP — Delete test booking & test users
 // ═══════════════════════════════════════════════════════════════
 async function cleanup() {
   console.log('\n╔═══════════════════════════════════════════╗');
@@ -1003,6 +1043,21 @@ async function cleanup() {
       if (r.status === 200) log('PASS', 'CLEANUP', `Deleted test booking ${testBookingId}`);
       else log('WARN', 'CLEANUP', `Could not delete test booking`, `Got ${r.status}`);
     } catch (e) { log('WARN', 'CLEANUP', 'Booking cleanup failed', e.message); }
+  }
+
+  try {
+    const mongoose = require('mongoose');
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/joygurutravels');
+    
+    // Delete all QA test users
+    const User = require('./server/models/User');
+    const result = await User.deleteMany({
+      email: { $in: [TEST_USER.email, 'google_qa_test@testmail.com', `evil_${UNIQUE}@hack.com`, `qatest_${UNIQUE}@testmail.com`] }
+    });
+    log('PASS', 'CLEANUP', `Deleted ${result.deletedCount} test users from MongoDB`);
+    await mongoose.disconnect();
+  } catch (err) {
+    log('WARN', 'CLEANUP', 'Failed to clean up test users from MongoDB', err.message);
   }
 }
 

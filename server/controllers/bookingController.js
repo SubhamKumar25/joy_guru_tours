@@ -27,8 +27,15 @@ const createBooking = async (req, res, next) => {
       return next(new Error('Please fill in all required travel request fields'));
     }
 
-    const count = await Booking.countDocuments();
-    const dbUniqueId = `JG-${1000 + count + 1}`;
+    const latestBooking = await Booking.findOne({}).sort({ createdAt: -1 });
+    let sequence = 1001;
+    if (latestBooking && latestBooking.id) {
+      const match = latestBooking.id.match(/JG-(\d+)/);
+      if (match) {
+        sequence = parseInt(match[1]) + 1;
+      }
+    }
+    const dbUniqueId = `JG-${sequence}`;
 
     const booking = await Booking.create({
       id: dbUniqueId,

@@ -36,6 +36,7 @@ const updateSettings = async (req, res, next) => {
     settings.refundPolicy = req.body.refundPolicy !== undefined ? req.body.refundPolicy : settings.refundPolicy;
     settings.promoCouponCode = req.body.promoCouponCode !== undefined ? req.body.promoCouponCode : settings.promoCouponCode;
     settings.minAdvancePercent = req.body.minAdvancePercent !== undefined ? parseInt(req.body.minAdvancePercent) : settings.minAdvancePercent;
+    settings.googleClientId = req.body.googleClientId !== undefined ? req.body.googleClientId : settings.googleClientId;
 
     settings.updatedAt = Date.now();
     const updatedSettings = await settings.save();

@@ -17,13 +17,12 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please add a password'],
-    minlength: 6,
+    required: false,
     select: false
   },
   phone: {
     type: String,
-    required: [true, 'Please add a phone number']
+    required: false
   },
   role: {
     type: String,
@@ -33,6 +32,15 @@ const userSchema = new mongoose.Schema({
   avatarUrl: {
     type: String,
     default: ''
+  },
+  googleId: {
+    type: String,
+    default: ''
+  },
+  authProvider: {
+    type: String,
+    enum: ['email', 'google'],
+    default: 'email'
   },
   favoritePlaces: {
     home: { type: String, default: '' },

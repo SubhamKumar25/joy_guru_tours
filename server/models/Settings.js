@@ -33,6 +33,10 @@ const settingsSchema = new mongoose.Schema({
     type: Number,
     default: 25 // 25% minimum advance payment required
   },
+  googleClientId: {
+    type: String,
+    default: ''
+  },
   updatedAt: {
     type: Date,
     default: Date.now

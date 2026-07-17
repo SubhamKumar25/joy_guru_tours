@@ -12,13 +12,15 @@ const {
   getCustomers,
   uploadAvatar,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  googleLogin
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+router.post('/google-login', googleLogin);
 router.get('/me', protect, getMe);
 router.put('/me', protect, updateProfile);
 router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
