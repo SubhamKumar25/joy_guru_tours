@@ -1,9 +1,12 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const https = require('https');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const cloudinary = require('../config/cloudinary');
 const { sendNotificationEmail } = require('../services/mailService');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Helper to generate JWT Token
 const generateToken = (id) => {
@@ -357,7 +360,7 @@ const googleLogin = async (req, res, next) => {
       return next(new Error('Google ID Token is required'));
     }
 
-    // Verify token using Google's validation API
+    // Verify token using Google's official library
     let payload;
     if (idToken === 'test_google_id_token_123') {
       // QA test bypass hook
@@ -369,24 +372,11 @@ const googleLogin = async (req, res, next) => {
       };
     } else {
       try {
-        payload = await new Promise((resolve, reject) => {
-          const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`;
-          https.get(url, (googleRes) => {
-            let data = '';
-            googleRes.on('data', chunk => data += chunk);
-            googleRes.on('end', () => {
-              try {
-                const parsed = JSON.parse(data);
-                if (googleRes.statusCode !== 200) {
-                  return reject(new Error(parsed.error_description || 'Google ID Token validation failed'));
-                }
-                resolve(parsed);
-              } catch (err) {
-                reject(err);
-              }
-            });
-          }).on('error', reject);
+        const ticket = await googleClient.verifyIdToken({
+          idToken,
+          audience: process.env.GOOGLE_CLIENT_ID
         });
+        payload = ticket.getPayload();
       } catch (verifyErr) {
         res.status(400);
         return next(new Error(`Google token verification failed: ${verifyErr.message}`));
