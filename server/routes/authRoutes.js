@@ -10,7 +10,9 @@ const {
   getMe,
   updateProfile,
   getCustomers,
-  uploadAvatar
+  uploadAvatar,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
@@ -21,5 +23,7 @@ router.get('/me', protect, getMe);
 router.put('/me', protect, updateProfile);
 router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
 router.get('/customers', protect, adminOnly, getCustomers);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password/:token', resetPassword);
 
 module.exports = router;

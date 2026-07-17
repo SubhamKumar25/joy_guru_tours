@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
-
-const isDbConnected = () => mongoose.connection.readyState === 1;
+const { logAudit } = require('../utils/auditLogger');
+const { sendNotificationEmail } = require('../services/mailService');
 
 // @desc    Create new booking request
 // @route   POST /api/bookings
@@ -26,38 +25,6 @@ const createBooking = async (req, res, next) => {
     if (!customerName || !customerPhone || !pickup || !destination || !travelDate || !travelTime || !vehicleName || !vehicleType) {
       res.status(400);
       return next(new Error('Please fill in all required travel request fields'));
-    }
-
-    const uniqueId = `JG-${1000 + Math.floor(Math.random() * 9000)}`;
-
-    if (!isDbConnected()) {
-      // Mock creation in offline mode
-      return res.status(201).json({
-        success: true,
-        data: {
-          id: uniqueId,
-          userId: userId || null,
-          customerName,
-          customerPhone,
-          customerEmail: customerEmail || '',
-          pickup,
-          destination,
-          travelDate,
-          travelTime,
-          passengerCount: parseInt(passengerCount) || 1,
-          specialRequest: specialRequest || '',
-          vehicleName,
-          vehicleType,
-          status: 'Requested',
-          baseFare: 0,
-          discount: 0,
-          finalFare: 0,
-          advanceRequired: 0,
-          advancePaid: 0,
-          balanceDue: 0,
-          createdAt: new Date().toISOString()
-        }
-      });
     }
 
     const count = await Booking.countDocuments();
@@ -86,6 +53,15 @@ const createBooking = async (req, res, next) => {
       balanceDue: 0
     });
 
+    // Write audit log
+    await logAudit(
+      userId || null,
+      customerName,
+      'BOOKING_CREATE',
+      `Booking request ${dbUniqueId} created for route ${pickup} to ${destination}.`,
+      req.ip
+    );
+
     res.status(201).json({
       success: true,
       data: booking
@@ -100,13 +76,6 @@ const createBooking = async (req, res, next) => {
 // @access  Private/Admin
 const getBookings = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: []
-      });
-    }
-
     const bookings = await Booking.find({}).sort({ createdAt: -1 });
     res.json({
       success: true,
@@ -122,13 +91,6 @@ const getBookings = async (req, res, next) => {
 // @access  Private
 const getMyBookings = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: []
-      });
-    }
-
     const query = {
       $or: [
         { userId: req.user._id },
@@ -151,21 +113,6 @@ const getMyBookings = async (req, res, next) => {
 // @access  Private
 const getBookingById = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: {
-          id: req.params.id,
-          customerName: ' राहुल शर्मा (Mock)',
-          pickup: 'Silchar',
-          destination: 'Guwahati',
-          travelDate: '2026-07-20',
-          travelTime: '10:00 AM',
-          status: 'Requested'
-        }
-      });
-    }
-
     const booking = await Booking.findOne({ id: req.params.id });
     if (!booking) {
       res.status(404);
@@ -196,13 +143,6 @@ const getBookingById = async (req, res, next) => {
 // @access  Private
 const updateBooking = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: Object.assign({ id: req.params.id }, req.body)
-      });
-    }
-
     const booking = await Booking.findOne({ id: req.params.id });
     if (!booking) {
       res.status(404);
@@ -218,6 +158,8 @@ const updateBooking = async (req, res, next) => {
       res.status(403);
       return next(new Error('Unauthorized, you cannot update this booking request'));
     }
+
+    const previousStatus = booking.status;
 
     if (isAdmin) {
       booking.customerName = req.body.customerName !== undefined ? req.body.customerName : booking.customerName;
@@ -250,6 +192,27 @@ const updateBooking = async (req, res, next) => {
     }
 
     const updatedBooking = await booking.save();
+
+    // Log Audit Change
+    await logAudit(
+      req.user._id,
+      req.user.name,
+      'BOOKING_UPDATE',
+      `Booking ${booking.id} updated. Status changed from ${previousStatus} to ${booking.status}.`,
+      req.ip
+    );
+
+    // If Fare was proposed, send customer an email notification
+    if (previousStatus === 'Requested' && booking.status === 'Fare Proposed') {
+      const subject = `Fare Proposed for Booking Ref: ${booking.id}`;
+      const text = `Hello ${booking.customerName}, the administrator has proposed a fare of INR ${booking.finalFare} for your trip from ${booking.pickup} to ${booking.destination}. Advance required: INR ${booking.advanceRequired}. Please pay to confirm.`;
+      const html = `<p>Hello <strong>${booking.customerName}</strong>,</p>
+                    <p>The administrator has proposed a fare of <strong>INR ${booking.finalFare}</strong> for your trip Ref: <strong>${booking.id}</strong>.</p>
+                    <p>Advance required: <strong>INR ${booking.advanceRequired}</strong>.</p>
+                    <p>Please log in to your dashboard to confirm your booking and complete the payment.</p>`;
+      await sendNotificationEmail(booking.customerEmail, subject, text, html);
+    }
+
     res.json({
       success: true,
       data: updatedBooking
@@ -264,18 +227,20 @@ const updateBooking = async (req, res, next) => {
 // @access  Private/Admin
 const deleteBooking = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        message: 'Booking record successfully deleted'
-      });
-    }
-
     const booking = await Booking.findOneAndDelete({ id: req.params.id });
     if (!booking) {
       res.status(404);
       return next(new Error('Booking record not found'));
     }
+
+    // Log Audit Log deletion
+    await logAudit(
+      req.user._id,
+      req.user.name,
+      'BOOKING_DELETE',
+      `Booking record ${req.params.id} permanently deleted.`,
+      req.ip
+    );
 
     res.json({
       success: true,

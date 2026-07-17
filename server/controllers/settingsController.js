@@ -1,30 +1,10 @@
-const mongoose = require('mongoose');
 const Settings = require('../models/Settings');
-
-// Helper to check DB connectivity
-const isDbConnected = () => mongoose.connection.readyState === 1;
 
 // @desc    Get platform settings
 // @route   GET /api/settings
 // @access  Public
 const getSettings = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: {
-          companyName: 'Joy Guru Tours & Travels (Offline Mode)',
-          supportPhone: '+91 94350 12345',
-          supportWhatsapp: '+91 94350 12345',
-          supportEmail: 'info@joygurutravels.com',
-          officeAddress: 'Club Road, Silchar, Assam - 788001',
-          refundPolicy: 'No refund within 24 hours of scheduled travel date.',
-          promoCouponCode: 'JOYGURU10',
-          minAdvancePercent: 25
-        }
-      });
-    }
-
     let settings = await Settings.findOne({});
     if (!settings) {
       settings = await Settings.create({});
@@ -43,13 +23,6 @@ const getSettings = async (req, res, next) => {
 // @access  Private/Admin
 const updateSettings = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: req.body
-      });
-    }
-
     let settings = await Settings.findOne({});
     if (!settings) {
       settings = await Settings.create({});

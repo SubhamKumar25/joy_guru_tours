@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-
-const isDbConnected = () => mongoose.connection.readyState === 1;
+const cloudinary = require('../config/cloudinary');
+const { sendNotificationEmail } = require('../services/mailService');
 
 // Helper to generate JWT Token
 const generateToken = (id) => {
@@ -21,19 +21,6 @@ const registerUser = async (req, res, next) => {
     if (!name || !email || !password || !phone) {
       res.status(400);
       return next(new Error('Please fill in all registration fields'));
-    }
-
-    if (!isDbConnected()) {
-      // Mock success for offline mode
-      return res.status(201).json({
-        success: true,
-        _id: 'mock_user_id',
-        name,
-        email,
-        phone,
-        role: 'customer',
-        token: generateToken('mock_user_id')
-      });
     }
 
     // Check if user already exists
@@ -81,20 +68,6 @@ const loginUser = async (req, res, next) => {
     if (!email || !password) {
       res.status(400);
       return next(new Error('Please enter both email and password'));
-    }
-
-    if (!isDbConnected()) {
-      // Offline mode simulator
-      const isMockAdmin = email.toLowerCase().includes('admin') || email === 'admin@joyguru.com';
-      return res.json({
-        success: true,
-        _id: isMockAdmin ? 'mock_admin_id' : 'mock_customer_id',
-        name: isMockAdmin ? 'Joy Guru Administrator (Offline)' : email.split('@')[0],
-        email: email,
-        phone: '+91 94350 12345',
-        role: isMockAdmin ? 'admin' : 'customer',
-        token: generateToken(isMockAdmin ? 'mock_admin_id' : 'mock_customer_id')
-      });
     }
 
     // Auto-create/seed default administrator account if it doesn't exist yet
@@ -167,13 +140,6 @@ const getMe = async (req, res, next) => {
 // @access  Private
 const updateProfile = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: req.body
-      });
-    }
-
     const user = await User.findById(req.user._id);
     if (!user) {
       res.status(404);
@@ -219,12 +185,6 @@ const updateProfile = async (req, res, next) => {
 // @access  Private/Admin
 const getCustomers = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: []
-      });
-    }
     const customers = await User.find({ role: 'customer' });
     res.json({
       success: true,
@@ -234,8 +194,6 @@ const getCustomers = async (req, res, next) => {
     next(error);
   }
 };
-
-const cloudinary = require('../config/cloudinary');
 
 // @desc    Upload profile avatar image to Cloudinary
 // @route   POST /api/auth/upload-avatar
@@ -252,11 +210,20 @@ const uploadAvatar = async (req, res, next) => {
                                    process.env.CLOUDINARY_API_KEY !== 'mock_key';
 
     if (!isCloudinaryConfigured) {
-      console.log('[CLOUDINARY STUB] Returning high-quality mock unsplash avatar due to unconfigured keys.');
-      return res.json({
-        success: true,
-        url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
-      });
+      res.status(503);
+      return next(new Error('Cloudinary credentials missing or unconfigured'));
+    }
+
+    // Delete old avatar if present in Cloudinary
+    if (req.user && req.user.avatarUrl && req.user.avatarUrl.includes('cloudinary')) {
+      try {
+        const parts = req.user.avatarUrl.split('/');
+        const fileAndExt = parts[parts.length - 1];
+        const publicId = `joyguru_avatars/${fileAndExt.split('.')[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      } catch (err) {
+        console.error('Failed to delete old Cloudinary image:', err);
+      }
     }
 
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -280,11 +247,110 @@ const uploadAvatar = async (req, res, next) => {
   }
 };
 
+// @desc    Forgot Password - Request Reset Link
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400);
+      return next(new Error('Please enter email address'));
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(404);
+      return next(new Error('No user account found with this email'));
+    }
+
+    // Generate token
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    // Send email reset link
+    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password.html?token=${resetToken}`;
+
+    const subject = 'Password Recovery Request - Joy Guru Travels';
+    const text = `You are receiving this email because you requested a password recovery for your account. Please make a request to: \n\n ${resetUrl}`;
+    const html = `<p>You are receiving this email because you requested a password recovery for your account.</p>
+                  <p>Please click the link below to set a new password:</p>
+                  <p><a href="${resetUrl}" target="_blank">${resetUrl}</a></p>
+                  <p>If you did not request this, please ignore this email.</p>`;
+
+    const mailSent = await sendNotificationEmail(email, subject, text, html);
+
+    if (!mailSent) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      res.status(500);
+      return next(new Error('SMTP service is unconfigured or unable to send recovery emails'));
+    }
+
+    res.json({
+      success: true,
+      message: 'Password reset link sent to your email address'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Reset Password with token
+// @route   POST /api/auth/reset-password/:token
+// @access  Public
+const resetPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      res.status(400);
+      return next(new Error('Please enter a new password'));
+    }
+
+    // Get hashed token
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      res.status(400);
+      return next(new Error('Invalid or expired recovery token'));
+    }
+
+    // Set new password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password successfully reset',
+      token: generateToken(user._id)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
   updateProfile,
   getCustomers,
-  uploadAvatar
+  uploadAvatar,
+  forgotPassword,
+  resetPassword
 };

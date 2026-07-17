@@ -42,6 +42,9 @@ app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/vehicles', require('./routes/vehicleRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/audit-logs', require('./routes/auditLogRoutes'));
 
 // Serve static frontend from the parent root directory
 app.use(express.static(path.join(__dirname, '..')));

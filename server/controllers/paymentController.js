@@ -5,8 +5,7 @@ const Invoice = require('../models/Invoice');
 const { createOrder, verifyPayment } = require('../services/razorpayService');
 const { generateInvoicePDF } = require('../services/pdfService');
 const { sendNotificationEmail } = require('../services/mailService');
-
-const isDbConnected = () => mongoose.connection.readyState === 1;
+const crypto = require('crypto');
 
 // @desc    Create Razorpay checkout order ID
 // @route   POST /api/payments/razorpay-order
@@ -18,19 +17,6 @@ const createRazorpayOrder = async (req, res, next) => {
     if (!bookingId || !amount) {
       res.status(400);
       return next(new Error('Please provide bookingId and payment amount'));
-    }
-
-    if (!isDbConnected()) {
-      return res.status(201).json({
-        success: true,
-        data: {
-          success: true,
-          orderId: `order_${bookingId}_${Date.now().toString().slice(-4)}`,
-          amount: parseFloat(amount),
-          currency: 'INR',
-          isMock: true
-        }
-      });
     }
 
     const booking = await Booking.findOne({ id: bookingId });
@@ -66,18 +52,6 @@ const verifyRazorpayPayment = async (req, res, next) => {
     if (!bookingId || !amount || !razorpay_payment_id) {
       res.status(400);
       return next(new Error('Missing payment verification parameters'));
-    }
-
-    if (!isDbConnected()) {
-      // Mock payment verification success
-      return res.json({
-        success: true,
-        message: 'Payment verified and booking state updated successfully (Offline Mode)',
-        data: {
-          payment: { bookingId, amount: parseFloat(amount), paymentStatus: 'Completed', transactionId: razorpay_payment_id },
-          invoice: { invoiceNumber: `INV-2026-${Math.floor(Math.random() * 9000)}`, bookingId, customerName: 'Rahul Sharma', travelDate: '2026-07-20', finalFare: parseFloat(amount) }
-        }
-      });
     }
 
     // Verify signature
@@ -163,15 +137,6 @@ const verifyRazorpayPayment = async (req, res, next) => {
 // @access  Private
 const getInvoices = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: [
-          { invoiceNumber: 'INV-2026-1001', bookingId: 'JG-2025-4829', customerName: 'Rahul Sharma', travelDate: '2025-10-15', route: 'Silchar ⇄ Shillong', finalFare: 5999, advancePaid: 1500, remainingPaid: 0, paymentStatus: 'PAID' }
-        ]
-      });
-    }
-
     let query = {};
 
     if (req.user.role === 'customer') {
@@ -201,42 +166,20 @@ const getInvoices = async (req, res, next) => {
 // @access  Private
 const downloadInvoicePDF = async (req, res, next) => {
   try {
-    let bookingObj = null;
+    const bookingObj = await Booking.findOne({ id: req.params.bookingId });
+    if (!bookingObj) {
+      res.status(404);
+      return next(new Error('Booking details not found'));
+    }
 
-    if (!isDbConnected()) {
-      // Mock booking object for PDF compilation
-      bookingObj = {
-        id: req.params.bookingId,
-        customerName: 'Rahul Sharma (Offline Test)',
-        customerPhone: '+91 94350 12345',
-        customerEmail: 'rahul@example.com',
-        vehicleName: 'Toyota Innova Crysta',
-        vehicleType: 'suv',
-        pickup: 'Silchar Airport (IXS), Assam',
-        destination: 'Shillong, Meghalaya',
-        travelDate: '2026-07-20',
-        travelTime: '10:00 AM',
-        finalFare: 6000,
-        advancePaid: 1500,
-        balanceDue: 4500,
-        status: 'Advance Paid'
-      };
-    } else {
-      bookingObj = await Booking.findOne({ id: req.params.bookingId });
-      if (!bookingObj) {
-        res.status(404);
-        return next(new Error('Booking details not found'));
-      }
+    const isOwner = req.user.role === 'admin' || 
+                    (bookingObj.userId && bookingObj.userId.toString() === req.user._id.toString()) ||
+                    bookingObj.customerEmail === req.user.email ||
+                    bookingObj.customerPhone === req.user.phone;
 
-      const isOwner = req.user.role === 'admin' || 
-                      (bookingObj.userId && bookingObj.userId.toString() === req.user._id.toString()) ||
-                      bookingObj.customerEmail === req.user.email ||
-                      bookingObj.customerPhone === req.user.phone;
-
-      if (!isOwner) {
-        res.status(403);
-        return next(new Error('Not authorized to access this invoice receipt'));
-      }
+    if (!isOwner) {
+      res.status(403);
+      return next(new Error('Not authorized to access this invoice receipt'));
     }
 
     // Setup headers
@@ -249,8 +192,6 @@ const downloadInvoicePDF = async (req, res, next) => {
     next(error);
   }
 };
-
-const crypto = require('crypto');
 
 // @desc    Handle Razorpay Webhook notification
 // @route   POST /api/payments/webhook
@@ -327,10 +268,99 @@ const handleRazorpayWebhook = async (req, res, next) => {
   }
 };
 
+// @desc    Get Payment History
+// @route   GET /api/payments
+// @access  Private
+const getPaymentHistory = async (req, res, next) => {
+  try {
+    let query = {};
+    if (req.user.role === 'customer') {
+      const userBookings = await Booking.find({
+        $or: [
+          { userId: req.user._id },
+          { customerEmail: req.user.email },
+          { customerPhone: req.user.phone }
+        ]
+      });
+      const bookingIds = userBookings.map(b => b.id);
+      query = { bookingId: { $in: bookingIds } };
+    }
+
+    const payments = await Payment.find(query).sort({ createdAt: -1 });
+    res.json({
+      success: true,
+      data: payments
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Refund Razorpay Payment (Skeleton / DB Update)
+// @route   POST /api/payments/:paymentId/refund
+// @access  Private/Admin
+const refundPayment = async (req, res, next) => {
+  try {
+    const payment = await Payment.findOne({ transactionId: req.params.paymentId });
+    if (!payment) {
+      res.status(404);
+      return next(new Error('Payment transaction record not found'));
+    }
+
+    if (payment.paymentStatus === 'Refunded') {
+      res.status(400);
+      return next(new Error('This payment transaction has already been refunded'));
+    }
+
+    // Live Razorpay refund call if keys configured
+    const isRazorpayConfigured = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID !== 'rzp_test_dummy';
+    let gatewayRefundId = 'ref_mock_' + Math.floor(Math.random() * 900000);
+
+    if (isRazorpayConfigured) {
+      try {
+        const { getRazorpayInstance } = require('../services/razorpayService');
+        const rzp = getRazorpayInstance();
+        if (rzp) {
+          const rzpRefund = await rzp.payments.refund(payment.transactionId, {
+            amount: payment.amount * 100 // convert back to paise
+          });
+          gatewayRefundId = rzpRefund.id;
+        }
+      } catch (err) {
+        console.error('Razorpay API refund failure, falling back to db log:', err);
+      }
+    }
+
+    // Update payment state
+    payment.paymentStatus = 'Refunded';
+    payment.gatewayResponse = Object.assign({}, payment.gatewayResponse, { refundId: gatewayRefundId, refundedAt: new Date().toISOString() });
+    await payment.save();
+
+    // Update booking values if linked
+    const booking = await Booking.findOne({ id: payment.bookingId });
+    if (booking) {
+      booking.advancePaid = Math.max(0, booking.advancePaid - payment.amount);
+      booking.balanceDue = booking.finalFare - booking.advancePaid;
+      booking.status = 'Cancelled'; // Mark cancelled on refund as standard travel policy
+      await booking.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Payment refunded successfully',
+      data: payment
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createRazorpayOrder,
   verifyRazorpayPayment,
   getInvoices,
   downloadInvoicePDF,
-  handleRazorpayWebhook
+  handleRazorpayWebhook,
+  getPaymentHistory,
+  refundPayment
 };

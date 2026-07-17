@@ -1,24 +1,10 @@
-const mongoose = require('mongoose');
 const Vehicle = require('../models/Vehicle');
-
-const isDbConnected = () => mongoose.connection.readyState === 1;
 
 // @desc    Get all vehicles
 // @route   GET /api/vehicles
 // @access  Public
 const getVehicles = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: [
-          { id: 1, name: 'Toyota Innova Crysta', type: 'suv', number: 'AS-11-A-1234', capacity: 7, price: 3500, status: 'Available' },
-          { id: 2, name: 'Maruti Suzuki Swift Dzire', type: 'sedan', number: 'AS-11-B-5678', capacity: 4, price: 2000, status: 'Available' },
-          { id: 3, name: 'Hyundai Grand i10', type: 'hatchback', number: 'AS-11-C-9012', capacity: 4, price: 1500, status: 'Maintenance' }
-        ]
-      });
-    }
-
     const vehicles = await Vehicle.find({});
     res.json({
       success: true,
@@ -39,13 +25,6 @@ const addVehicle = async (req, res, next) => {
     if (!name || !type || !number || !capacity || !price) {
       res.status(400);
       return next(new Error('Please fill in all vehicle registration fields'));
-    }
-
-    if (!isDbConnected()) {
-      return res.status(201).json({
-        success: true,
-        data: { id: 99, name, type, number, capacity: parseInt(capacity), price: parseFloat(price), status: status || 'Available' }
-      });
     }
 
     const count = await Vehicle.countDocuments();
@@ -75,13 +54,6 @@ const addVehicle = async (req, res, next) => {
 // @access  Private/Admin
 const updateVehicle = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        data: Object.assign({ id: parseInt(req.params.id) }, req.body)
-      });
-    }
-
     const vehicle = await Vehicle.findOne({ id: parseInt(req.params.id) });
     if (!vehicle) {
       res.status(404);
@@ -110,13 +82,6 @@ const updateVehicle = async (req, res, next) => {
 // @access  Private/Admin
 const deleteVehicle = async (req, res, next) => {
   try {
-    if (!isDbConnected()) {
-      return res.json({
-        success: true,
-        message: 'Vehicle registration record deleted successfully'
-      });
-    }
-
     const vehicle = await Vehicle.findOneAndDelete({ id: parseInt(req.params.id) });
     if (!vehicle) {
       res.status(404);

@@ -146,10 +146,10 @@
                 <h3 class="font-heading font-bold text-lg text-primary">Recover Password</h3>
                 <p class="text-xs text-muted-foreground mt-1">Enter your registered email address below</p>
             </div>
-            <input type="email" placeholder="email@example.com" class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-xs focus:ring-2 focus:ring-ring focus:outline-none">
+            <input type="email" id="forgot-email-input" placeholder="email@example.com" class="w-full bg-muted border border-input rounded-lg px-4 py-2.5 text-xs focus:ring-2 focus:ring-ring focus:outline-none">
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button onclick="document.getElementById('forgot-modal').classList.add('hidden')" class="bg-muted hover:bg-muted/80 text-primary font-bold px-4 py-2 rounded-lg text-xs">Cancel</button>
-                <button onclick="document.getElementById('forgot-modal').classList.add('hidden'); UIUtils.showToast('Reset password instructions sent to your email!', 'success');" class="bg-primary hover:bg-primary/95 text-primary-foreground font-bold px-4 py-2 rounded-lg text-xs">Send Recovery Link</button>
+                <button id="forgot-submit-btn" class="bg-primary hover:bg-primary/95 text-primary-foreground font-bold px-4 py-2 rounded-lg text-xs">Send Recovery Link</button>
             </div>
         </div>
     </div>
@@ -349,7 +349,53 @@
             if (forgotPassBtn) {
                 forgotPassBtn.onclick = () => {
                     const forgotModal = document.getElementById('forgot-modal');
-                    if (forgotModal) forgotModal.classList.remove('hidden');
+                    if (forgotModal) {
+                        forgotModal.classList.remove('hidden');
+                        const emailInput = document.getElementById('forgot-email-input');
+                        if (emailInput) emailInput.value = '';
+                    }
+                };
+            }
+
+            // Forgot Password AJAX submission
+            const forgotSubmitBtn = document.getElementById('forgot-submit-btn');
+            if (forgotSubmitBtn) {
+                forgotSubmitBtn.onclick = async () => {
+                    const emailInput = document.getElementById('forgot-email-input');
+                    const emailVal = emailInput ? emailInput.value.trim() : '';
+
+                    if (!emailVal) {
+                        UIUtils.showToast('Please enter your email address', 'error');
+                        return;
+                    }
+
+                    forgotSubmitBtn.disabled = true;
+                    forgotSubmitBtn.textContent = 'Sending...';
+
+                    try {
+                        const res = await fetch('/api/auth/forgot-password', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ email: emailVal })
+                        });
+
+                        const data = await res.json();
+                        
+                        if (res.ok && data.success) {
+                            UIUtils.showToast('Reset password link sent to your email!', 'success');
+                            const forgotModal = document.getElementById('forgot-modal');
+                            if (forgotModal) forgotModal.classList.add('hidden');
+                        } else {
+                            UIUtils.showToast(data.message || 'Recovery email failed to send', 'error');
+                        }
+                    } catch (err) {
+                        UIUtils.showToast('Unable to connect to recovery mail server.', 'error');
+                    } finally {
+                        forgotSubmitBtn.disabled = false;
+                        forgotSubmitBtn.textContent = 'Send Recovery Link';
+                    }
                 };
             }
         });
