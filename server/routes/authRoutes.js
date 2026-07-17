@@ -13,7 +13,9 @@ const {
   uploadAvatar,
   forgotPassword,
   resetPassword,
-  googleLogin
+  googleLogin,
+  updateCustomer,
+  deleteCustomer
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const { adminOnly } = require('../middlewares/roleMiddleware');
@@ -25,6 +27,8 @@ router.get('/me', protect, getMe);
 router.put('/me', protect, updateProfile);
 router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
 router.get('/customers', protect, adminOnly, getCustomers);
+router.put('/customers/:id', protect, adminOnly, updateCustomer);
+router.delete('/customers/:id', protect, adminOnly, deleteCustomer);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 

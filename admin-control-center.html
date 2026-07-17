@@ -452,6 +452,48 @@
     </section>
   </main>
 
+  <!-- Edit Customer Modal overlay -->
+  <div id="edit-customer-modal" class="fixed inset-0 bg-background/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-card border border-border rounded-xl p-6 shadow-xl max-w-md w-full mx-4 space-y-4 text-slate-800 dark:text-slate-200">
+      <div class="flex items-center justify-between border-b border-border pb-3">
+        <h3 class="font-heading font-bold text-base text-primary">Modify Customer Profile</h3>
+        <button onclick="window.closeEditCustomerModal()" class="text-muted-foreground hover:text-primary transition-all">
+          <iconify-icon icon="lucide:x" class="text-lg"></iconify-icon>
+        </button>
+      </div>
+      <form id="edit-customer-form" class="space-y-4 text-xs">
+        <input type="hidden" id="edit-customer-id">
+        <div class="space-y-1">
+          <label class="font-bold text-muted-foreground block mb-1">FULL NAME</label>
+          <input type="text" id="edit-customer-name" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+        </div>
+        <div class="space-y-1">
+          <label class="font-bold text-muted-foreground block mb-1">EMAIL ADDRESS</label>
+          <input type="email" id="edit-customer-email" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+        </div>
+        <div class="space-y-1">
+          <label class="font-bold text-muted-foreground block mb-1">PHONE NUMBER</label>
+          <input type="text" id="edit-customer-phone" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+        </div>
+        <div class="space-y-1">
+          <label class="font-bold text-muted-foreground block mb-1">ROLE</label>
+          <select id="edit-customer-role" required class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+            <option value="customer">Customer</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="font-bold text-muted-foreground block mb-1">NEW PASSWORD (OPTIONAL)</label>
+          <input type="password" id="edit-customer-password" placeholder="Leave blank to keep current" class="w-full bg-muted border border-input rounded-lg px-3 py-2 focus:ring-1 focus:ring-ring focus:outline-none">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="window.closeEditCustomerModal()" class="bg-muted text-muted-foreground hover:bg-muted/80 font-bold px-4 py-2 rounded-lg transition-all">Cancel</button>
+          <button type="submit" class="bg-primary text-primary-foreground font-bold px-4 py-2 rounded-lg hover:bg-primary/95 transition-all">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Sticky Footer -->
   <footer class="bg-primary text-primary-foreground border-t border-border/10 py-6 px-6 text-center text-xs text-primary-foreground/60">
     <p>© 2025 Joy Guru Tours &amp; Travels. All Rights Reserved. Control panel session active.</p>
@@ -527,49 +569,143 @@
           });
         }
 
-        function renderAdminCustomers() {
+        function escapeHtml(str) {
+          if (!str) return '';
+          return str.replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+        }
+
+        async function renderAdminCustomers() {
           const tbody = document.getElementById('admin-customers-tbody');
           if (!tbody) return;
-          const bookings = StateEngine.getBookings() || [];
-          tbody.innerHTML = '';
+          tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-muted-foreground"><iconify-icon icon="lucide:loader-2" class="animate-spin text-lg"></iconify-icon> Loading customers...</td></tr>`;
 
-          const customersMap = {};
-          bookings.forEach(b => {
-            const key = b.customerPhone || b.customerName;
-            if (!customersMap[key]) {
-              customersMap[key] = {
-                name: b.customerName,
-                phone: b.customerPhone || 'N/A',
-                email: b.customerEmail || 'N/A',
-                bookingsCount: 0
-              };
+          try {
+            const res = await StateEngine.apiFetch('/auth/customers');
+            if (!res || !res.success) {
+              throw new Error(res.message || 'Failed to fetch customer list');
             }
-            customersMap[key].bookingsCount++;
-          });
+            const customers = res.data || [];
+            const bookings = StateEngine.getBookings() || [];
 
-          const customers = Object.values(customersMap);
+            tbody.innerHTML = '';
+            if (customers.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-muted-foreground">No customers found.</td></tr>`;
+              return;
+            }
 
-          if (customers.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-muted-foreground">No customers found.</td></tr>`;
+            customers.forEach(c => {
+              const tr = document.createElement('tr');
+              tr.className = "border-b border-border hover:bg-muted/30 transition-all text-slate-800 dark:text-slate-200 text-xs";
+              
+              const customerEmail = c.email || '';
+              const customerPhone = c.phone || '';
+              const count = bookings.filter(b => 
+                (customerEmail && b.customerEmail && b.customerEmail.toLowerCase() === customerEmail.toLowerCase()) ||
+                (customerPhone && b.customerPhone && b.customerPhone === customerPhone)
+              ).length;
+
+              tr.innerHTML = `
+                <td class="py-3 px-4 font-semibold flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full overflow-hidden border border-border bg-muted flex items-center justify-center text-[10px] font-bold text-primary">
+                    ${c.avatarUrl ? `<img src="${c.avatarUrl}" class="w-full h-full object-cover">` : (c.name ? c.name.charAt(0).toUpperCase() : 'U')}
+                  </div>
+                  <span>${c.name || 'Unnamed User'}</span>
+                  ${c.authProvider === 'google' ? '<span class="bg-blue-100 text-blue-800 text-[8px] font-bold px-1 py-0.5 rounded flex items-center gap-0.5"><iconify-icon icon="lucide:chrome"></iconify-icon> Google</span>' : ''}
+                </td>
+                <td class="py-3 px-4 font-bold text-primary">${c.phone || 'N/A'}</td>
+                <td class="py-3 px-4">${c.email}</td>
+                <td class="py-3 px-4 font-bold text-secondary">${count} Booking(s)</td>
+                <td class="py-3 px-4 text-right space-x-2">
+                  <button onclick="window.filterBookingsByCustomer('${c.phone || c.email}')" class="text-primary font-bold hover:underline">View History</button>
+                  <button onclick="window.openEditCustomerModal('${c._id}', '${escapeHtml(c.name || '')}', '${escapeHtml(c.email || '')}', '${escapeHtml(c.phone || '')}', '${c.role || 'customer'}')" class="text-amber-600 font-bold hover:underline">Edit</button>
+                  <button onclick="window.deleteCustomer('${c._id}')" class="text-rose-600 font-bold hover:underline">Delete</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-600 font-bold">Error loading customer list: ${err.message}</td></tr>`;
+          }
+        }
+
+        window.openEditCustomerModal = function(id, name, email, phone, role) {
+          document.getElementById('edit-customer-id').value = id;
+          document.getElementById('edit-customer-name').value = name;
+          document.getElementById('edit-customer-email').value = email;
+          document.getElementById('edit-customer-phone').value = phone === 'N/A' ? '' : phone;
+          document.getElementById('edit-customer-role').value = role || 'customer';
+          document.getElementById('edit-customer-password').value = '';
+          
+          const modal = document.getElementById('edit-customer-modal');
+          if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeEditCustomerModal = function() {
+          const modal = document.getElementById('edit-customer-modal');
+          if (modal) modal.classList.add('hidden');
+        };
+
+        window.deleteCustomer = async function(id) {
+          if (!confirm('Are you absolutely sure you want to delete this customer? This will permanently remove their profile.')) {
             return;
           }
+          try {
+            const res = await StateEngine.apiFetch('/auth/customers/' + id, {
+              method: 'DELETE'
+            });
+            if (res && res.success) {
+              UIUtils.showToast('Customer profile deleted successfully', 'success');
+              renderAdminCustomers();
+            } else {
+              throw new Error(res.message || 'Deletion failed');
+            }
+          } catch (err) {
+            console.error(err);
+            UIUtils.showToast('Error: ' + err.message, 'error');
+          }
+        };
 
-          customers.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-border hover:bg-muted/30 transition-all text-slate-800 dark:text-slate-200 text-xs";
-            
-            tr.innerHTML = `
-              <td class="py-3 px-4 font-semibold">${c.name}</td>
-              <td class="py-3 px-4 font-bold text-primary">${c.phone}</td>
-              <td class="py-3 px-4">${c.email}</td>
-              <td class="py-3 px-4 font-bold text-secondary">${c.bookingsCount} Booking(s)</td>
-              <td class="py-3 px-4 text-right">
-                <button onclick="window.filterBookingsByCustomer('${c.phone}')" class="text-primary font-bold hover:underline">View History</button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-        }
+        // Handle customer edit form submit
+        document.addEventListener('DOMContentLoaded', () => {
+          const editForm = document.getElementById('edit-customer-form');
+          if (editForm) {
+            editForm.onsubmit = async (e) => {
+              e.preventDefault();
+              const id = document.getElementById('edit-customer-id').value;
+              const name = document.getElementById('edit-customer-name').value;
+              const email = document.getElementById('edit-customer-email').value;
+              const phone = document.getElementById('edit-customer-phone').value;
+              const role = document.getElementById('edit-customer-role').value;
+              const password = document.getElementById('edit-customer-password').value;
+
+              const payload = { name, email, phone, role };
+              if (password) payload.password = password;
+
+              try {
+                const res = await StateEngine.apiFetch('/auth/customers/' + id, {
+                  method: 'PUT',
+                  body: JSON.stringify(payload)
+                });
+
+                if (res && res.success) {
+                  UIUtils.showToast('Customer profile updated successfully', 'success');
+                  window.closeEditCustomerModal();
+                  renderAdminCustomers();
+                } else {
+                  throw new Error(res.message || 'Update failed');
+                }
+              } catch (err) {
+                console.error(err);
+                UIUtils.showToast('Error: ' + err.message, 'error');
+              }
+            };
+          }
+        });
 
         window.filterBookingsByCustomer = function(phone) {
           window.location.hash = '#bookings';

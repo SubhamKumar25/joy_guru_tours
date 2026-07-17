@@ -441,6 +441,70 @@ const googleLogin = async (req, res, next) => {
   }
 };
 
+// @desc    Update a customer's profile (Admin only)
+// @route   PUT /api/auth/customers/:id
+// @access  Private/Admin
+const updateCustomer = async (req, res, next) => {
+  try {
+    const customer = await User.findById(req.params.id);
+
+    if (!customer) {
+      res.status(404);
+      return next(new Error('Customer not found'));
+    }
+
+    customer.name = req.body.name !== undefined ? req.body.name : customer.name;
+    customer.email = req.body.email !== undefined ? req.body.email : customer.email;
+    customer.phone = req.body.phone !== undefined ? req.body.phone : customer.phone;
+    customer.role = req.body.role !== undefined ? req.body.role : customer.role;
+    if (req.body.avatarUrl !== undefined) customer.avatarUrl = req.body.avatarUrl;
+
+    if (req.body.password) {
+      customer.password = req.body.password;
+    }
+
+    const updatedCustomer = await customer.save();
+
+    res.json({
+      success: true,
+      message: 'Customer updated successfully',
+      data: {
+        _id: updatedCustomer._id,
+        name: updatedCustomer.name,
+        email: updatedCustomer.email,
+        phone: updatedCustomer.phone,
+        role: updatedCustomer.role,
+        avatarUrl: updatedCustomer.avatarUrl
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete a customer's profile (Admin only)
+// @route   DELETE /api/auth/customers/:id
+// @access  Private/Admin
+const deleteCustomer = async (req, res, next) => {
+  try {
+    const customer = await User.findById(req.params.id);
+
+    if (!customer) {
+      res.status(404);
+      return next(new Error('Customer not found'));
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: 'Customer profile deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -450,5 +514,7 @@ module.exports = {
   uploadAvatar,
   forgotPassword,
   resetPassword,
-  googleLogin
+  googleLogin,
+  updateCustomer,
+  deleteCustomer
 };

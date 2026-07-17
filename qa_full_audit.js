@@ -195,6 +195,27 @@ async function testAuth() {
     else log('FAIL', 'AUTH', 'RBAC: admin should access GET /customers', `Got ${r.status}`);
   } catch (e) { log('FAIL', 'AUTH', 'RBAC: admin access /customers', e.message); }
 
+  // 1.15.1 Admin can update customer profile
+  try {
+    const r = await request('PUT', `/api/auth/customers/${customerId}`, { name: `QA Admin Edit ${UNIQUE}` }, adminToken);
+    if (r.status === 200 && r.body.success && r.body.data.name.includes('Admin Edit')) log('PASS', 'AUTH', 'Admin: update customer profile succeeds');
+    else log('FAIL', 'AUTH', 'Admin: update customer profile', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'AUTH', 'Admin: update customer profile', e.message); }
+
+  // 1.15.2 Customer cannot update customer profile
+  try {
+    const r = await request('PUT', `/api/auth/customers/${customerId}`, { name: `Hack Name` }, customerToken);
+    if (r.status === 403) log('PASS', 'AUTH', 'RBAC: customer cannot edit customer profiles (returns 403)');
+    else log('FAIL', 'AUTH', 'RBAC: customer edit other customer profiles should be blocked', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'AUTH', 'RBAC: customer cannot edit customer profiles', e.message); }
+
+  // 1.15.3 Customer cannot delete customer profile
+  try {
+    const r = await request('DELETE', `/api/auth/customers/${customerId}`, null, customerToken);
+    if (r.status === 403) log('PASS', 'AUTH', 'RBAC: customer cannot delete customer profiles (returns 403)');
+    else log('FAIL', 'AUTH', 'RBAC: customer delete other customer profiles should be blocked', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'AUTH', 'RBAC: customer cannot delete customer profiles', e.message); }
+
   // 1.16 Update profile
   try {
     const r = await request('PUT', '/api/auth/me', { name: `QA Updated ${UNIQUE}`, phone: '+91 00000 00001' }, customerToken);
@@ -248,10 +269,12 @@ async function testAuth() {
 
   // 1.23 Google Login — valid test ID token (new registration)
   let googleUserToken = null;
+  let googleUserId = null;
   try {
     const r = await request('POST', '/api/auth/google-login', { idToken: 'test_google_id_token_123' });
     if (r.status === 200 && r.body.success && r.body.token) {
       googleUserToken = r.body.token;
+      googleUserId = r.body._id;
       log('PASS', 'AUTH', 'Google Login: valid test token creates new MongoDB user');
     } else log('FAIL', 'AUTH', 'Google Login: valid test token registration', `Got ${r.status}`);
   } catch (e) { log('FAIL', 'AUTH', 'Google Login: valid test token registration', e.message); }
@@ -271,6 +294,13 @@ async function testAuth() {
       log('PASS', 'AUTH', 'Google JWT: successfully accesses protected route (/me)');
     } else log('FAIL', 'Google JWT access check', `Got ${r.status}`);
   } catch (e) { log('FAIL', 'Google JWT access check', e.message); }
+
+  // 1.26 Admin can delete customer profile
+  try {
+    const r = await request('DELETE', `/api/auth/customers/${googleUserId}`, null, adminToken);
+    if (r.status === 200 && r.body.success) log('PASS', 'AUTH', 'Admin: delete customer profile succeeds');
+    else log('FAIL', 'AUTH', 'Admin: delete customer profile', `Got ${r.status}`);
+  } catch (e) { log('FAIL', 'Admin: delete customer profile', e.message); }
 }
 
 // ═══════════════════════════════════════════════════════════════
