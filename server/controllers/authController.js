@@ -235,10 +235,56 @@ const getCustomers = async (req, res, next) => {
   }
 };
 
+const cloudinary = require('../config/cloudinary');
+
+// @desc    Upload profile avatar image to Cloudinary
+// @route   POST /api/auth/upload-avatar
+// @access  Private
+const uploadAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      res.status(400);
+      return next(new Error('Please upload an image file'));
+    }
+
+    const isCloudinaryConfigured = process.env.CLOUDINARY_API_KEY && 
+                                   process.env.CLOUDINARY_API_KEY !== 'dummy_key' && 
+                                   process.env.CLOUDINARY_API_KEY !== 'mock_key';
+
+    if (!isCloudinaryConfigured) {
+      console.log('[CLOUDINARY STUB] Returning high-quality mock unsplash avatar due to unconfigured keys.');
+      return res.json({
+        success: true,
+        url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
+      });
+    }
+
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: 'joyguru_avatars' },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary stream upload error:', error);
+          res.status(500);
+          return next(error);
+        }
+        res.json({
+          success: true,
+          url: result.secure_url
+        });
+      }
+    );
+
+    uploadStream.end(req.file.buffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
   updateProfile,
-  getCustomers
+  getCustomers,
+  uploadAvatar
 };
